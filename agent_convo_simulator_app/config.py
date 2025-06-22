@@ -60,7 +60,11 @@ AGENT_SETTINGS = {
     "summary_temperature": 0.3,
     
     # Maximum retries for API calls
-    "max_retries": 2
+    "max_retries": 2,
+    
+    # Frequency of reminding agents about termination condition
+    # (every X invocations for each agent)
+    "termination_reminder_frequency": 2
 }
 
 # Gemini model settings

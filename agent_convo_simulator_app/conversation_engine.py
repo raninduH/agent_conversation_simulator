@@ -116,7 +116,7 @@ Recent conversation messages:
             response = self.summary_model.invoke([HumanMessage(content=summary_prompt)])
             new_summary = response.content.strip()
             
-            # Create new messages list with summary + last N messages
+            # Create new messages list with summary + last N messages            
             new_messages = [{"past_convo_summary": new_summary}] + last_n_messages
             
             return new_messages
@@ -129,7 +129,8 @@ Recent conversation messages:
     
     def create_agent_prompt(self, agent_config: Dict[str, str], environment: str, 
                           scene_description: str, messages: List[Dict[str, str]], 
-                          all_agents: List[str] ) -> str:
+                          all_agents: List[str], termination_condition: Optional[str] = None,
+                          should_remind_termination: bool = False) -> str:
         """
         Create the prompt for an agent including scene, participants, and conversation history.
         
@@ -139,6 +140,8 @@ Recent conversation messages:
             scene_description: Scene description
             messages: Current messages list
             all_agents: List of all agent names
+            termination_condition: Optional termination condition for the conversation
+            should_remind_termination: Whether to include termination condition reminder
             
         Returns:
             Formatted prompt string
@@ -157,8 +160,7 @@ SCENE DESCRIPTION: {scene_description}
 PARTICIPANTS: {', '.join(all_agents)}
 
 """
-        
-        # Add conversation history
+          # Add conversation history
         if messages:
             if messages[0].get("past_convo_summary"):
                 prompt += f"PREVIOUS CONVERSATION SUMMARY: {messages[0]['past_convo_summary']}\n\n"
@@ -173,10 +175,19 @@ PARTICIPANTS: {', '.join(all_agents)}
                         prompt += f"{msg['agent_name']}: {msg['message']}\n"
                 prompt += "\n"
         
+        # Add termination condition reminder if appropriate
+        if should_remind_termination and termination_condition:
+            prompt += f"""TERMINATION CONDITION REMINDER: The conversation should end when the following condition is met:
+{termination_condition}
+
+Keep this condition in mind while participating in the conversation.
+
+"""
+        
         prompt += f"""Give your response to the ongoing conversation as {agent_name}. 
 Keep your response natural, conversational, and true to your character. 
 Respond as if you're speaking directly in the conversation (don't say "As {agent_name}, I would say..." just respond naturally).
-Keep responses to 1-3 sentences to maintain good conversation flow."""        
+Keep responses to 1-3 sentences to maintain good conversation flow."""
         return prompt
     
     def start_conversation(self, conversation_id: str, agents_config: List[Dict[str, str]], 
@@ -219,8 +230,7 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             )
             
             agents[agent_name] = agent
-        
-        # Store conversation data
+          # Store conversation data
         self.active_conversations[conversation_id] = {
             "agents": agents,
             "agents_config": agents_config,
@@ -233,7 +243,8 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             "current_agent_index": 0,
             "conversation_started": False,
             "invocation_method": invocation_method,
-            "termination_condition": termination_condition
+            "termination_condition": termination_condition,
+            "agent_invocation_counts": {name: 0 for name in agent_names}  # Track invocations per agent
         }
             # Start the conversation automatically after a short delay
         threading.Timer(CONVERSATION_TIMING["start_delay"], self._start_conversation_cycle, args=(conversation_id,)).start()
@@ -266,11 +277,22 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
         conv_data = self.active_conversations[conversation_id]
         if conv_data["status"] != "active":
             return
-        
-        # Get current agent
+          # Get current agent
         current_agent_name = conv_data["agent_names"][conv_data["current_agent_index"]]
         current_agent_config = next(config for config in conv_data["agents_config"] 
                                   if config["name"] == current_agent_name)
+        
+        # Increment invocation count for current agent
+        conv_data["agent_invocation_counts"][current_agent_name] += 1
+        
+        # Determine if we should remind about termination condition
+        termination_condition = conv_data.get("termination_condition")
+        should_remind_termination = False
+        
+        if termination_condition:
+            reminder_frequency = AGENT_SETTINGS["termination_reminder_frequency"]
+            current_count = conv_data["agent_invocation_counts"][current_agent_name]
+            should_remind_termination = (current_count % reminder_frequency == 0)
         
         # Apply message summarization before creating prompt
         conv_data["messages"] = self.message_list_summarization(conv_data["messages"])
@@ -281,7 +303,9 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             conv_data["environment"],
             conv_data["scene_description"],
             conv_data["messages"],
-            conv_data["agent_names"]
+            conv_data["agent_names"],
+            termination_condition,
+            should_remind_termination
         )
         
         try:
@@ -309,8 +333,7 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                         "content": agent_message,
                         "timestamp": datetime.now().isoformat(),
                         "type": "ai"
-                    })
-                
+                    })                
                 # Determine the next agent based on invocation method
                 invocation_method = conv_data.get("invocation_method", "round_robin")
                 termination_condition = conv_data.get("termination_condition", None)
@@ -322,7 +345,8 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                         environment=conv_data["environment"],
                         scene=conv_data["scene_description"],
                         agents=conv_data["agents_config"],
-                        termination_condition=termination_condition
+                        termination_condition=termination_condition,
+                        agent_invocation_counts=conv_data.get("agent_invocation_counts", {})
                     )
                     
                     next_response = selection_result.get("next_response", "error_parsing")
@@ -335,14 +359,14 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                                 "content": "The conversation has reached its termination condition and has ended.",
                                 "timestamp": datetime.now().isoformat(),
                                 "type": "system"
-                            })
-                        # Stop the conversation
+                            })                        # Stop the conversation
                         conv_data["status"] = "completed"
                         return
                     elif next_response == "error_parsing":
                         # Error in parsing, use round robin as fallback
                         conv_data["current_agent_index"] = (conv_data["current_agent_index"] + 1) % len(conv_data["agent_names"])
-                    else:                        # Set the next agent
+                    else:
+                        # Set the next agent
                         if next_response in conv_data["agent_names"]:
                             # Find the index of the selected agent
                             for i, name in enumerate(conv_data["agent_names"]):

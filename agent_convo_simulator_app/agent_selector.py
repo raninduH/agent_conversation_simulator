@@ -40,7 +40,8 @@ class AgentSelector:
         environment: str, 
         scene: str, 
         agents: List[Dict[str, str]],
-        termination_condition: Optional[str] = None
+        termination_condition: Optional[str] = None,
+        agent_invocation_counts: Optional[Dict[str, int]] = None
     ) -> Dict[str, str]:
         """
         Determine which agent should speak next or if the conversation should terminate.
@@ -51,6 +52,7 @@ class AgentSelector:
             scene: The conversation scene description
             agents: List of agent configurations with name and role
             termination_condition: Optional condition for when to terminate the conversation
+            agent_invocation_counts: Optional dict tracking how many times each agent has been invoked
             
         Returns:
             Dictionary with {"next_response": agent_name} or {"next_response": "terminate"}
@@ -67,18 +69,23 @@ class AgentSelector:
         # Format agents for the prompt
         agents_str = ", ".join([f"{agent['name']} ({agent['role']})" for agent in agents])
         
+        # Add invocation count information if available
+        invocation_info = ""
+        if agent_invocation_counts:
+            invocation_info = "\nAgent invocation counts: " + ", ".join([f"{name}: {count}" for name, count in agent_invocation_counts.items()])
+        
         # Create the prompt
         prompt = f"""You are handling a role play of agents. 
 This is the last 10 messages of the current conversation: {messages_str}, 
 this is the current environment the agents are in: {environment} 
 and this is the current starting scene: {scene}. 
-These are the active agents: {agents_str}. 
+These are the active agents: {agents_str}.{invocation_info}
 This is the termination condition for the conversation: {termination_condition or 'None'}. 
 Decide which agent should invoke next and output the following JSON: 
 {{ "next_response": "agent_name" }} or output the following if the conversation is ready to terminate: 
 {{ "next_response": "terminate" }}.
 Don't output anything else only the JSON response. 
-Note: sometimes the last response agent might need to invoke right again if that agent needs to give more to the conversation. Also, if one agent hasn't responded in a while, try to giev thatt agent a chance if it's possible but this is not cruicial"""
+Note: sometimes the last response agent might need to invoke right again if that agent needs to give more to the conversation"""
         
         # Call the LLM to select the next agent
         response = self.model.invoke([HumanMessage(content=prompt)])

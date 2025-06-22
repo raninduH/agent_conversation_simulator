@@ -1137,3 +1137,197 @@ class AgentConversationSimulatorGUI:
                 
         except Exception as e:
             messagebox.showerror("Error", f"Failed to change scene: {str(e)}")
+    
+    def load_conversation(self):
+        """Load an existing conversation from saved conversations."""
+        try:
+            # Get all saved conversations
+            conversations = self.data_manager.load_conversations()
+            
+            if not conversations:
+                messagebox.showinfo("No Conversations", "No saved conversations found.")
+                return
+            
+            # Create selection dialog
+            dialog = tk.Toplevel(self.root)
+            dialog.title("Load Conversation")
+            dialog.geometry("600x400")
+            dialog.transient(self.root)
+            dialog.grab_set()
+            
+            # Center the dialog
+            dialog.update_idletasks()
+            x = (dialog.winfo_screenwidth() // 2) - (dialog.winfo_width() // 2)
+            y = (dialog.winfo_screenheight() // 2) - (dialog.winfo_height() // 2)
+            dialog.geometry(f"+{x}+{y}")
+            
+            # Configure grid
+            dialog.grid_rowconfigure(1, weight=1)
+            dialog.grid_columnconfigure(0, weight=1)
+            
+            # Title
+            title_label = ttk.Label(dialog, text="Select Conversation to Load", font=("Arial", 14, "bold"))
+            title_label.grid(row=0, column=0, pady=10)
+            
+            # Conversation list
+            list_frame = ttk.Frame(dialog)
+            list_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
+            list_frame.grid_rowconfigure(0, weight=1)
+            list_frame.grid_columnconfigure(0, weight=1)
+            
+            # Listbox with scrollbar
+            scrollbar = ttk.Scrollbar(list_frame)
+            scrollbar.grid(row=0, column=1, sticky="ns")
+            
+            conv_listbox = tk.Listbox(list_frame, yscrollcommand=scrollbar.set)
+            conv_listbox.grid(row=0, column=0, sticky="nsew")
+            scrollbar.config(command=conv_listbox.yview)
+            
+            # Populate conversations
+            conv_items = []
+            for conv in conversations:
+                display_text = f"{conv.title} - {conv.status.upper()} - {conv.environment}"
+                conv_listbox.insert(tk.END, display_text)
+                conv_items.append(conv)
+            
+            # Buttons
+            button_frame = ttk.Frame(dialog)
+            button_frame.grid(row=2, column=0, pady=20)
+            
+            def on_load():
+                selection = conv_listbox.curselection()
+                if not selection:
+                    messagebox.showwarning("No Selection", "Please select a conversation to load.")
+                    return
+                
+                selected_conv = conv_items[selection[0]]
+                dialog.destroy()
+                self.load_selected_conversation(selected_conv)
+            
+            def on_cancel():
+                dialog.destroy()
+            
+            ttk.Button(button_frame, text="Load", command=on_load).pack(side=tk.LEFT, padx=5)
+            ttk.Button(button_frame, text="Cancel", command=on_cancel).pack(side=tk.LEFT, padx=5)
+            
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load conversations: {str(e)}")
+    
+    def load_selected_conversation(self, conversation: Conversation):
+        """Load the selected conversation into the simulation."""
+        try:
+            # Store the loaded conversation
+            self.loaded_conversation = conversation
+            
+            # Set API key if not already set
+            api_key = self.api_key_var.get().strip()
+            if not api_key:
+                messagebox.showwarning("API Key Required", "Please enter your Google API key first.")
+                return
+            
+            # Initialize conversation engine if needed
+            if not self.conversation_engine:
+                self.conversation_engine = ConversationSimulatorEngine(api_key)
+            
+            # Get agent configs for the conversation
+            all_agents = self.data_manager.load_agents()
+            agents_config = []
+            
+            for agent_id in conversation.agents:
+                agent = next((a for a in all_agents if a.id == agent_id), None)
+                if agent:
+                    # Get color from agent or conversation agent_colors
+                    color = agent.color
+                    if not color and hasattr(conversation, 'agent_colors') and agent.name in conversation.agent_colors:
+                        color = conversation.agent_colors[agent.name]
+                    
+                    agents_config.append({
+                        "name": agent.name,
+                        "role": agent.role,
+                        "base_prompt": agent.base_prompt,
+                        "color": color
+                    })
+            
+            if len(agents_config) < 2:
+                messagebox.showerror("Error", "Not enough agents found for this conversation.")
+                return
+            
+            # Get invocation method and termination condition
+            invocation_method = getattr(conversation, 'invocation_method', 'round_robin')
+            termination_condition = getattr(conversation, 'termination_condition', None)
+            
+            # Start the conversation
+            thread_id = self.conversation_engine.start_conversation(
+                conversation_id=conversation.id,
+                agents_config=agents_config,
+                environment=conversation.environment,
+                scene_description=conversation.scene_description,
+                invocation_method=invocation_method,
+                termination_condition=termination_condition
+            )
+            
+            if thread_id:
+                self.current_conversation_id = conversation.id
+                self.conversation_active = True
+                self.update_simulation_controls(True)
+                
+                # Set up message callback
+                self.conversation_engine.register_message_callback(conversation.id, self.on_message_received)
+                  # Load existing messages into chat
+                self.chat_canvas.clear()
+                for msg in conversation.messages:
+                    sender = msg.get("agent_name", "Unknown")
+                    content = msg.get("message", "")
+                    timestamp = msg.get("timestamp", datetime.now().strftime("%H:%M:%S"))
+                    
+                    # Get agent color
+                    color = None
+                    for agent_config in agents_config:
+                        if agent_config["name"] == sender:
+                            color = agent_config.get("color")
+                            break
+                    
+                    if not color:
+                        color = UI_COLORS["ai_bubble"]
+                    
+                    self.chat_canvas.add_bubble(sender, content, timestamp, "ai", color)
+                
+                # Update UI
+                self.current_env_label.config(text=conversation.environment)
+                
+                # Switch to simulation tab
+                self.notebook.select(2)
+                
+                self.update_status(f"Conversation '{conversation.title}' loaded successfully!")
+                
+            else:
+                messagebox.showerror("Error", "Failed to start conversation.")
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load conversation: {str(e)}")
+    
+    def update_simulation_controls(self, conversation_active: bool):
+        """Update the state of simulation control buttons based on conversation status."""
+        if conversation_active:
+            # Conversation is active - enable pause, summarize, stop buttons
+            self.pause_btn.config(state="normal")
+            self.resume_btn.config(state="disabled")
+            self.summarize_btn.config(state="normal")
+            self.stop_btn.config(state="normal")
+        else:
+            # Conversation is not active - enable resume, disable others
+            self.pause_btn.config(state="disabled")
+            self.resume_btn.config(state="normal")
+            self.summarize_btn.config(state="disabled")
+            self.stop_btn.config(state="disabled")
+
+    def update_status(self, message: str):
+        """Update the status bar with a new message."""
+        self.status_bar.config(text=message)
+        # Auto-clear status after 5 seconds for non-error messages
+        if not message.lower().startswith(("error", "failed")):
+            self.root.after(5000, lambda: self.status_bar.config(text="Ready"))
+
+if __name__ == "__main__":
+    app = AgentConversationSimulatorGUI()
+    app.root.mainloop()

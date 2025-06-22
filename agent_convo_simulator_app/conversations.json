@@ -1641,6 +1641,124 @@
         "Alice": "#FFD3B4",
         "David": "#FFDAC1"
       }
+    },
+    {
+      "id": "conv_8c5ffc08",
+      "title": "Extra Sugar better",
+      "environment": "Coffee shop",
+      "scene_description": "Four friends are in the coffee shop and Alice and Bob brings a high sugar donouts for them. Clara and david thinks they are too unhealthy, but the other two thinks high sugar is okay.",
+      "agents": [
+        "agent_alice",
+        "agent_bob",
+        "agent_clara",
+        "agent_david"
+      ],
+      "messages": [
+        {
+          "sender": "David",
+          "content": "Hey everyone! Wow, those donuts look...intense! Are we sure we're ready for that kind of sugar rush this early? I mean, I've seen what sugar can do to people in some of the festivals I've been to – it's not always pretty!",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:06:36.770290",
+          "color": "#FFDCDC"
+        },
+        {
+          "sender": "Alice",
+          "content": "Oh, come on, David! Live a little! I think a little indulgence can be a great source of inspiration. Plus, haven't you ever noticed how some of the best stories come from moments of pure, unadulterated joy...or maybe a little chaos?",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:06:45.974784",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Bob",
+          "content": "Well, from an engineering perspective, I guess it's all about input and output, right? High sugar input, potentially high energy output... followed by a crash, maybe? But Alice has a point about inspiration – sometimes a little chaos *does* spark creativity.",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:06:55.761194",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Clara",
+          "content": "This is quite the debate! I think there's something to be said for both sides. Maybe it's about finding a balance between enjoying the moment and being mindful of how it affects us in the long run?",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:07:06.024573",
+          "color": "#4F8B61"
+        },
+        {
+          "sender": "David",
+          "content": "Okay, okay, you both make good points! I guess I'm just thinking about that time I was in Japan and saw how they portion everything so mindfully. Maybe a *tiny* bite won't hurt, for inspiration's sake, of course!",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:07:14.772793",
+          "color": "#FFDCDC"
+        },
+        {
+          "sender": "Alice",
+          "content": "A tiny bite! That's all it takes, David. Just enough to unlock the floodgates of creativity. Perhaps this donut will inspire a story set in Japan, with mindful portions and a dash of delightful chaos!",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:07:22.928563",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Alice",
+          "content": "Exactly! And who knows, maybe the sugar rush will give us all a new perspective on our current projects. Has anyone been wrestling with writer's block lately? A donut might be just the thing to break through!",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:07:56.747029",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Bob",
+          "content": "Writer's block, huh? I've definitely had my share of code block. Maybe a sugar-fueled brainstorming session is just what we need. We could treat it like a debugging exercise, systematically tackling the problem!",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:08:05.438987",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Clara",
+          "content": "It's interesting how a simple donut can spark such different perspectives and approaches! I wonder if the expectation of a \"sugar rush\" also plays a role in how we experience it?",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:08:14.286329",
+          "color": "#4F8B61"
+        },
+        {
+          "sender": "David",
+          "content": "Okay, you've officially sold me on the donut-as-inspiration concept! Clara, that's a great point about the expectation too, it's like a self-fulfilling prophecy sometimes. I'm in for a bite, let's see where this takes us!",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:08:25.481129",
+          "color": "#FFDCDC"
+        },
+        {
+          "sender": "Alice",
+          "content": "Wonderful! I love how we've turned a simple donut into a philosophical and creative exploration. Who wants to go first with their sugar-fueled idea? Let's see what kind of stories we can spin!",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:08:34.345969",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Bob",
+          "content": "Alright, I'm in! Maybe after this, we can apply the same systematic problem-solving to that bug I've been chasing all week. I'm thinking divide and conquer, donut-style.",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:08:44.283480",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Clara",
+          "content": "I'm excited to see where this goes! It's amazing how a shared experience, even something as small as a donut, can bring us closer and spark new ideas. Maybe we can even analyze our brainstorming process afterward!",
+          "type": "ai",
+          "timestamp": "2025-06-22T22:08:51.760499",
+          "color": "#4F8B61"
+        }
+      ],
+      "status": "active",
+      "created_at": "2025-06-22T22:06:32.838114",
+      "last_updated": "2025-06-22T22:08:51.773238",
+      "summary": null,
+      "thread_id": "thread_ce8ac10c",
+      "agent_colors": {
+        "Alice": "#CAE8BD",
+        "Bob": "#FFE8CD",
+        "Clara": "#4F8B61",
+        "David": "#FFDCDC"
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "When all four friends comes to the agreement that high sugar is good or bad."
     }
   ]
 }
