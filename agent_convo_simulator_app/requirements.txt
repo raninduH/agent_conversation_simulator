@@ -1,0 +1,30 @@
+# Essential dependencies for the Multi-Agent Conversation Simulator
+# Core LangGraph and LangChain (without supervisor)
+langgraph
+langchain
+langchain-core
+langchain-google-genai
+
+# Additional dependencies
+python-dotenv
+
+# Note: Supervisor agent has been removed for simplified direct agent interaction
+# The application now uses round-robin agent selection instead of a supervisor
+
+# Built-in libraries (included with Python, listed for reference)
+# tkinter - GUI framework (built-in)
+# threading - Multi-threading support (built-in)
+# json - JSON parsing (built-in)
+# os - Operating system interface (built-in)
+# datetime - Date and time utilities (built-in)
+# typing - Type hints (built-in)
+# uuid - UUID generation (built-in)
+# dataclasses - Data classes (built-in Python 3.7+)
+# random - Random number generation (built-in)
+# threading - Multi-threading support (built-in)
+# json - JSON parsing (built-in)
+# os - Operating system interface (built-in)
+# datetime - Date and time utilities (built-in)
+# typing - Type hints (built-in)
+# uuid - UUID generation (built-in)
+# dataclasses - Data classes (built-in Python 3.7+)
