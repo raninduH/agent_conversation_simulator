@@ -78,7 +78,7 @@ Decide which agent should invoke next and output the following JSON:
 {{ "next_response": "agent_name" }} or output the following if the conversation is ready to terminate: 
 {{ "next_response": "terminate" }}.
 Don't output anything else only the JSON response. 
-Note: sometimes the last response agent might need to invoke right again if that agent needs to give more to the conversation"""
+Note: sometimes the last response agent might need to invoke right again if that agent needs to give more to the conversation. Also, if one agent hasn't responded in a while, try to giev thatt agent a chance if it's possible but this is not cruicial"""
         
         # Call the LLM to select the next agent
         response = self.model.invoke([HumanMessage(content=prompt)])

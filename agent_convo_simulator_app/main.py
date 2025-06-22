@@ -836,82 +836,64 @@ class AgentConversationSimulatorGUI:
     def pause_conversation(self):
         """Pause the active conversation."""
         if self.conversation_engine and self.current_conversation_id:
-            self.conversation_engine.pause_conversation(self.current_conversation_id)
-            self.conversation_active = False
-            self.update_simulation_controls(False)
-            self.update_status("Conversation paused.")
-    
-    def resume_conversation(self):
-        """Resume the paused conversation."""
-        if self.conversation_engine and self.current_conversation_id:
-            self.conversation_engine.resume_conversation(self.current_conversation_id)
-            self.conversation_active = True
-            self.update_simulation_controls(True)
-            self.update_status("Conversation resumed.")
-    
-    def summarize_conversation(self):
-        """Generate and display a conversation summary."""
-        if self.conversation_engine and self.current_conversation_id:
             try:
-                summary = self.conversation_engine.get_conversation_summary(self.current_conversation_id)
-                messagebox.showinfo("Conversation Summary", summary)
+                self.conversation_engine.pause_conversation(self.current_conversation_id)
+                self.conversation_active = False
+                self.update_simulation_controls(False)
+                self.update_status("Conversation paused.")
+                
+                # Add system message about pause
+                self.chat_canvas.add_bubble(
+                    "System", 
+                    "Conversation paused.", 
+                    datetime.now().strftime("%H:%M:%S"), 
+                    "system", 
+                    UI_COLORS["system_bubble"]
+                )
             except Exception as e:
-                messagebox.showerror("Error", f"Failed to generate summary: {str(e)}")
-    
-    def stop_conversation(self):
-        """Stop the active conversation."""
-        if self.conversation_engine and self.current_conversation_id:
-            self.conversation_engine.stop_conversation(self.current_conversation_id)
-            self.conversation_active = False
-            self.current_conversation_id = None
-            self.update_simulation_controls(False)
-            self.current_env_label.config(text="None")
-            self.update_status("Conversation stopped.")
-    
-    def change_scene(self):
-        """Change the scene/environment of the active conversation."""
-        new_env = self.new_env_var.get().strip()
-        new_scene = self.new_scene_text.get(1.0, tk.END).strip()
-        
-        if not new_env or not new_scene:
-            messagebox.showerror("Missing Information", "Please provide both environment and scene description.")
+                messagebox.showerror("Error", f"Failed to pause conversation: {str(e)}")
+
+    def resume_conversation(self):
+        """Resume a paused conversation or restart a terminated one."""
+        if not self.current_conversation_id:
+            messagebox.showwarning("Warning", "No conversation to resume.")
             return
         
-        if self.conversation_engine and self.current_conversation_id:
-            try:
-                self.conversation_engine.change_scene(self.current_conversation_id, new_env, new_scene)
-                self.current_env_label.config(text=new_env)
-                self.new_env_var.set("")
-                self.new_scene_text.delete(1.0, tk.END)
-                self.update_status(f"Scene changed to: {new_env}")
-                  # Display scene change in chat
-                self.display_message("System", f"Scene changed to: {new_env}. {new_scene}", "system")
-                
-            except Exception as e:
-                messagebox.showerror("Error", f"Failed to change scene: {str(e)}")
-    
-    def load_conversation(self):
-        """Load a previously saved conversation."""
         try:
-            # Get all available conversations
-            conversations = self.data_manager.get_conversations()
+            # Check if conversation was terminated due to termination condition
+            if hasattr(self, 'loaded_conversation'):
+                conversation = self.loaded_conversation
+            else:
+                conversation = self.data_manager.get_conversation_by_id(self.current_conversation_id)
             
-            if not conversations:
-                messagebox.showinfo("No Conversations", "No previous conversations found.")
-                return
-            
-            # Create conversation selection dialog
-            self.show_conversation_selection_dialog(conversations)
-            
+            if conversation and conversation.status == "completed":
+                # This was a terminated conversation, ask for new termination condition
+                self.show_resume_terminated_dialog(conversation)
+            else:
+                # Regular resume of paused conversation
+                if self.conversation_engine:
+                    self.conversation_engine.resume_conversation(self.current_conversation_id)
+                    self.conversation_active = True
+                    self.update_simulation_controls(True)
+                    self.update_status("Conversation resumed.")
+                    
+                    # Add system message about resume
+                    self.chat_canvas.add_bubble(
+                        "System", 
+                        "Conversation resumed.", 
+                        datetime.now().strftime("%H:%M:%S"), 
+                        "system", 
+                        UI_COLORS["system_bubble"]
+                    )
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to load conversations: {str(e)}")
-    
-    def show_conversation_selection_dialog(self, conversations: List[Conversation]):
-        """Show dialog to select a conversation to load."""
+            messagebox.showerror("Error", f"Failed to resume conversation: {str(e)}")
+
+    def show_resume_terminated_dialog(self, conversation: Conversation):
+        """Show dialog to get new termination condition for terminated conversation."""
         # Create dialog window
         dialog = tk.Toplevel(self.root)
-        dialog.title("Load Conversation")
-        dialog.geometry("800x600")
+        dialog.title("Resume Terminated Conversation")
+        dialog.geometry("600x400")
         dialog.transient(self.root)
         dialog.grab_set()
         
@@ -922,283 +904,61 @@ class AgentConversationSimulatorGUI:
         dialog.geometry(f"+{x}+{y}")
         
         # Configure grid
-        dialog.grid_rowconfigure(1, weight=1)
+        dialog.grid_rowconfigure(2, weight=1)
         dialog.grid_columnconfigure(0, weight=1)
         
         # Title
-        title_label = ttk.Label(dialog, text="Select a Conversation to Load", font=("Arial", 14, "bold"))
+        title_label = ttk.Label(dialog, text="Resume Terminated Conversation", font=("Arial", 14, "bold"))
         title_label.grid(row=0, column=0, pady=10)
         
-        # Main frame
-        main_frame = ttk.Frame(dialog)
-        main_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
-        main_frame.grid_rowconfigure(0, weight=1)
-        main_frame.grid_columnconfigure(0, weight=1)
+        # Information
+        info_text = f"The conversation '{conversation.title}' was terminated because its termination condition was met.\n\n"
+        info_text += "To resume the conversation, please provide a new termination condition:"
         
-        # Conversation list frame
-        list_frame = ttk.Frame(main_frame)
-        list_frame.grid(row=0, column=0, sticky="nsew")
-        list_frame.grid_rowconfigure(0, weight=1)
-        list_frame.grid_columnconfigure(0, weight=1)
+        info_label = ttk.Label(dialog, text=info_text, wraplength=550, justify="left")
+        info_label.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
         
-        # Treeview for conversations
-        columns = ("Title", "Environment", "Agents", "Messages", "Created", "Status")
-        tree = ttk.Treeview(list_frame, columns=columns, show="headings", height=15)
+        # Termination condition input
+        input_frame = ttk.LabelFrame(dialog, text="New Termination Condition", padding="10")
+        input_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=10)
+        input_frame.grid_rowconfigure(0, weight=1)
+        input_frame.grid_columnconfigure(0, weight=1)
         
-        # Configure columns
-        tree.heading("Title", text="Title")
-        tree.heading("Environment", text="Environment")
-        tree.heading("Agents", text="Agents")
-        tree.heading("Messages", text="Messages")
-        tree.heading("Created", text="Created")
-        tree.heading("Status", text="Status")
+        termination_text = scrolledtext.ScrolledText(input_frame, width=60, height=8)
+        termination_text.grid(row=0, column=0, sticky="nsew")
         
-        tree.column("Title", width=200)
-        tree.column("Environment", width=150)
-        tree.column("Agents", width=100)
-        tree.column("Messages", width=80)
-        tree.column("Created", width=120)
-        tree.column("Status", width=80)
+        # Current termination condition (if any)
+        if hasattr(conversation, 'termination_condition') and conversation.termination_condition:
+            termination_text.insert(1.0, f"Previous condition: {conversation.termination_condition}\n\n")
         
-        # Add scrollbars
-        v_scrollbar = ttk.Scrollbar(list_frame, orient="vertical", command=tree.yview)
-        h_scrollbar = ttk.Scrollbar(list_frame, orient="horizontal", command=tree.xview)
-        tree.configure(yscrollcommand=v_scrollbar.set, xscrollcommand=h_scrollbar.set)
-        
-        tree.grid(row=0, column=0, sticky="nsew")
-        v_scrollbar.grid(row=0, column=1, sticky="ns")
-        h_scrollbar.grid(row=1, column=0, sticky="ew")
-        
-        # Populate treeview
-        conversation_data = {}
-        for conv in conversations:
-            # Format creation date
-            try:
-                created_date = datetime.fromisoformat(conv.created_at.replace('Z', '+00:00'))
-                created_str = created_date.strftime("%Y-%m-%d %H:%M")
-            except:
-                created_str = conv.created_at[:16] if conv.created_at else "Unknown"
-            
-            # Count messages
-            message_count = len(conv.messages)
-            
-            # Get agent names
-            agent_names = ", ".join(conv.agents) if len(conv.agents) <= 2 else f"{len(conv.agents)} agents"
-            
-            # Insert into tree
-            item_id = tree.insert("", "end", values=(
-                conv.title,
-                conv.environment,
-                agent_names,
-                message_count,
-                created_str,
-                conv.status
-            ))
-            conversation_data[item_id] = conv
-        
-        # Preview frame
-        preview_frame = ttk.LabelFrame(main_frame, text="Conversation Preview", padding="10")
-        preview_frame.grid(row=0, column=1, sticky="nsew", padx=(10, 0))
-        preview_frame.grid_rowconfigure(1, weight=1)
-        preview_frame.grid_columnconfigure(0, weight=1)
-        
-        # Preview labels
-        self.preview_title = ttk.Label(preview_frame, text="", font=("Arial", 12, "bold"))
-        self.preview_title.grid(row=0, column=0, sticky="w")
-        
-        self.preview_text = scrolledtext.ScrolledText(preview_frame, width=50, height=20, state="disabled")
-        self.preview_text.grid(row=1, column=0, sticky="nsew", pady=(10, 0))
-        
-        # Selection handler
-        def on_conversation_select(event):
-            selection = tree.selection()
-            if selection:
-                selected_conv = conversation_data[selection[0]]
-                self.show_conversation_preview(selected_conv)
-        
-        tree.bind("<<TreeviewSelect>>", on_conversation_select)
-        
-        # Button frame
+        # Buttons
         button_frame = ttk.Frame(dialog)
-        button_frame.grid(row=2, column=0, pady=20)
+        button_frame.grid(row=3, column=0, pady=20)
         
-        def load_selected():
-            selection = tree.selection()
-            if not selection:
-                messagebox.showwarning("No Selection", "Please select a conversation to load.")
+        def on_resume():
+            new_condition = termination_text.get(1.0, tk.END).strip()
+            if not new_condition:
+                messagebox.showwarning("Warning", "Please enter a termination condition.")
                 return
             
-            selected_conv = conversation_data[selection[0]]
-            self.load_selected_conversation(selected_conv)
+            # Update conversation with new termination condition
+            conversation.termination_condition = new_condition
+            conversation.status = "active"
+            self.data_manager.save_conversation(conversation)
+            
+            dialog.destroy()
+            self.restart_conversation_with_new_condition(conversation, new_condition)
+        
+        def on_cancel():
             dialog.destroy()
         
-        def cancel_load():
-            dialog.destroy()
-        
-        ttk.Button(button_frame, text="Load Conversation", command=load_selected).pack(side=tk.LEFT, padx=(0, 10))
-        ttk.Button(button_frame, text="Cancel", command=cancel_load).pack(side=tk.LEFT)
-    
-    def show_conversation_preview(self, conversation: Conversation):
-        """Show preview of the selected conversation."""
-        self.preview_title.config(text=conversation.title)
-        
-        self.preview_text.config(state="normal")
-        self.preview_text.delete(1.0, tk.END)
-        
-        # Add conversation details
-        preview_content = f"Environment: {conversation.environment}\n"
-        preview_content += f"Scene: {conversation.scene_description}\n"
-        preview_content += f"Agents: {', '.join(conversation.agents)}\n"
-        preview_content += f"Messages: {len(conversation.messages)}\n"
-        preview_content += f"Status: {conversation.status}\n"
-        preview_content += f"Created: {conversation.created_at}\n\n"
-        
-        if conversation.messages:
-            preview_content += "Recent Messages:\n"
-            preview_content += "-" * 40 + "\n"
-            
-            # Show last 5 messages
-            recent_messages = conversation.messages[-5:]
-            for msg in recent_messages:
-                if msg.get('type') == 'system':
-                    preview_content += f"[SYSTEM] {msg.get('content', '')}\n"
-                else:
-                    sender = msg.get('sender', 'Unknown')
-                    content = msg.get('content', '')
-                    # Truncate long messages
-                    if len(content) > 200:
-                        content = content[:200] + "..."
-                    preview_content += f"{sender}: {content}\n"
-                preview_content += "\n"
-        else:
-            preview_content += "No messages yet."        
-        self.preview_text.insert(1.0, preview_content)
-        self.preview_text.config(state="disabled")
-    
-    def load_selected_conversation(self, conversation: Conversation):
-        """Load the selected conversation into the simulation."""
+        ttk.Button(button_frame, text="Resume with New Condition", command=on_resume).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Cancel", command=on_cancel).pack(side=tk.LEFT, padx=5)
+
+    def restart_conversation_with_new_condition(self, conversation: Conversation, new_termination_condition: str):
+        """Restart a terminated conversation with a new termination condition."""
         try:
-            # Switch to simulation tab
-            self.notebook.select(2)  # Index 2 is simulation tab
-            
-            # Clear existing conversation
-            if self.conversation_active:
-                self.stop_conversation()
-            
-            # Load conversation data into the interface
-            self.conv_title_entry.delete(0, tk.END)
-            self.conv_title_entry.insert(0, conversation.title)
-            
-            self.conv_env_entry.delete(0, tk.END)
-            self.conv_env_entry.insert(0, conversation.environment)
-            
-            self.conv_scene_text.delete(1.0, tk.END)
-            self.conv_scene_text.insert(1.0, conversation.scene_description)
-            
-            # Load invocation method and termination condition
-            invocation_method = getattr(conversation, 'invocation_method', 'round_robin')
-            self.invocation_method_var.set(invocation_method)
-            
-            # Set termination condition if any
-            self.termination_condition_text.config(state=tk.NORMAL)
-            self.termination_condition_text.delete(1.0, tk.END)
-            if invocation_method == "agent_selector" and hasattr(conversation, 'termination_condition') and conversation.termination_condition:
-                self.termination_condition_text.insert(1.0, conversation.termination_condition)
-            
-            # Toggle termination condition field state
-            self._toggle_termination_condition()
-            
-            # Update agent selection
-            for agent_obj, var in self.agent_checkboxes:
-                var.set(False)  # Uncheck all first
-            
-            # Check the agents that are in this conversation
-            for agent_obj, var in self.agent_checkboxes:
-                if agent_obj.id in conversation.agents:
-                    var.set(True)
-            
-            # Update selected agents list
-            self.update_selected_agents()            # Clear the chat display
-            self.chat_canvas.clear()
-              # Load agent colors from conversation if available
-            self.agent_colors = {}
-            if hasattr(conversation, 'agent_colors') and conversation.agent_colors:
-                self.agent_colors = conversation.agent_colors
-            else:
-                # Try to get colors from agent_colors field in conversation data
-                agent_colors = self.data_manager.get_agent_colors(conversation.id)
-                if agent_colors:
-                    self.agent_colors = agent_colors
-            
-            # Add conversation header as a system message
-            header = f"=== LOADED CONVERSATION: {conversation.title} ===\n"
-            header += f"Environment: {conversation.environment}\n"
-            header += f"Scene: {conversation.scene_description}\n"
-            header += f"Participants: {', '.join(conversation.agents)}\n"
-            header += f"Original Messages: {len(conversation.messages)}"
-            
-            self.chat_canvas.add_bubble("System", header, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
-            
-            # Add existing messages
-            for msg in conversation.messages:
-                sender = msg.get('sender', 'Unknown')
-                content = msg.get('content', '')
-                msg_type = msg.get('type', 'ai')
-                color = msg.get('color')  # Get the color from the message if available
-                
-                # Format timestamp
-                timestamp = msg.get('timestamp', '')
-                try:
-                    dt = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
-                    time_str = dt.strftime("%H:%M:%S")
-                except:
-                    time_str = timestamp[:8] if timestamp else datetime.now().strftime("%H:%M:%S")
-                
-                # If color not available in message, check agent_colors
-                if not color and sender in self.agent_colors:
-                    color = self.agent_colors[sender]
-                      # If still no color and it's an agent message, assign a unique one from the palette
-                if not color and msg_type not in ["user", "system"]:
-                    # Get all assigned colors in this conversation
-                    assigned_colors = set(self.agent_colors.values())
-                    # Find an available color that hasn't been used yet
-                    for c in UI_COLORS["agent_colors"]:
-                        if c not in assigned_colors:
-                            color = c
-                            break
-                    # If all colors are used, fall back to the first color
-                    if not color:
-                        color = UI_COLORS["agent_colors"][0]
-                    self.agent_colors[sender] = color
-                  # Display the message using chat bubble
-                self.chat_canvas.add_bubble(sender, content, time_str, msg_type, color)
-            
-            # Store loaded conversation info
-            self.loaded_conversation = conversation
-            
-            # Show resumption option
-            result = messagebox.askyesno(
-                "Resume Conversation", 
-                f"Conversation '{conversation.title}' has been loaded.\n\n"
-                f"Would you like to resume the conversation where it left off?\n\n"
-                f"Click 'Yes' to continue with AI agents, or 'No' to just view the conversation."
-            )
-            
-            if result:
-                self.resume_loaded_conversation()
-            
-            messagebox.showinfo("Success", f"Conversation '{conversation.title}' loaded successfully!")
-            
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to load conversation: {str(e)}")
-    
-    def resume_loaded_conversation(self):
-        """Resume the loaded conversation with AI agents."""
-        try:
-            if not hasattr(self, 'loaded_conversation'):
-                messagebox.showerror("Error", "No conversation loaded to resume.")
-                return
-              # Initialize conversation engine if needed
+            # Initialize conversation engine if needed
             api_key = self.api_key_var.get().strip()
             if not api_key:
                 messagebox.showerror("Error", "Please enter your Google API key to resume the conversation.")
@@ -1206,128 +966,174 @@ class AgentConversationSimulatorGUI:
             
             if not self.conversation_engine:
                 self.conversation_engine = ConversationSimulatorEngine(api_key)
-                  # Get selected agents
-            selected_agent_ids = []
-            for agent, var in self.agent_checkboxes:
-                if var.get():
-                    # Use agent ID directly from agent object
-                    selected_agent_ids.append(agent.id)
             
-            if len(selected_agent_ids) < 2:
-                messagebox.showerror("Error", "Please select at least 2 agents to resume the conversation.")
-                return
-            
-            # Get agent configs
+            # Get agent configs for the conversation
             all_agents = self.data_manager.load_agents()
-            agent_configs = {agent.id: agent for agent in all_agents if agent.id in selected_agent_ids}
-            
-            if len(agent_configs) != len(selected_agent_ids):
-                messagebox.showerror("Error", "Some selected agents were not found in the database.")
-                return
-                
-            # Convert agent objects to config dictionaries
             agents_config = []
-            for agent_id in selected_agent_ids:
-                agent = agent_configs.get(agent_id)
-                if agent:                    # Get color from agent attribute or from conversation agent_colors
+            
+            for agent_id in conversation.agents:
+                agent = next((a for a in all_agents if a.id == agent_id), None)
+                if agent:
+                    # Get color from agent or conversation agent_colors
                     color = agent.color
-                    if not color and agent.name in self.agent_colors:
-                        color = self.agent_colors[agent.name]
+                    if not color and hasattr(conversation, 'agent_colors') and agent.name in conversation.agent_colors:
+                        color = conversation.agent_colors[agent.name]
                     
-                    # If still no color, assign a unique one from the palette
-                    if not color:
-                        # Get all assigned colors in this conversation
-                        assigned_colors = set(self.agent_colors.values())
-                        # Find an available color that hasn't been used yet
-                        for c in UI_COLORS["agent_colors"]:
-                            if c not in assigned_colors:
-                                color = c
-                                break
-                        # If all colors are used, fall back to the first color
-                        if not color:
-                            color = UI_COLORS["agent_colors"][0]
-                        self.agent_colors[agent.name] = color
-                        
                     agents_config.append({
                         "name": agent.name,
                         "role": agent.role,
                         "base_prompt": agent.base_prompt,
                         "color": color
                     })
-              # Start conversation with existing messages
-            conversation_id = self.loaded_conversation.id
             
-            # Get invocation method and termination condition from loaded conversation
-            invocation_method = getattr(self.loaded_conversation, 'invocation_method', 'round_robin')
-            termination_condition = None
-            if invocation_method == "agent_selector":
-                termination_condition = getattr(self.loaded_conversation, 'termination_condition', None)
+            if len(agents_config) < 2:
+                messagebox.showerror("Error", "Not enough agents found to resume conversation.")
+                return
             
+            # Get invocation method
+            invocation_method = getattr(conversation, 'invocation_method', 'round_robin')
+            
+            # Start conversation with new termination condition
             thread_id = self.conversation_engine.start_conversation(
-                conversation_id=conversation_id,
+                conversation_id=conversation.id,
                 agents_config=agents_config,
-                environment=self.loaded_conversation.environment,
-                scene_description=self.loaded_conversation.scene_description,
+                environment=conversation.environment,
+                scene_description=conversation.scene_description,
                 invocation_method=invocation_method,
-                termination_condition=termination_condition
-            )            
+                termination_condition=new_termination_condition
+            )
+            
             if thread_id:
-                self.current_conversation_id = conversation_id
+                self.current_conversation_id = conversation.id
                 self.conversation_active = True
                 self.update_simulation_controls(True)
                 
-                # Set up message callback to update display
-                self.conversation_engine.register_message_callback(conversation_id, self.on_message_received)
+                # Set up message callback
+                self.conversation_engine.register_message_callback(conversation.id, self.on_message_received)
                 
-                # Add a system message indicating resumption
-                resume_msg = f"CONVERSATION RESUMED at {datetime.now().strftime('%H:%M:%S')}"
-                self.chat_canvas.add_bubble("System", resume_msg, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
+                # Add system message about restart
+                restart_msg = f"CONVERSATION RESTARTED with new termination condition at {datetime.now().strftime('%H:%M:%S')}"
+                self.chat_canvas.add_bubble("System", restart_msg, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
                 
-                messagebox.showinfo("Success", "Conversation resumed! The AI agents will continue from where they left off.")
+                # Switch to simulation tab
+                self.notebook.select(2)
+                
+                self.update_status(f"Conversation '{conversation.title}' restarted with new termination condition!")
+                
             else:
-                messagebox.showerror("Error", "Failed to resume conversation.")
+                messagebox.showerror("Error", "Failed to restart conversation.")
                 
         except Exception as e:
-            messagebox.showerror("Error", f"Failed to resume conversation: {str(e)}")
-    
-    def update_simulation_controls(self, active: bool):
-        """Update the state of simulation control buttons."""
-        if active:
-            self.pause_btn.config(state="normal")
-            self.resume_btn.config(state="disabled")
-            self.summarize_btn.config(state="normal")
-            self.stop_btn.config(state="normal")
-            self.send_btn.config(state="normal")
-            self.change_scene_btn.config(state="normal")
-        else:
-            self.pause_btn.config(state="disabled")
-            self.resume_btn.config(state="normal" if self.current_conversation_id else "disabled")
-            self.summarize_btn.config(state="disabled")
-            self.stop_btn.config(state="disabled")
-            self.send_btn.config(state="disabled")
-            self.change_scene_btn.config(state="disabled")
-    
-    def update_status(self, message: str):
-        """Update the status bar message."""
-        self.status_bar.config(text=message)
-        self.root.after(5000, lambda: self.status_bar.config(text="Ready"))
-    
-    def run(self):
-        """Start the GUI application."""
+            messagebox.showerror("Error", f"Failed to restart conversation: {str(e)}")
+
+    def stop_conversation(self):
+        """Stop the active conversation."""
+        if self.conversation_engine and self.current_conversation_id:
+            try:
+                result = messagebox.askyesno(
+                    "Stop Conversation", 
+                    "Are you sure you want to stop the conversation?\n\nThis will end the current session."
+                )
+                
+                if result:
+                    self.conversation_engine.stop_conversation(self.current_conversation_id)
+                    self.conversation_active = False
+                    self.current_conversation_id = None
+                    self.update_simulation_controls(False)
+                    self.update_status("Conversation stopped.")
+                    
+                    # Add system message about stopping
+                    self.chat_canvas.add_bubble(
+                        "System", 
+                        "Conversation stopped by user.", 
+                        datetime.now().strftime("%H:%M:%S"), 
+                        "system", 
+                        UI_COLORS["system_bubble"]
+                    )
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to stop conversation: {str(e)}")
+
+    def summarize_conversation(self):
+        """Generate and display a summary of the current conversation."""
+        if self.conversation_engine and self.current_conversation_id:
+            try:
+                summary = self.conversation_engine.get_conversation_summary(self.current_conversation_id)
+                
+                # Create summary dialog
+                dialog = tk.Toplevel(self.root)
+                dialog.title("Conversation Summary")
+                dialog.geometry("600x400")
+                dialog.transient(self.root)
+                
+                # Center the dialog
+                dialog.update_idletasks()
+                x = (dialog.winfo_screenwidth() // 2) - (dialog.winfo_width() // 2)
+                y = (dialog.winfo_screenheight() // 2) - (dialog.winfo_height() // 2)
+                dialog.geometry(f"+{x}+{y}")
+                
+                # Configure grid
+                dialog.grid_rowconfigure(1, weight=1)
+                dialog.grid_columnconfigure(0, weight=1)
+                
+                # Title
+                title_label = ttk.Label(dialog, text="Conversation Summary", font=("Arial", 14, "bold"))
+                title_label.grid(row=0, column=0, pady=10)
+                
+                # Summary text
+                summary_frame = ttk.Frame(dialog)
+                summary_frame.grid(row=1, column=0, sticky="nsew", padx=20, pady=10)
+                summary_frame.grid_rowconfigure(0, weight=1)
+                summary_frame.grid_columnconfigure(0, weight=1)
+                
+                summary_text = scrolledtext.ScrolledText(summary_frame, width=70, height=20, wrap=tk.WORD)
+                summary_text.grid(row=0, column=0, sticky="nsew")
+                summary_text.insert(1.0, summary)
+                summary_text.config(state=tk.DISABLED)
+                
+                # Close button
+                ttk.Button(dialog, text="Close", command=dialog.destroy).grid(row=2, column=0, pady=10)
+                
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to generate summary: {str(e)}")
+
+    def change_scene(self):
+        """Change the scene/environment for the active conversation."""
+        if not (self.conversation_engine and self.current_conversation_id and self.conversation_active):
+            messagebox.showwarning("Warning", "No active conversation to change scene for.")
+            return
+        
+        new_env = self.new_env_var.get().strip()
+        new_scene = self.new_scene_text.get(1.0, tk.END).strip()
+        
+        if not new_env or not new_scene:
+            messagebox.showwarning("Warning", "Please enter both new environment and scene description.")
+            return
+        
         try:
-            self.root.mainloop()
-        except KeyboardInterrupt:
-            print("Application interrupted by user")
+            result = self.conversation_engine.change_scene(
+                self.current_conversation_id, 
+                new_env, 
+                new_scene
+            )
+            
+            if result.get("success"):
+                self.current_env_label.config(text=new_env)
+                self.new_env_var.set("")
+                self.new_scene_text.delete(1.0, tk.END)
+                
+                # Add system message about scene change
+                scene_msg = f"Scene changed to: {new_env}. {new_scene}"
+                self.chat_canvas.add_bubble(
+                    "System", 
+                    scene_msg, 
+                    datetime.now().strftime("%H:%M:%S"), 
+                    "system", 
+                    UI_COLORS["system_bubble"]
+                )
+                
+                self.update_status("Scene changed successfully!")
+            else:
+                messagebox.showerror("Error", "Failed to change scene.")
+                
         except Exception as e:
-            print(f"Application error: {e}")
-            messagebox.showerror("Application Error", f"An unexpected error occurred: {e}")
-
-
-if __name__ == "__main__":
-    print("Starting Multi-Agent Conversation Simulator...")
-    try:
-        app = AgentConversationSimulatorGUI()
-        app.run()
-    except Exception as e:
-        print(f"Failed to start application: {e}")
-        messagebox.showerror("Startup Error", f"Failed to start application: {e}")
+            messagebox.showerror("Error", f"Failed to change scene: {str(e)}")

@@ -5,6 +5,8 @@ Real LangGraph react agents with Gemini in conversation cycle.
 
 import os
 import random
+import json
+import re
 from typing import Dict, List, Any, Optional, Callable
 from datetime import datetime
 import threading
@@ -127,7 +129,7 @@ Recent conversation messages:
     
     def create_agent_prompt(self, agent_config: Dict[str, str], environment: str, 
                           scene_description: str, messages: List[Dict[str, str]], 
-                          all_agents: List[str]) -> str:
+                          all_agents: List[str] ) -> str:
         """
         Create the prompt for an agent including scene, participants, and conversation history.
         
@@ -174,9 +176,9 @@ PARTICIPANTS: {', '.join(all_agents)}
         prompt += f"""Give your response to the ongoing conversation as {agent_name}. 
 Keep your response natural, conversational, and true to your character. 
 Respond as if you're speaking directly in the conversation (don't say "As {agent_name}, I would say..." just respond naturally).
-Keep responses to 1-3 sentences to maintain good conversation flow."""
-        
+Keep responses to 1-3 sentences to maintain good conversation flow."""        
         return prompt
+    
     def start_conversation(self, conversation_id: str, agents_config: List[Dict[str, str]], 
                         environment: str, scene_description: str, initial_message: str = None,
                         invocation_method: str = "round_robin", termination_condition: Optional[str] = None) -> str:
@@ -190,7 +192,11 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             scene_description: Scene description for the conversation
             initial_message: Optional initial message to start the conversation
             invocation_method: Method for selecting which agent speaks next ("round_robin" or "agent_selector")
-            termination_condition: Optional condition for when to end the conversation (used with agent_selector)
+            termination_condition: Optional condition for when to end the conversation. 
+                                  When provided with "round_robin" method, an LLM will evaluate
+                                  after each round if the condition is met. When provided with 
+                                  "agent_selector" method, the selector LLM decides termination.
+                                  If not provided, conversation continues indefinitely.
             
         Returns:
             Thread ID for the conversation
@@ -336,8 +342,7 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                     elif next_response == "error_parsing":
                         # Error in parsing, use round robin as fallback
                         conv_data["current_agent_index"] = (conv_data["current_agent_index"] + 1) % len(conv_data["agent_names"])
-                    else:
-                        # Set the next agent
+                    else:                        # Set the next agent
                         if next_response in conv_data["agent_names"]:
                             # Find the index of the selected agent
                             for i, name in enumerate(conv_data["agent_names"]):
@@ -350,6 +355,26 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                 else:
                     # Round robin method - move to next agent in cycle
                     conv_data["current_agent_index"] = (conv_data["current_agent_index"] + 1) % len(conv_data["agent_names"])
+                    
+                    # Check if we completed a round (all agents have spoken)
+                    # and if there's a termination condition to check
+                    if (conv_data["current_agent_index"] == 0 and 
+                        termination_condition and 
+                        len(conv_data["messages"]) >= len(conv_data["agent_names"])):
+                        
+                        # Check if conversation should terminate
+                        if self._check_round_robin_termination(conversation_id):
+                            # End the conversation
+                            if conversation_id in self.message_callbacks:
+                                self.message_callbacks[conversation_id]({
+                                    "sender": "System",
+                                    "content": "Termination condition reached.",
+                                    "timestamp": datetime.now().isoformat(),
+                                    "type": "system"
+                                })
+                            # Stop the conversation
+                            conv_data["status"] = "completed"
+                            return
                 
                 # Schedule next agent response with configurable delay
                 delay = random.uniform(
@@ -452,3 +477,98 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             "success": True,
             "timestamp": datetime.now().isoformat()
         }
+    
+    def _check_round_robin_termination(self, conversation_id: str) -> bool:
+        """
+        Check if the conversation should terminate for Round Robin mode.
+        
+        Args:
+            conversation_id: The conversation identifier
+            
+        Returns:
+            True if conversation should terminate, False otherwise
+        """
+        conv_data = self.active_conversations[conversation_id]
+        termination_condition = conv_data.get("termination_condition")
+        
+        # If no termination condition provided, don't terminate
+        if not termination_condition:
+            return False
+        
+        messages = conv_data["messages"]
+        environment = conv_data["environment"]
+        scene_description = conv_data["scene_description"]
+        
+        # Get messages from the last three rounds
+        # Assuming a round is when all agents have spoken once
+        num_agents = len(conv_data["agent_names"])
+        last_three_rounds_count = num_agents * 3
+        
+        if len(messages) < last_three_rounds_count:
+            # Not enough messages for three rounds, don't terminate yet
+            return False
+            
+        last_three_rounds_messages = messages[-last_three_rounds_count:]
+        
+        # Format messages for the prompt
+        formatted_messages = []
+        for msg in last_three_rounds_messages:
+            if "agent_name" in msg and "message" in msg:
+                formatted_messages.append(f"{msg['agent_name']}: {msg['message']}")
+        messages_str = "\n".join(formatted_messages)
+        
+        # Create termination prompt
+        prompt = f"""You are evaluating whether a conversation should terminate based on a specific condition.
+
+MESSAGES FROM THE LAST THREE ROUNDS:
+{messages_str}
+
+CURRENT SCENE: {environment}
+ENVIRONMENT: {scene_description}
+TERMINATION CONDITION: {termination_condition}
+
+Based on the conversation messages and the termination condition, determine if the conversation can terminate now.
+
+Respond with ONLY a JSON object in this exact format:
+{{ "termination_decision": true }} or {{ "termination_decision": false }}
+
+Do not include any other text or explanation."""
+        
+        try:
+            # Call LLM to check termination
+            response = self.model.invoke([HumanMessage(content=prompt)])
+            response_text = response.content.strip()
+            
+            # Parse the JSON response
+            termination_result = self._extract_termination_json(response_text)
+            return termination_result.get("termination_decision", False)
+            
+        except Exception as e:
+            print(f"Error checking termination condition: {e}")
+            return False
+    
+    def _extract_termination_json(self, text: str) -> Dict[str, Any]:
+        """Extract termination JSON from the response text, handling different formats."""
+        # First try direct JSON parsing
+        try:
+            return json.loads(text)
+        except json.JSONDecodeError:
+            # If that fails, try to extract JSON using regex
+            try:
+                # Look for JSON-like structure with curly braces
+                json_match = re.search(r'({.*?})', text, re.DOTALL)
+                if json_match:
+                    json_text = json_match.group(1)
+                    return json.loads(json_text)
+                
+                # If still no match, try to extract key-value from markdown format
+                markdown_match = re.search(r'```(?:json)?(.*?)```', text, re.DOTALL)
+                if markdown_match:
+                    json_text = markdown_match.group(1).strip()
+                    return json.loads(json_text)
+            except Exception:
+                # If all parsing attempts fail, return a default response
+                pass
+            
+            # Default response if no valid JSON found
+            return {"termination_decision": False}

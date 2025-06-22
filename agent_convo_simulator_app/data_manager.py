@@ -41,7 +41,8 @@ class Conversation:
     scene_description: str
     agents: List[str]  # Agent IDs
     messages: List[Dict[str, Any]]
-    status: str  # 'active', 'paused', 'completed'    created_at: str
+    status: str  # 'active', 'paused', 'completed'
+    created_at: str  # <-- Added this field
     last_updated: str
     summary: Optional[str]
     thread_id: str
