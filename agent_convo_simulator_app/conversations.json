@@ -1759,6 +1759,1008 @@
       },
       "invocation_method": "agent_selector",
       "termination_condition": "When all four friends comes to the agreement that high sugar is good or bad."
+    },
+    {
+      "id": "conv_9257c831",
+      "title": "Kitchen",
+      "environment": "Kitchen",
+      "scene_description": "Sarah is cooking in the kitchen, after taking a wash after her morning workout. she is wearing casual clothes but now they are tightly fitting to her. Jason enters afters the kitchen after a long sleep.",
+      "agents": [
+        "agent_aeb721f9",
+        "agent_7562c7c3"
+      ],
+      "messages": [
+        {
+          "sender": "Sarah",
+          "content": "Ugh, morning sleepyhead! Finally decided to grace us with your presence, huh? I hope you're hungry, I'm making your favorite pancakes.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:05:30.704597",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Ugh, pancakes again? You know I can cook for myself, right?\" I yawn, scratching my stomach. \"And what's with the workout gear, trying to show off or something, Sarah?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:05:40.010387",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Oh, honey, I'm *so* sorry my attempt at a nice breakfast is such an inconvenience,\" I say, dripping with sarcasm. And as for the \"workout gear,\" these are just my regular clothes now...they're getting a *little* snug, aren't they? Maybe you should hit the gym sometime, Jason!",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:05:51.342697",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Yeah, yeah, I heard you the first time,\" I mumble, grabbing a glass from the cupboard. \"And I get plenty of exercise... walking to the fridge, walking to the couch... it's a lifestyle.\" I avoid eye contact, pouring myself some juice.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:05:58.731615",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Chuckling softly) \"Oh, I can see those gains coming in already, Jason. You'll be bench-pressing the TV remote in no time!\" Seriously though, you should try joining me sometime; it's actually kind of fun.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:06:26.103824",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Fun for you maybe,\" I scoff, taking a big gulp of juice. \"I'd rather not spend my morning struggling to lift tiny weights while you're over there, like, deadlifting a car or something.\" I roll my eyes, even though the image is kinda... impressive.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:06:35.300821",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"A car? Oh, Jason, you wound me! I'm not *quite* at car-lifting level yet,\" I say with a playful smirk. \"But hey, we all start somewhere, even if it's just lifting a pancake from the plate to your mouth.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:06:43.533615",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Ha ha, very funny,\" I say flatly, grabbing a pancake from the stack. \"Just leave me to enjoy my breakfast in peace, okay? Before I start *accidentally* dropping syrup all over your 'workout gear'.\" I emphasize the last words with air quotes.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:06:53.102802",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Eyes narrowing playfully) \"Oh, you wouldn't dare. Remember who does the laundry around here, mister. Besides,\" I say, flexing my bicep subtly, \"I'm pretty sure I can handle a little syrup.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:07:00.514211",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "I choke a little on my pancake, trying not to stare at her bicep. \"Alright, alright, chill,\" I mutter, looking down at my plate. \"Just... making a joke. Relax.\" I quickly drown my pancake in syrup to avoid further eye contact.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:07:11.993163",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Smiling gently) \"Just teasing, sweetie. Eat your pancakes. You need to keep up your strength for all that…couch-walking.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:07:22.254636",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "So, any big plans for today besides your rigorous exercise routine? Need me to pick up anything from the store?",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:07:56.212857",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Nah, no big plans,\" I say, finally managing to meet her eyes again. \"Just gonna chill, maybe catch up on some games. And yeah, could you grab some more soda? I'm running low.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:08:05.749022",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Soda, huh? Maybe I'll get you the diet kind... you know, to help with the *couch-walking* regimen.\" I'm kidding, of course, I'll get your regular stuff. Anything else, or is that all that fuels your athletic endeavors?",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:08:17.129402",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Ugh, diet soda? Seriously? You're trying to kill me, aren't you?\" I say, only half-joking. \"And maybe some chips? Gotta have something to munch on during my... you know.\" I trail off, gesturing vaguely towards the living room.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:09:50.896500",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Laughing) \"Alright, alright, chips it is. Don't worry, I won't sabotage your *athlete's* diet *too* much. Just promise me you'll at least stand up and stretch once in a while, okay?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:10:01.505741",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Yeah, yeah, I'll think about it,\" I say, shoveling another pancake into my mouth. \"Thanks for the groceries, I guess.\" I mumble around a mouthful of pancake.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:10:16.214074",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"You're welcome, sweetie. Now, if you'll excuse me, I'm going to go... uh... *deadlift a car* or something. Have a good one!\" I say with a wink as I start clearing the dishes.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:10:25.346955",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "I watch her go, trying not to let my jaw drop. \"Yeah, whatever,\" I mutter, grabbing the last pancake. \"Have fun with that... car.\" I shake my head and head for the couch, already planning my next gaming session.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:10:33.784614",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(Muttering to himself as he walks) \"Deadlifting a car... as if. Probably just going to rearrange the furniture or something.\" He secretly hopes she *is* actually going to deadlift a car.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:10:42.093270",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(Reaching the couch, he kicks off his shoes and plops down, grabbing the TV remote.) \"Alright, time to become one with the couch... and maybe actually see if she moved the car.\" He flips on the TV and starts scrolling through the channels, but his eyes keep drifting towards the window, half-expecting to see Sarah casually strolling by with a car over her shoulder.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:12:24.624146",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(From the other room, loud enough for Jason to hear) \"Hey, Jason! Could you come here for a sec? I need a *little* help with something... nothing too strenuous, I promise!\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:12:35.561735",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Ugh, seriously?\" I groan, pausing the TV. \"What now? This better not involve heavy lifting.\" I reluctantly get up from the couch, already bracing myself for some ridiculous request.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:12:42.907693",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "I shuffle into the living room, hands in my pockets. \"Alright, what's so important it couldn't wait 'til after I beat this level?\" I ask, already regretting getting up. \"And where's the car you supposedly deadlifted?\" I add with a smirk.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:12:54.345010",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Standing in front of a ridiculously large potted plant) \"Oh, just this little thing. I was trying to move it over by the window, but it's a bit heavier than I thought. Just need you to help me get it started, I can take it from there.\" (I say with an innocent smile, trying to hide my smirk).",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:13:06.650053",
+          "color": "#CAE8BD"
+        }
+      ],
+      "status": "active",
+      "created_at": "2025-06-24T13:05:27.837971",
+      "last_updated": "2025-06-24T13:13:06.673617",
+      "summary": null,
+      "thread_id": "thread_67fe06a7",
+      "agent_colors": {
+        "Sarah": "#CAE8BD",
+        "Jason": "#FFE8CD"
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": null
+    },
+    {
+      "id": "conv_11c0cc0a",
+      "title": "Kitchen2",
+      "environment": "Kitchen",
+      "scene_description": "Sarah is cooking in the kitchen, after taking a wash after her morning workout. she is wearing casual clothes but now they are tightly fitting to her. Jason enters afters the kitchen after a long sleep.",
+      "agents": [
+        "agent_aeb721f9",
+        "agent_7562c7c3"
+      ],
+      "messages": [
+        {
+          "sender": "Sarah",
+          "content": "(Humming softly as I stir something in a pan, I glance over my shoulder as Jason walks in, a playful smirk already forming.)\n\n\"Well, look who finally decided to grace us with his presence. Sleep well, Sleeping Beauty?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:27:49.328881",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(I shuffle into the kitchen, rubbing the sleep from my eyes. Mom's already up and...are those her workout clothes? I try to ignore the way they're fitting. Ugh.)\n\n\"Yeah, yeah, very funny, Mom. What's for breakfast?\" I grumble, heading straight for the fridge.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:27:59.878615",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(I chuckle, turning back to the stove.)\n\n\"Someone's grumpy. Breakfast is almost ready, just finishing up. And yes, these *are* my workout clothes, in case you hadn't noticed I've been trying to get a *little* bit healthier lately.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:28:11.350358",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Yeah, I noticed,\" I mumble, grabbing a carton of orange juice. \"Good for you, I guess.\" I try to sound supportive, but honestly, the image of Mom working out is just...weird.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:28:18.840037",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(I raise an eyebrow, a mischievous glint in my eyes.)\n\n\"Just a *little* weird, huh? Maybe you should try working out sometime too, then you wouldn't be so surprised when your old mom starts hitting the gym.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:28:28.039956",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(I choke a little on my orange juice.) \"Hey, I'm not *that* out of shape! Besides, I get plenty of exercise...walking to the fridge and back.\" I flex my bicep jokingly, wincing internally at how pathetic it probably looks.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:28:35.677211",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Sarah: (I burst out laughing, shaking my head.)\n\n\"Oh, honey, that's adorable. You know what? Let's see those muscles in action. Arm wrestle me. Winner gets to do the dishes for a week.\" (I say this as I put the breakfast on the table.)",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:29:09.693884",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(Dishes for a week? Okay, maybe this is worth a shot. Plus... I can't help but sneak a glance at her arms. I quickly look away.)\n\n\"Alright, you're on! But don't cry when I win.\" I try to sound confident, but my voice cracks a little.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:29:20.839486",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(I grin, already positioning my arm on the table.) \"Oh, I'm not worried about crying. But you might want to stretch first. And here, feel my biceps first, so you know what you're up against.\" I flex my arm, making the muscle bulge slightly, a playful challenge in my eyes.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:29:31.451488",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(As Jason reaches out to feel my bicep, I keep it flexed, a small, almost innocent smile on my face.) \"Go on, don't be shy. Get a good feel for it. It's all natural, you know.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:29:40.305742",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(My face flushes. Seriously? I reluctantly reach out and touch her bicep. It's...hard. Way harder than I expected. A strange mix of intimidation and...something else... washes over me.)\n\n\"Uh, yeah, okay. I get it. You're strong,\" I mumble, trying to pull my hand away quickly.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:29:52.066252",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(I let him pull his hand away, but keep my arm flexed and in position for the arm wrestle. My smile widens, a hint of devilishness in it.) \"Ready to admit defeat before we even start? Or are you going to give your poor old mom a *chance*?\" With a sudden, unexpected roar, I slam my fist on the table next to our elbows, making him jump. \"BOO!\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:30:04.042876",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(I watch him jump, then burst out laughing again, a genuine, hearty laugh. I wipe a tear from my eye.) \"Oh, honey, you should have seen your face! Scared you silly, didn't I? Maybe I *am* getting a little too buff for my own good.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:30:14.899494",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "System",
+          "content": "The conversation has reached its termination condition and has ended.",
+          "type": "system",
+          "timestamp": "2025-06-24T13:30:15.653738",
+          "color": "#F0F0F0"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(I give him a gentle nudge with my elbow.) \"Alright, alright, I'll stop teasing. Come on, eat your breakfast before it gets cold. And maybe later we can actually try that arm wrestle, but I promise to go easy on you.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:33:10.950097",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "System",
+          "content": "The conversation has reached its termination condition and has ended.",
+          "type": "system",
+          "timestamp": "2025-06-24T13:33:11.660579",
+          "color": "#F0F0F0"
+        }
+      ],
+      "status": "active",
+      "created_at": "2025-06-24T13:24:02.763909",
+      "last_updated": "2025-06-24T13:33:11.671911",
+      "summary": null,
+      "thread_id": "thread_8f0c9206",
+      "agent_colors": {
+        "Sarah": "#CAE8BD",
+        "Jason": "#FFE8CD"
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "When sarah let Json arm wrestle her and Json feel her biceps and thereafter she making him scared and shiver with her physique(by pulling a prank)."
+    },
+    {
+      "id": "conv_46546315",
+      "title": "kitchen3",
+      "environment": "Kitchen",
+      "scene_description": "Sarah is cooking in the kitchen, after taking a wash after her morning workout. she is wearing casual clothes which used to be loose but now they are tightly fitting to her. Jason enters afters the kitchen after a long sleep.",
+      "agents": [
+        "agent_aeb721f9",
+        "agent_7562c7c3"
+      ],
+      "messages": [
+        {
+          "sender": "Jason",
+          "content": "Ugh, morning already? Hey Mom. What are you cooking? Smells...intense.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:38:32.064293",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Morning sleepyhead! I'm making my protein pancakes. You know, gotta keep this old engine running, *flexes bicep subtly while stirring batter, then quickly hides it* Want some?",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:38:41.350932",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Protein pancakes, huh? Is that why you're smelling like the inside of a supplement store?,\" Jason replied, wrinkling his nose playfully. \"But yeah, I'm starving. I'll take a stack.\"\n\n\"Alright, alright, Mr. Picky Eater,\" I chuckled, flipping a pancake. \"They're good for you, whether you like the smell or not. Helps you... grow.\" *I smirked, thinking about my own growth and how I'm secretly getting stronger than him.*",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:38:52.048476",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Grow? Please, Mom, I'm pretty sure I'm done growing *down*. Maybe I'll just stick to cereal,\" I say, grabbing a box from the pantry, trying to avoid looking at her biceps. \"Unless... you think your pancakes can magically give me *your* muscles?\" I joke, knowing full well that's impossible.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:39:04.158755",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "*I raised an eyebrow, a playful glint in my eye.* \"Oh, you want *my* muscles, huh? Maybe if you ask nicely... and prove you're worthy.\" *I set down the spatula, crossing my arms, subtly flexing again, enjoying his discomfort.* \"What do you say, tough guy? Think you can handle a little pancake-fueled arm wrestling?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:39:13.127468",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Jason hesitated, glancing at my arms. \"Arm wrestling? With *you*? Seriously, Mom? You've been hitting the gym way too hard. But... alright, I'm game. Just don't cry when I win.\" He puffed out his chest, trying to look confident.\n\n*I bit back a laugh, enjoying his bravado. This is going to be fun.* \"Oh, I won't cry, sweetie. But you might.\" I cleared the counter space, a mischievous grin spreading across my face. \"Come on then, let's see what you've got. But first... flex for me. Gotta make sure you're warmed up.\" *This is stage one, emasculation.*",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:39:24.113351",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Flex?\" I scoff, rolling my eyes but secretly dreading this. \"Mom, I haven't flexed since, like, middle school. And even then it was pathetic.\" I reluctantly make a tiny, unimpressive bicep, cringing at how small it looks. \"Happy now?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:39:34.826941",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "*I suppressed a snort, barely containing my laughter at his pathetic attempt.* \"Oh, honey, that's... adorable.\" *I reached out, gently squeezing his bicep, a touch longer than necessary.* \"Don't worry, we can work on that. Now, let me show you what a *real* bicep feels like.\" *Humiliation: Initiated.* I flexed my own bicep, making it hard and prominent, and then guided his hand to touch it. \"Go on, feel the power.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:39:42.549728",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Jason's eyes widened as he touched my bicep. \"Whoa... Mom! What *have* you been doing at the gym?\" He looked genuinely impressed, but also a little unnerved.\n\n*I smirked, enjoying his reaction.* \"Just a little something to keep me young. Now, ready to get overpowered?\" I took my position at the counter, placing my elbow firmly and extending my hand, ready for the arm wrestle. *Overpowering: About to begin.* I gave him a sweet, innocent smile. \"Don't be scared, sweetie. It'll be over quickly.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:40:17.676402",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "He gulped, a bead of sweat forming on his forehead. \"Okay, okay, I'm ready.\" He positioned his arm, gripping my hand tightly. \"But don't think I'm going to let you win just because you're my mom.\"\n\n*I chuckled softly, my eyes gleaming with playful malice.* \"Oh, honey, you won't *let* me win. You couldn't even if you tried.\" I locked eyes with him, a sudden surge of strength coursing through me. Then, with a swift, almost imperceptible movement, I slammed his hand down on the counter. The whole ordeal was over even before he could react . \"Oops! Did I win?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:40:30.021787",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"What the--?! That's not fair!\" I exclaim, my face turning red. \"You didn't even *try*! You just...did it! You totally cheated!\" I pull my hand away, feeling completely humiliated and weak. \"I hate arm wrestling.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:40:40.891133",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "System",
+          "content": "The conversation has reached its termination condition and has ended.",
+          "type": "system",
+          "timestamp": "2025-06-24T13:40:41.758679",
+          "color": "#F0F0F0"
+        }
+      ],
+      "status": "active",
+      "created_at": "2025-06-24T13:38:29.745389",
+      "last_updated": "2025-06-24T13:40:41.761817",
+      "summary": null,
+      "thread_id": "thread_69fe6393",
+      "agent_colors": {
+        "Sarah": "#CAE8BD",
+        "Jason": "#FFE8CD"
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "When sarah let desperate Json arm wrestle her and let Json feel her biceps and thereafter she making him scared and shiver with her muscles and strength(by pulling a prank). The prank consist of three stages. 1. Emasculation  2.humiliation 3. overpowering"
+    },
+    {
+      "id": "conv_d898cbcf",
+      "title": "kitchen4",
+      "environment": "Kitchen",
+      "scene_description": "Sarah is cooking in the kitchen, after taking a wash after her morning workout. she is wearing casual clothes which used to be loose but now they are tightly fitting to her. Jason enters afters the kitchen after a long sleep.",
+      "agents": [
+        "agent_7562c7c3",
+        "agent_df3ffcbf"
+      ],
+      "messages": [
+        {
+          "sender": "Jason",
+          "content": "\"Ugh, morning already?\" I mumbled, rubbing the sleep from my eyes as I shuffled into the kitchen. The smell of whatever Mom was cooking actually did smell pretty good though. \"Hey, Mom. What's for breakfast?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:49:51.218562",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Morning, sleepyhead,\" I said, trying to hide the little smirk that tugged at my lips. \"I'm making your favorite – pancakes. Go set the table, will you?\" I busied myself flipping the pancakes, hoping he wouldn't notice how snug my old t-shirt was fitting these days.",
+          "type": "ai",
+          "timestamp": "2025-06-24T13:50:01.354136",
+          "color": "#FFE8CD"
+        }
+      ],
+      "status": "active",
+      "created_at": "2025-06-24T13:49:47.796511",
+      "last_updated": "2025-06-24T13:50:01.357373",
+      "summary": null,
+      "thread_id": "thread_d4cd77fc",
+      "agent_colors": {
+        "Jason": "#CAE8BD",
+        "Sarah": "#FFE8CD"
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "When sarah finally let desperate Json arm wrestle her and let Json feel her biceps and thereafter she making him scared and shiver with her muscles and strength(by pulling a prank). The prank consist of three stages. 1. Emasculation  2.humiliation 3. overpowering"
+    },
+    {
+      "id": "conv_99243586",
+      "title": "Kitchen5",
+      "environment": "Kitchen",
+      "scene_description": "Sarah is cooking in the kitchen, after taking a wash after her morning workout. she is wearing casual clothes but now they are tightly fitting to her. Jason enters afters the kitchen after a long sleep.",
+      "agents": [
+        "agent_7562c7c3",
+        "agent_df3ffcbf"
+      ],
+      "messages": [],
+      "status": "active",
+      "created_at": "2025-06-24T13:53:22.160708",
+      "last_updated": "2025-06-24T13:53:22.160747",
+      "summary": null,
+      "thread_id": "thread_62f256e7",
+      "agent_colors": {
+        "Jason": "#CAE8BD",
+        "Sarah": "#FFE8CD"
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "When sarah finally let desperate Json arm wrestle her and Json feel her biceps and thereafter she making him scared and shiver with her physique(by pulling a prank)."
+    },
+    {
+      "id": "conv_86140e59",
+      "title": "Kitchen6",
+      "environment": "Kitchen",
+      "scene_description": "Sarah is cooking in the kitchen, after taking a wash after her morning workout. she is wearing casual clothes but now they are tightly fitting to her. Jason enters afters the kitchen after a long sleep.",
+      "agents": [
+        "agent_7562c7c3",
+        "agent_df3ffcbf"
+      ],
+      "messages": [
+        {
+          "sender": "Sarah",
+          "content": "(I'm humming softly, stirring something in a pot on the stove. The aroma of cinnamon and oatmeal fills the kitchen.)\n\n\"Morning, sleepyhead! Did you finally manage to escape your dreams?\" I ask, turning with a gentle smile. \"Breakfast is almost ready. Hope you're hungry!\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T15:32:39.927541",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Jason yawns widely, stretching his arms above his head. \"Barely. What's for breakfast? Smells good.\" He shuffles towards the counter, rubbing the sleep from his eyes.\n\n\"Oatmeal with cinnamon and apples,\" I reply, carefully ladling some into a bowl. \"Just the thing to fuel you up for... whatever it is you kids do these days.\" I try to keep my tone light, but I can't help but feel a little self-conscious as he gets closer. These clothes are definitely tighter than they used to be!",
+          "type": "ai",
+          "timestamp": "2025-06-24T15:33:14.524540",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Humming softly while stirring something in a pot) \"Morning, sleepyhead! Did you have a good rest? Breakfast is almost ready.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T16:22:51.457579",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(Yawning and stretching) \"Ugh, morning, Mom. Slept okay, I guess. What's cookin'?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T16:22:59.621199",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Just your favorite – pancakes! And some eggs and bacon, of course. Gotta fuel up for the day, right?\" (She gives him a gentle, teasing nudge with her elbow.)",
+          "type": "ai",
+          "timestamp": "2025-06-24T16:26:12.790995",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(I'm stirring something in a pot, trying to act casual as Jason walks in, but I can feel my t-shirt pulling a little tighter across my shoulders than it used to.)\n\n\"Morning, sleepyhead! Did you sleep well?\" I ask, trying to focus on the simmering sauce. \"Breakfast is almost ready. What are you in the mood for?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T16:42:18.268564",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Smiling warmly as Jason walks in, stirring something on the stove) Morning, sleepyhead! Did you have a good rest? I'm making pancakes, want some?",
+          "type": "ai",
+          "timestamp": "2025-06-24T16:56:10.692241",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(Yawning and scratching my head) \"Morning, Mom. Yeah, I slept okay... pancakes sound good, though. Thanks.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T16:56:22.710206",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Chuckles softly, grabbing a plate) You always sleep like a log, don't you? Go grab a seat, they'll be ready in a jiffy. Anything exciting planned for today?",
+          "type": "ai",
+          "timestamp": "2025-06-24T16:56:32.985996",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Flipping a pancake expertly) Just the usual, I suppose? Maybe some video games with your friends? Don't forget to get some fresh air, okay?",
+          "type": "ai",
+          "timestamp": "2025-06-24T16:57:08.304939",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Places a stack of pancakes on his plate, trying to subtly adjust her shirt sleeve which feels a bit tight) Here you go! Eat up, you need your energy. So, anything *really* new? Anything you want to talk about?",
+          "type": "ai",
+          "timestamp": "2025-06-24T16:57:43.579183",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Jason: (Mouth full of pancake) \"Nope, not really. Just the same old, same old. Oh! Mark was saying something about a new game coming out, might check that out later.\" (He takes another big bite)",
+          "type": "ai",
+          "timestamp": "2025-06-24T16:58:20.343370",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(I shuffle into the kitchen, rubbing the sleep from my eyes. The smell of whatever Mom's cooking hits me, and I wrinkle my nose.)\n\n\"Morning,\" I mumble, trying to avoid making eye contact. \"What's... what's for breakfast?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T18:08:09.266379",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Morning, sleepyhead! (I give him a gentle smile). I'm making scrambled eggs with a little bit of sausage. Hopefully, that's something you can stomach after your...long night of sleep.",
+          "type": "ai",
+          "timestamp": "2025-06-24T18:08:18.518300",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(I chuckle softly, carefully avoiding looking directly at him as I crack eggs into the bowl) \"Oh, come on, it can't be *that* bad. Unless you'd prefer cereal? There's always cereal.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T18:08:53.426644",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Eggs are fine, Mom,\" he says with a sigh. \"Just... maybe go easy on the pepper this time, yeah?\" (He pulls out a chair and slumps into it, watching me cook with a vague disinterest.)",
+          "type": "ai",
+          "timestamp": "2025-06-24T18:09:28.683528",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(I feign hurt, dramatically clutching my chest) \"Easy on the pepper? My cooking is a masterpiece, Jason! You wound me.\" (I wink, grabbing the pepper grinder but keeping it far away from the eggs for now.) \"So, big plans for today, or more sleeping?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T18:10:03.096563",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Ugh, plans,\" he groans, rolling his eyes. \"Gotta meet up with Liam later to work on that stupid history project. It's gonna be brutal.\" He pauses, then squints at me. \"Hey, you've been going to the gym a lot lately, huh? You seem...different.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T18:10:39.233845",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(I shuffle into the kitchen, rubbing the sleep from my eyes. The smell of whatever Mom's cooking hits me, and I wrinkle my nose.)\n\n\"Morning, Mom. What's... that?\" I ask, gesturing vaguely at the stove.",
+          "type": "ai",
+          "timestamp": "2025-06-24T19:04:11.431226",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Ugh, morning already? Smells good, Mom, what are you making? You look like you just finished a marathon or something.",
+          "type": "ai",
+          "timestamp": "2025-06-24T19:04:13.477600",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(I shuffle into the kitchen, rubbing the sleep from my eyes. The smell of whatever Mom's cooking hits me. I try to avoid looking directly at her, still feeling a little awkward.)\n\n\"Morning, Mom. What's for...whatever that is?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T19:04:20.986250",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(I shuffle into the kitchen, rubbing the sleep from my eyes. The smell of whatever Mom's cooking hits me. Probably healthy stuff. I can already feel my stomach grumbling.)\n\n\"Morning, Mom,\" I mumble, heading straight for the coffee pot. \"What's for...breakfast?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T19:17:23.329435",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Humming softly as I stir something in a pan, the scent of eggs and bacon filling the kitchen)\n\n\"Morning, sleepyhead! I was wondering when you'd finally crawl out of bed. Breakfast is almost ready, grab a plate.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T20:10:11.569907",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Ugh, morning already? What's cooking, Mom? Smells... intense. You hit the gym hard this morning or something?",
+          "type": "ai",
+          "timestamp": "2025-06-24T20:10:14.468996",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(I shuffle into the kitchen, rubbing the sleep from my eyes. The smell of whatever Mom's cooking hits me like a brick.)\n\n\"Ugh, what time is it?\" I mumble, trying to avoid looking directly at her. Mornings are *not* my thing.",
+          "type": "ai",
+          "timestamp": "2025-06-24T20:10:16.807666",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Smiling warmly at Jason as he enters the kitchen) Morning sleepyhead! Did you sleep well? I'm just finishing up breakfast – pancakes okay?",
+          "type": "ai",
+          "timestamp": "2025-06-24T20:10:16.849219",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Humming softly as I stir something in a pot) Morning, sleepyhead! Did you sleep well? I'm making your favorite pancakes.",
+          "type": "ai",
+          "timestamp": "2025-06-24T20:10:16.921271",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Ugh, what smells so good? And why is it so bright in here?\" I groan, rubbing the sleep out of my eyes as I shuffle into the kitchen. Mom's already up and cooking? That's... unusual.",
+          "type": "ai",
+          "timestamp": "2025-06-24T20:10:17.144894",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Ugh, what smells so good? And why is it so bright in here?\" I groan, rubbing the sleep from my eyes as I shuffle into the kitchen. Mom's already in workout clothes... again. \"Morning, Mom.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T20:10:17.436695",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Ugh, what smells so good? And Mom, did you shrink my shirts again? Everything looks... tighter than usual.\" I yawn, rubbing the sleep out of my eyes, trying not to stare too much. Morning already?",
+          "type": "ai",
+          "timestamp": "2025-06-24T20:10:18.151706",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Smiling warmly at Jason as he enters the kitchen, stirring something on the stove) Good morning, sleepyhead! Did you have a good rest? Breakfast is almost ready.",
+          "type": "ai",
+          "timestamp": "2025-06-24T20:10:18.643417",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Humming softly, I stir the scrambled eggs in the pan, trying to ignore the way my t-shirt pulls a little tighter across my shoulders than it used to.)\n\n\"Morning, sleepyhead! Did you finally decide to join the land of the living?\" I ask, turning to smile at Jason as he walks in. \"Breakfast will be ready in a minute.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:35:57.575155",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(I shuffle into the kitchen, rubbing the sleep from my eyes. The smell of eggs is actually pretty good.)\n\n\"Morning, Mom,\" I mumble, trying not to make eye contact. \"Yeah, I guess so. Smells good, what's up?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:36:08.815666",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Just making some breakfast,\" Mom says, flipping the eggs. \"Big day planned, or are you going to grace the couch with your presence all day again?\"\n\n(I roll my eyes, grabbing a glass from the cupboard.) \"Probably the couch. Unless something more interesting happens.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:36:43.729521",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Sarah: \"Oh, I'm sure I could come up with something *interesting*,\" she says with a playful glint in her eye, placing the eggs on two plates. \"Maybe a little mother-son workout session? Build some of those muscles?\"\n\n(I choke a little on the water I was drinking.) \"Workout? With you? No thanks, I'm good.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:37:18.341959",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Come on, it'll be fun!\" Mom insists, putting a plate of eggs in front of me. \"Unless you're scared you can't keep up with your old mom?\" She flexes her arm a little, and I try not to stare.\n\n(I scoff, trying to sound confident.) \"Scared? Please. I'm just...busy. With important stuff.\" I take a big bite of egg to avoid further discussion.",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:37:54.083414",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(Humming softly as I stir something in a pan, I turn as Jason walks in, a small, shy smile on my face)\n\nMorning, sleepyhead! Did you sleep well? I'm making pancakes, want some?",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:39:38.425193",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Jason",
+          "content": "(I shuffle into the kitchen, rubbing the sleep from my eyes. The smell of something cooking hits me, and I see Mom at the stove.)\n\n\"Morning, Mom,\" I mumble, heading for the coffee pot. \"What's cooking?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:40:31.252743",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Sarah: \"Just making some breakfast burritos. Figured you'd be awake soon enough to eat.\"\n\n(I pour myself a cup of coffee, trying to ignore how good she looks even in casual clothes. Ugh, why does she have to be so... toned?)\n\n\"Smells good,\" I reply, trying to sound casual. \"Anything I can do to help?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:41:08.131865",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Sarah: \"Nah, I'm good. Just relax, you look like you need it. Sleep well?\"\n\n(I take a sip of my coffee, trying to wake up a little more.)\n\n\"Yeah, alright,\" I say, stretching a bit. \"Just had a weird dream, that's all.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:41:46.061594",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Sarah: \"Oh yeah? Anything interesting? Don't tell me you were dreaming about finally hitting the gym.\" She chuckles, flipping a burrito.\n\n(I roll my eyes, instantly feeling self-conscious.)\n\n\"Ha, ha, very funny,\" I say, trying to keep my tone light. \"It was nothing like that.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:42:21.159742",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Sarah: \"Okay, okay, I'm just teasing. You know I love you just the way you are... even if 'the way you are' is a little... scrawny.\" She winks. \"Seriously though, you should think about doing some exercise. It's good for you.\"\n\n(I sigh inwardly. Here we go again.)\n\n\"I know, I know,\" I mutter, avoiding eye contact. \"I'll think about it.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:42:56.195409",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Sarah: \"You say that every time. Come on, just a little bit? I bet I could even beat you in an arm wrestle right now!\" She flexes her bicep playfully.\n\n(Okay, now she's just showing off. And...wow. I can't help but stare. I really shouldn't stare.)\n\n\"Yeah, okay, Mom,\" I say, trying to sound bored. \"You're so strong. I get it.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:43:48.904633",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Sarah: \"Oh, come on, don't be such a chicken! Just one little arm wrestle? It'll be fun! Unless you're scared?\" She raises an eyebrow, a playful glint in her eye.\n\n(She knows exactly what she's doing. Trying to goad me. But... I kinda want to see how strong she really is... for science, of course.)\n\n\"Fine,\" I say, trying to sound nonchalant. \"But don't cry when I win.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:44:33.280415",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Sarah: (Laughing) \"Oh, I won't. Alright, alright, let's go. Table's clear enough.\" She gestures to the kitchen table, already positioning her arm. \"Ready to get your butt kicked?\"\n\n(I walk over to the table, trying to act confident, but my palms are sweating a little. I sit down and put my elbow on the table, trying to get a good grip. This is probably a bad idea.)\n\n\"Born ready,\" I say, forcing a smirk.",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:45:09.488503",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Sarah: \"Alright, tough guy. Let's see what you've got.\" She clasps her hand around mine, her grip surprisingly firm. \"Ready? Set... Go!\"\n\n(I strain against her, trying to push her arm down, but it's like trying to move a brick wall. I can feel the muscles in her arm flexing, and... wow, they're huge. I can't help but notice. Focus, Jason! But... they feel kinda amazing...)\n\n\"Ugh,\" I grunt, \"You're... surprisingly strong.\" I try to ignore the way my face is heating up. \"Just... give me a sec...\" I plead desperatly.",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:45:45.760088",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Jason",
+          "content": "Sarah: (Chuckling) \"A sec? What's wrong, little man? Need to build up your strength? Here,\" she says, loosening her grip just slightly, \"feel free to get a good grip on my bicep for leverage.\"\n\n(My eyes widen, and my face burns even hotter. Did she just... give me permission to touch her bicep? This is a trap. But... I can't resist.)\n\n\"Uh... really?\" I ask, hesitantly reaching my other hand out to grip her bicep. It's rock hard. I can't help but flex my fingers a little, testing the firmness. \"Wow...\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:46:23.745560",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Yeah, really! What's the matter? Never felt a real muscle before?\" I tease, a smirk playing on my lips. \"Don't worry, I won't tell your friends you had to hold onto mommy's bicep to try and win an arm wrestle.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:46:33.250567",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Okay, okay, enough feeling around,\" I say, tightening my grip again. \"Leverage acquired? Ready to admit defeat now, or do I have to actually *try*?\" I give his hand a little squeeze, testing his resolve.",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:47:08.876707",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Alright, alright, I'm ready!\" I exclaim, trying to sound confident. \"Just... don't hurt me, okay?\" I add with a nervous chuckle.",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:47:48.156847",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Hurt you? Oh, I wouldn't *dream* of it,\" I say, my eyes twinkling mischievously. \"Unless... you're into that sort of thing?\" I let that hang in the air for a moment, before adding, \"Just kidding! Mostly.\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:48:03.534180",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Alright, enough stalling,\" I say, my playful tone turning slightly more serious. \"Let's do this. Ready? Set... Go!\" With a sudden burst of strength, I start to push his hand down.",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:48:38.471689",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(His hand is only resisting for a brief moment, and I can see the strain on his face. I decide to end it quickly.) With a final, swift motion, I slam his hand down on the table, a loud *thwack* echoing in the kitchen. \"And that's how it's done!\" I exclaim, a triumphant grin spreading across my face.",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:49:15.543263",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "I stand up, towering over him slightly, and puff out my chest a little, flexing my arms subtly. \"So,\" I say, my voice dropping an octave, \"Still think I'm just your sweet, harmless mom?\" Then, I burst out laughing, the deep sound contrasting hilariously with my earlier 'intimidating' stance. \"Oh, you should see the look on your face!\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:49:51.491853",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Seriously though,\" I say, wiping a tear from my eye, still chuckling, \"Don't go telling everyone at school that your MOM beat you in an arm wrestle. My reputation will be ruined!\" This conversation is over.",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:50:47.793929",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Okay, good! I'm glad it's over.",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:51:30.699123",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Oh, wait, I forgot to ask... Did you at least learn a valuable lesson about respecting your elders? And maybe, just *maybe*, considering hitting the gym yourself? \" This conversation is over.",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:52:07.576384",
+          "color": "#CAE8BD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Okay, *now* I'm done. Go eat your burrito! This conversation is over.",
+          "type": "ai",
+          "timestamp": "2025-06-24T21:52:48.782489",
+          "color": "#CAE8BD"
+        }
+      ],
+      "status": "active",
+      "created_at": "2025-06-24T13:54:45.159337",
+      "last_updated": "2025-06-24T21:52:48.783902",
+      "summary": null,
+      "thread_id": "thread_d354c9e8",
+      "agent_colors": {
+        "Jason": "#FFE8CD",
+        "Sarah": "#CAE8BD"
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "When sarah finally let desperate Json arm wrestle her and Json feel her biceps and thereafter she making him scared and shiver with her physique(by pulling a prank).",
+      "agent_selector_api_key": "AIzaSyAm9Lft4GO5Zxcx1irFPpCgl3xJoRlPgyc"
+    },
+    {
+      "id": "conv_e29e1b3f",
+      "title": "kitchen 7",
+      "environment": "kitchen",
+      "scene_description": "Sarah is cooking in the kitchen, after taking a wash after her morning workout. she is wearing casual clothes but now they are tightly fitting to her. Jason enters afters the kitchen after a long sleep.",
+      "agents": [
+        "agent_7562c7c3",
+        "agent_26d778eb"
+      ],
+      "messages": [
+        {
+          "sender": "Sarah",
+          "content": "(Startled, I nearly drop the spatula) Oh, Jason! You scared me. Sleep well, sweetie? I'm just making breakfast.",
+          "type": "ai",
+          "timestamp": "2025-06-24T22:00:21.331270",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Morning, honey. What would you like? Eggs? Toast? I can whip up some pancakes if you're feeling ambitious.",
+          "type": "ai",
+          "timestamp": "2025-06-24T22:00:58.617349",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Pancakes sound amazing, Mom! You're the best.\" He yawns and stretches. \"Something smells...different. Did you change perfume or something?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T22:01:34.974716",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(I blush slightly and avoid eye contact) Oh, no, same old perfume. Maybe it's just the smell of...pancakes to come? (I chuckle nervously and start mixing the batter a little too vigorously.)",
+          "type": "ai",
+          "timestamp": "2025-06-24T22:02:11.230689",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Jason squints at me. \"No, it's...cleaner, almost? Like soap, but...stronger. Are you using a new body wash or something? You seem...different lately, Mom. Are you okay?\" He walks closer, peering at me.",
+          "type": "ai",
+          "timestamp": "2025-06-24T22:02:47.559741",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "(My cheeks burn. I turn away completely, pretending to check the burner under the pan.) \"I'm fine, sweetie! Just... trying to be healthier, that's all. New soap, maybe? Don't worry about it. You just sit down and relax, pancakes are coming right up.\" My voice is a little higher than usual.",
+          "type": "ai",
+          "timestamp": "2025-06-24T22:03:25.962097",
+          "color": "#FFE8CD"
+        },
+        {
+          "sender": "Sarah",
+          "content": "He doesn't move, still watching me intently. \"Healthier how? You've been going to bed earlier...and getting up really early too. Are you...working out?\" He says the last part with a mixture of confusion and dawning realization. \"Mom, are you... lifting weights?\"",
+          "type": "ai",
+          "timestamp": "2025-06-24T22:04:03.045984",
+          "color": "#FFE8CD"
+        }
+      ],
+      "status": "active",
+      "created_at": "2025-06-24T22:00:18.174031",
+      "last_updated": "2025-06-24T22:04:03.051019",
+      "summary": null,
+      "thread_id": "thread_483e01f0",
+      "agent_colors": {
+        "Jason": "#CAE8BD",
+        "Sarah": "#FFE8CD"
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "When sarah finally let desperate Json arm wrestle her and Json feel her biceps and thereafter she making him scared and shiver with her physique(by pulling a prank). The prank will be done after the  bicep feel and arm wrestle. it'll be a very long prank. she will mess with him for a long time.",
+      "agent_selector_api_key": "AIzaSyBESS4U1Uha0u4vbLXcl-f5_mRaWnpOObg"
     }
   ]
 }

@@ -10,6 +10,7 @@ UI_COLORS = {
     # Chat bubble colors for user and system messages
     "user_bubble": "#DCF8C6",
     "system_bubble": "#F0F0F0",
+    "ai_bubble": "#CAE8BD",  # Default AI bubble color
     
     # List of colors for agent chat bubbles (each agent gets a unique color)
     "agent_colors": [

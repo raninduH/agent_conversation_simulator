@@ -29,30 +29,29 @@ from agent_selector import AgentSelector
 class ConversationSimulatorEngine:
     """
     Multi-agent conversation simulator using real LangGraph react agents with Gemini.
-    Agents take turns in a cycle, maintaining conversation history with summarization.    """
+    Agents take turns in a cycle, maintaining conversation history with summarization.
+    """
+    
     def __init__(self, google_api_key: Optional[str] = None):
         """Initialize the conversation simulator engine."""
-        self.google_api_key = google_api_key or os.getenv("GOOGLE_API_KEY")
-        if not self.google_api_key:
-            raise ValueError("Google API key is required. Set GOOGLE_API_KEY environment variable or pass it directly.")
+        # Store the provided API key as default for agents without specific keys
+        self.default_api_key = google_api_key
         
-        self.model = ChatGoogleGenerativeAI(
-            model=MODEL_SETTINGS["agent_model"],
-            temperature=AGENT_SETTINGS["response_temperature"],
-            max_retries=AGENT_SETTINGS["max_retries"],
-            google_api_key=self.google_api_key
-        )
+        # Only use the environment variable for the summary model
+        summary_api_key = os.getenv("GOOGLE_API_KEY")
+        if not summary_api_key:
+            raise ValueError("GOOGLE_API_KEY environment variable is required for the summary model.")
         
-        # Separate model for summarization
+        print(f"DEBUG: ConversationEngine initialized with default API key: {'Yes' if self.default_api_key else 'No'}")
+        print(f"DEBUG: Summary model using environment API key")
+        
+        # Separate model for summarization - always uses environment variable
         self.summary_model = ChatGoogleGenerativeAI(
             model=MODEL_SETTINGS["summary_model"],
             temperature=AGENT_SETTINGS["summary_temperature"],  # Lower temperature for more consistent summaries
             max_retries=AGENT_SETTINGS["max_retries"],
-            google_api_key=self.google_api_key
+            google_api_key=summary_api_key
         )
-        
-        # Initialize agent selector for dynamic agent selection
-        self.agent_selector = AgentSelector(google_api_key=self.google_api_key)
         
         self.memory = MemorySaver()
           # Storage for active conversations
@@ -188,17 +187,19 @@ Keep this condition in mind while participating in the conversation.
 Keep your response natural, conversational, and true to your character. 
 Respond as if you're speaking directly in the conversation (don't say "As {agent_name}, I would say..." just respond naturally).
 Keep responses to 1-3 sentences to maintain good conversation flow."""
+        
         return prompt
     
-    def start_conversation(self, conversation_id: str, agents_config: List[Dict[str, str]], 
+    def start_conversation(self, conversation_id: str, agents_config: List[Dict[str, str]],
                         environment: str, scene_description: str, initial_message: str = None,
-                        invocation_method: str = "round_robin", termination_condition: Optional[str] = None) -> str:
+                        invocation_method: str = "round_robin", termination_condition: Optional[str] = None,
+                        agent_selector_api_key: Optional[str] = None) -> str:
         """
         Start a new conversation session.
         
         Args:
             conversation_id: Unique identifier for the conversation
-            agents_config: List of agent configurations (name, role, base_prompt)
+            agents_config: List of agent configurations (name, role, base_prompt, api_key)
             environment: Environment description for the conversation
             scene_description: Scene description for the conversation
             initial_message: Optional initial message to start the conversation
@@ -208,31 +209,33 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                                   after each round if the condition is met. When provided with 
                                   "agent_selector" method, the selector LLM decides termination.
                                   If not provided, conversation continues indefinitely.
+            agent_selector_api_key: Optional API key for the agent selector (required if using agent_selector method)
             
         Returns:
             Thread ID for the conversation
         """
         thread_id = f"thread_{conversation_id}"
         
-        # Create individual react agents
-        agents = {}
+        print(f"DEBUG: Starting conversation {conversation_id} with method: {invocation_method}")
+          # Validate agent API keys
         agent_names = [config["name"] for config in agents_config]
-        
         for agent_config in agents_config:
             agent_name = agent_config["name"]
-            
-            # Create agent with minimal prompt (detailed prompt will be provided per invocation)
-            agent = create_react_agent(
-                model=self.model,
-                tools=[],  # No tools needed for conversation
-                prompt=f"You are {agent_name}. Respond naturally to conversations.",
-                checkpointer=self.memory
-            )
-            
-            agents[agent_name] = agent
-          # Store conversation data
+            agent_api_key = agent_config.get("api_key")
+            if not agent_api_key:
+                print(f"INFO: Agent '{agent_name}' will use default API key (no specific key provided)")
+            else:
+                print(f"INFO: Agent '{agent_name}' will use their specific API key")
+        
+        # Validate agent selector API key if needed
+        if invocation_method == "agent_selector":
+            if not agent_selector_api_key:
+                print("INFO: Agent selector will use default API key (no specific key provided)")
+            else:
+                print("INFO: Agent selector will use the provided specific API key")
+        
+        # Store conversation data (agents will be created individually when invoked)
         self.active_conversations[conversation_id] = {
-            "agents": agents,
             "agents_config": agents_config,
             "agent_names": agent_names,
             "thread_id": thread_id,
@@ -244,7 +247,8 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             "conversation_started": False,
             "invocation_method": invocation_method,
             "termination_condition": termination_condition,
-            "agent_invocation_counts": {name: 0 for name in agent_names}  # Track invocations per agent
+            "agent_invocation_counts": {name: 0 for name in agent_names},  # Track invocations per agent
+            "agent_selector_api_key": agent_selector_api_key  # Store agent selector API key
         }
             # Start the conversation automatically after a short delay
         threading.Timer(CONVERSATION_TIMING["start_delay"], self._start_conversation_cycle, args=(conversation_id,)).start()
@@ -271,16 +275,23 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
     
     def _invoke_next_agent(self, conversation_id: str):
         """Invoke the next agent in the cycle."""
+        print(f"DEBUG: _invoke_next_agent called for conversation {conversation_id}")
+        
         if conversation_id not in self.active_conversations:
+            print(f"ERROR: Conversation {conversation_id} not found in active conversations")
             return
         
         conv_data = self.active_conversations[conversation_id]
         if conv_data["status"] != "active":
+            print(f"DEBUG: Conversation {conversation_id} status is {conv_data['status']}, not active")
             return
-          # Get current agent
+        
+        # Get current agent
         current_agent_name = conv_data["agent_names"][conv_data["current_agent_index"]]
         current_agent_config = next(config for config in conv_data["agents_config"] 
                                   if config["name"] == current_agent_name)
+        
+        print(f"DEBUG: Invoking agent '{current_agent_name}' (index {conv_data['current_agent_index']})")
         
         # Increment invocation count for current agent
         conv_data["agent_invocation_counts"][current_agent_name] += 1
@@ -293,6 +304,8 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             reminder_frequency = AGENT_SETTINGS["termination_reminder_frequency"]
             current_count = conv_data["agent_invocation_counts"][current_agent_name]
             should_remind_termination = (current_count % reminder_frequency == 0)
+            if should_remind_termination:
+                print(f"DEBUG: Agent '{current_agent_name}' will be reminded about termination condition (invocation #{current_count})")
         
         # Apply message summarization before creating prompt
         conv_data["messages"] = self.message_list_summarization(conv_data["messages"])
@@ -305,18 +318,47 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             conv_data["messages"],
             conv_data["agent_names"],
             termination_condition,
-            should_remind_termination
-        )
+            should_remind_termination        )
         
         try:
-            # Invoke the agent
-            agent = conv_data["agents"][current_agent_name]
+            print(f"DEBUG: Creating agent model for '{current_agent_name}'")
+              # Create individual model for this agent using their specific API key
+            agent_api_key = current_agent_config.get("api_key")
+            print(f"DEBUG: Agent '{current_agent_name}' has API key: {'Yes' if agent_api_key else 'No'}")
+            
+            if not agent_api_key:
+                print(f"DEBUG: No specific API key for agent '{current_agent_name}', using default API key")
+                agent_api_key = self.default_api_key
+                if not agent_api_key:
+                    print(f"ERROR: No default API key available for agent '{current_agent_name}'")
+                    raise ValueError(f"No API key available for agent {current_agent_name}")
+            else:
+                print(f"DEBUG: Using agent-specific API key for '{current_agent_name}'")
+            
+            agent_model = ChatGoogleGenerativeAI(
+                model=MODEL_SETTINGS["agent_model"],
+                temperature=AGENT_SETTINGS["response_temperature"],
+                max_retries=AGENT_SETTINGS["max_retries"],
+                google_api_key=agent_api_key
+            )
+            
+            # Create agent with their specific model
+            agent = create_react_agent(
+                model=agent_model,
+                tools=[],  # No tools needed for conversation
+                prompt=f"You are {current_agent_name}. Respond naturally to conversations.",
+                checkpointer=self.memory
+            )
+            
+            print(f"DEBUG: Invoking agent '{current_agent_name}' with their specific model")
             config = {"configurable": {"thread_id": f"{conv_data['thread_id']}_{current_agent_name}"}}
             
             response = agent.invoke(
                 {"messages": [HumanMessage(content=prompt)]},
                 config
             )
+            
+            print(f"DEBUG: Agent '{current_agent_name}' responded successfully")
             
             # Extract the response
             if response and "messages" in response and response["messages"]:
@@ -326,57 +368,87 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                 conv_data["messages"].append({
                     "agent_name": current_agent_name,
                     "message": agent_message
-                })                # Notify callback
+                })
+                
+                # Notify callback
                 if conversation_id in self.message_callbacks:
                     self.message_callbacks[conversation_id]({
                         "sender": current_agent_name,
                         "content": agent_message,
                         "timestamp": datetime.now().isoformat(),
                         "type": "ai"
-                    })                
-                # Determine the next agent based on invocation method
+                    })
+                  # Determine the next agent based on invocation method
                 invocation_method = conv_data.get("invocation_method", "round_robin")
                 termination_condition = conv_data.get("termination_condition", None)
                 
+                print(f"DEBUG: Using invocation method: {invocation_method}")
+                
                 if invocation_method == "agent_selector":
-                    # Use the agent selector to determine the next agent
-                    selection_result = self.agent_selector.select_next_agent(
-                        messages=conv_data["messages"],
-                        environment=conv_data["environment"],
-                        scene=conv_data["scene_description"],
-                        agents=conv_data["agents_config"],
-                        termination_condition=termination_condition,
-                        agent_invocation_counts=conv_data.get("agent_invocation_counts", {})
-                    )
+                    print("DEBUG: Using agent_selector to determine next agent")
+                      # Get agent selector API key
+                    agent_selector_api_key = conv_data.get("agent_selector_api_key")
+                    print(f"DEBUG: Agent selector has API key: {'Yes' if agent_selector_api_key else 'No'}")
                     
-                    next_response = selection_result.get("next_response", "error_parsing")
-                    
-                    if next_response == "terminate":
-                        # End the conversation
-                        if conversation_id in self.message_callbacks:
-                            self.message_callbacks[conversation_id]({
-                                "sender": "System",
-                                "content": "The conversation has reached its termination condition and has ended.",
-                                "timestamp": datetime.now().isoformat(),
-                                "type": "system"
-                            })                        # Stop the conversation
-                        conv_data["status"] = "completed"
-                        return
-                    elif next_response == "error_parsing":
-                        # Error in parsing, use round robin as fallback
+                    if not agent_selector_api_key:
+                        print("DEBUG: No specific API key for agent_selector, using default API key")
+                        agent_selector_api_key = self.default_api_key
+                        
+                    if not agent_selector_api_key:
+                        print("ERROR: No default API key available for agent_selector")
+                        # Fall back to round robin
+                        print("DEBUG: Falling back to round robin due to missing agent_selector API key")
                         conv_data["current_agent_index"] = (conv_data["current_agent_index"] + 1) % len(conv_data["agent_names"])
                     else:
-                        # Set the next agent
-                        if next_response in conv_data["agent_names"]:
-                            # Find the index of the selected agent
-                            for i, name in enumerate(conv_data["agent_names"]):
-                                if name == next_response:
-                                    conv_data["current_agent_index"] = i
-                                    break
-                        else:
-                            # If agent name not found, use round robin as fallback
+                        print(f"DEBUG: Creating agent_selector with API key")
+                        # Create agent selector with specific API key
+                        temp_agent_selector = AgentSelector(google_api_key=agent_selector_api_key)
+                        
+                        # Use the agent selector to determine the next agent
+                        selection_result = temp_agent_selector.select_next_agent(
+                            messages=conv_data["messages"],
+                            environment=conv_data["environment"],
+                            scene=conv_data["scene_description"],
+                            agents=conv_data["agents_config"],
+                            termination_condition=termination_condition,
+                            agent_invocation_counts=conv_data.get("agent_invocation_counts", {})
+                        )
+                        
+                        next_response = selection_result.get("next_response", "error_parsing")
+                        print(f"DEBUG: Agent_selector decision: {next_response}")
+                        
+                        if next_response == "terminate":
+                            print("DEBUG: Agent_selector decided to terminate conversation")
+                            # End the conversation
+                            if conversation_id in self.message_callbacks:
+                                self.message_callbacks[conversation_id]({
+                                    "sender": "System",
+                                    "content": "The conversation has reached its termination condition and has ended.",
+                                    "timestamp": datetime.now().isoformat(),
+                                    "type": "system"
+                                })
+                            # Stop the conversation
+                            conv_data["status"] = "completed"
+                            return
+                        elif next_response == "error_parsing":
+                            print("DEBUG: Agent_selector had parsing error, using round robin fallback")
+                            # Error in parsing, use round robin as fallback
                             conv_data["current_agent_index"] = (conv_data["current_agent_index"] + 1) % len(conv_data["agent_names"])
+                        else:
+                            # Set the next agent
+                            if next_response in conv_data["agent_names"]:
+                                print(f"DEBUG: Agent_selector chose agent: {next_response}")
+                                # Find the index of the selected agent
+                                for i, name in enumerate(conv_data["agent_names"]):
+                                    if name == next_response:
+                                        conv_data["current_agent_index"] = i
+                                        break
+                            else:
+                                print(f"DEBUG: Agent_selector chose unknown agent '{next_response}', using round robin fallback")
+                                # If agent name not found, use round robin as fallback
+                                conv_data["current_agent_index"] = (conv_data["current_agent_index"] + 1) % len(conv_data["agent_names"])
                 else:
+                    print("DEBUG: Using round_robin method")
                     # Round robin method - move to next agent in cycle
                     conv_data["current_agent_index"] = (conv_data["current_agent_index"] + 1) % len(conv_data["agent_names"])
                     
@@ -386,8 +458,10 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                         termination_condition and 
                         len(conv_data["messages"]) >= len(conv_data["agent_names"])):
                         
+                        print("DEBUG: Checking round_robin termination condition")
                         # Check if conversation should terminate
                         if self._check_round_robin_termination(conversation_id):
+                            print("DEBUG: Round_robin termination condition met")
                             # End the conversation
                             if conversation_id in self.message_callbacks:
                                 self.message_callbacks[conversation_id]({
@@ -399,20 +473,29 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                             # Stop the conversation
                             conv_data["status"] = "completed"
                             return
+                        else:
+                            print("DEBUG: Round_robin termination condition not yet met")
+                
+                print(f"DEBUG: Next agent will be '{conv_data['agent_names'][conv_data['current_agent_index']]}'")
                 
                 # Schedule next agent response with configurable delay
                 delay = random.uniform(
                     CONVERSATION_TIMING["agent_turn_delay_min"], 
                     CONVERSATION_TIMING["agent_turn_delay_max"]
                 )
+                print(f"DEBUG: Scheduling next agent response in {delay:.2f} seconds")
                 threading.Timer(delay, self._invoke_next_agent, args=(conversation_id,)).start()
                 
         except Exception as e:
-            print(f"Error invoking agent: {e}")
+            print(f"ERROR: Error invoking agent '{current_agent_name}': {e}")
+            print(f"ERROR: Exception type: {type(e).__name__}")
+            import traceback
+            print(f"ERROR: Traceback: {traceback.format_exc()}")
             # Retry after error delay
             if conv_data["status"] == "active":
+                print(f"DEBUG: Retrying after {CONVERSATION_TIMING['error_retry_delay']} seconds")
                 threading.Timer(CONVERSATION_TIMING["error_retry_delay"], self._invoke_next_agent, args=(conversation_id,)).start()
-    
+
     def send_message(self, conversation_id: str, message: str, sender: str = "user") -> Dict[str, Any]:
         """Send a user message to interrupt the conversation."""
         if conversation_id not in self.active_conversations:

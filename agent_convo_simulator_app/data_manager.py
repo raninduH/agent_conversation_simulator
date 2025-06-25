@@ -17,9 +17,11 @@ class Agent:
     personality_traits: List[str]
     created_at: str
     color: Optional[str] = None  # Color for the agent's messages
+    api_key: Optional[str] = None  # API key for the agent's model
     
     @classmethod
-    def create_new(cls, name: str, role: str, base_prompt: str, personality_traits: List[str], color: str = None) -> 'Agent':
+    def create_new(cls, name: str, role: str, base_prompt: str, personality_traits: List[str], 
+                   color: str = None, api_key: str = None) -> 'Agent':
         """Create a new agent with auto-generated ID and timestamp."""
         return cls(
             id=f"agent_{uuid.uuid4().hex[:8]}",
@@ -28,7 +30,8 @@ class Agent:
             base_prompt=base_prompt,
             personality_traits=personality_traits,
             created_at=datetime.now().isoformat(),
-            color=color
+            color=color,
+            api_key=api_key
         )
 
 
@@ -49,10 +52,12 @@ class Conversation:
     agent_colors: Dict[str, str] = field(default_factory=dict)  # Maps agent names to color codes
     invocation_method: str = "round_robin"  # "round_robin" or "agent_selector"
     termination_condition: Optional[str] = None  # Condition for agent-selector to determine when to end conversation
+    agent_selector_api_key: Optional[str] = None  # API key for the agent selector
     
     @classmethod
-    def create_new(cls, title: str, environment: str, scene_description: str, agent_ids: List[str], 
-                  invocation_method: str = "round_robin", termination_condition: Optional[str] = None) -> 'Conversation':
+    def create_new(cls, title: str, environment: str, scene_description: str, agent_ids: List[str],
+                  invocation_method: str = "round_robin", termination_condition: Optional[str] = None,
+                  agent_selector_api_key: Optional[str] = None) -> 'Conversation':
         """Create a new conversation with auto-generated ID and timestamps."""
         now = datetime.now().isoformat()
         return cls(
@@ -68,7 +73,8 @@ class Conversation:
             summary=None,
             thread_id=f"thread_{uuid.uuid4().hex[:8]}",
             invocation_method=invocation_method,
-            termination_condition=termination_condition
+            termination_condition=termination_condition,
+            agent_selector_api_key=agent_selector_api_key
         )
 
 
@@ -105,15 +111,17 @@ class DataManager:
     def _save_json(self, file_path: str, data: Dict[str, Any]):
         """Save JSON data to file."""
         with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
-    
+            json.dump(data, f, indent=2, ensure_ascii=False)    
     # Agent management methods
     def load_agents(self) -> List[Agent]:
         """Load all agents from JSON file."""
         data = self._load_json(self.agents_file)
         agents = []
         for agent_data in data.get("agents", []):
-            agents.append(Agent(**agent_data))
+            print(f"DEBUG: Loading agent '{agent_data.get('name')}' with API key: {agent_data.get('api_key')}")
+            agent = Agent(**agent_data)
+            print(f"DEBUG: Loaded agent '{agent.name}' with API key: {agent.api_key}")
+            agents.append(agent)
         return agents
     
     def save_agent(self, agent: Agent):
@@ -154,7 +162,28 @@ class DataManager:
         data = self._load_json(self.conversations_file)
         conversations = []
         for conv_data in data.get("conversations", []):
-            conversations.append(Conversation(**conv_data))
+            try:
+                # Filter out any extra fields that aren't in the dataclass
+                conversation_fields = {
+                    'id': conv_data.get('id', ''),
+                    'title': conv_data.get('title', ''),
+                    'environment': conv_data.get('environment', ''),
+                    'scene_description': conv_data.get('scene_description', ''),
+                    'agents': conv_data.get('agents', []),
+                    'messages': conv_data.get('messages', []),
+                    'status': conv_data.get('status', 'active'),
+                    'created_at': conv_data.get('created_at', datetime.now().isoformat()),
+                    'last_updated': conv_data.get('last_updated', datetime.now().isoformat()),
+                    'summary': conv_data.get('summary'),
+                    'thread_id': conv_data.get('thread_id', ''),
+                    'agent_colors': conv_data.get('agent_colors', {}),
+                    'invocation_method': conv_data.get('invocation_method', 'round_robin'),
+                    'termination_condition': conv_data.get('termination_condition'),
+                    'agent_selector_api_key': conv_data.get('agent_selector_api_key')
+                }
+                conversations.append(Conversation(**conversation_fields))
+            except Exception as e:
+                print(f"Error loading conversation {conv_data.get('id', 'unknown')}: {e}")
         return conversations
     
     def save_conversation(self, conversation: Conversation):
@@ -232,3 +261,27 @@ class DataManager:
                 return conv.get("agent_colors", {})
         
         return {}
+    
+    def test_method_exists(self):
+        """Test method to verify the class is working properly."""
+        print(f"DataManager methods: {[method for method in dir(self) if not method.startswith('_')]}")
+        return True
+    
+    def save_conversation(self, conversation: Conversation):
+        """Save a single conversation to JSON file."""
+        conversation.last_updated = datetime.now().isoformat()
+        
+        data = self._load_json(self.conversations_file)
+        conversations = data.get("conversations", [])
+        
+        # Update existing conversation or add new one
+        conv_dict = asdict(conversation)
+        for i, existing_conv in enumerate(conversations):
+            if existing_conv["id"] == conversation.id:
+                conversations[i] = conv_dict
+                break
+        else:
+            conversations.append(conv_dict)
+        
+        data["conversations"] = conversations
+        self._save_json(self.conversations_file, data)
