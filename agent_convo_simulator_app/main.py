@@ -9,8 +9,10 @@ import threading
 import json
 import os
 import random
+import time
 from datetime import datetime
 from typing import List, Dict, Any, Optional
+import importlib
 
 # Import our custom modules
 try:
@@ -24,6 +26,17 @@ except ImportError as e:
     print("Run: pip install -r requirements.txt")
     exit(1)
 
+# Tab Navigation and Button State Management
+# Tab indices:
+# 0: Agent Management
+# 1: Conversation Setup  
+# 2: Past Conversations
+# 3: Simulation (Main conversation UI)
+#
+# Recent fixes:
+# - Fixed all tab navigation to use correct Simulation tab index (3)
+# - Fixed Resume button to become active when conversation is paused
+# - Updated update_simulation_controls to handle paused state properly
 
 class ChatBubble(tk.Frame):
     """Represents a chat message bubble in the conversation UI."""
@@ -220,12 +233,73 @@ class AgentConversationSimulatorGUI:
         self.current_conversation_id = None
         self.conversation_active = False
         
+        # Initialize tool-related variables
+        self.tool_vars = {}  # For tool checkboxes
+        self.tools_checkboxes_frame = None  # Will be set in create_agents_tab
+        self.tooltip = None  # For displaying tool descriptions
+        
+        # Register window close event
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
+        
         # Create the main interface
         self.create_widgets()
         self.load_data()
           # Configure grid weights for responsive design
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
+    
+    def on_closing(self):
+        """Handle application closing - stop any active conversations and clean up resources."""
+        try:
+            print("DEBUG: Application closing, cleaning up resources...")
+            
+            # Stop any active conversation
+            if self.conversation_active and self.conversation_engine and self.current_conversation_id:
+                print("DEBUG: Stopping active conversation before closing...")
+                try:
+                    # Try to pause the conversation first
+                    self.conversation_engine.pause_conversation(self.current_conversation_id)
+                    print("DEBUG: Conversation paused successfully")
+                except Exception as e:
+                    print(f"WARNING: Error pausing conversation: {e}")
+                
+                try:
+                    # Try to gracefully stop the conversation engine
+                    self.conversation_engine.stop_conversation(self.current_conversation_id)
+                    print("DEBUG: Conversation stopped successfully")
+                except Exception as e:
+                    print(f"WARNING: Error stopping conversation: {e}")
+                    
+                # Update conversation status in database to reflect it was stopped
+                try:
+                    conversation = self.data_manager.get_conversation_by_id(self.current_conversation_id)
+                    if conversation:
+                        conversation.status = "stopped"
+                        self.data_manager.save_conversation(conversation)
+                        print(f"DEBUG: Updated conversation {self.current_conversation_id} status to 'stopped'")
+                except Exception as e:
+                    print(f"WARNING: Error updating conversation status: {e}")
+            
+            # Clean up any other resources here
+            
+            # Signal all threads to stop if possible
+            if hasattr(self, 'conversation_engine') and self.conversation_engine:
+                # Set a flag to stop background threads if the engine has such a mechanism
+                if hasattr(self.conversation_engine, 'running'):
+                    self.conversation_engine.running = False
+                    print("DEBUG: Set conversation engine running flag to False")
+                
+                # Wait a moment for threads to clean up
+                time.sleep(0.5)
+            
+            print("DEBUG: Application shutdown complete")
+            # Destroy the application
+            self.root.destroy()
+            
+        except Exception as e:
+            print(f"ERROR during application shutdown: {e}")
+            # Make sure the application closes even if there's an error
+            self.root.destroy()
     
     def create_widgets(self):
         """Create the main GUI widgets."""
@@ -320,8 +394,39 @@ class AgentConversationSimulatorGUI:
         self.agent_api_key_entry = ttk.Entry(details_frame, textvariable=self.agent_api_key_var, width=30, show="*")
         self.agent_api_key_entry.grid(row=4, column=1, sticky="ew", pady=2, padx=(10, 0))
         
+        # Tools selection
+        ttk.Label(details_frame, text="Tools:").grid(row=5, column=0, sticky="nw", pady=2)
+        
+        # Create a frame for tools with a scrollbar
+        tools_frame = ttk.Frame(details_frame)
+        tools_frame.grid(row=5, column=1, sticky="nsew", pady=2, padx=(10, 0))
+        details_frame.grid_rowconfigure(5, weight=1)
+        
+        # Create a canvas for scrolling
+        tools_canvas = tk.Canvas(tools_frame, height=100)
+        tools_canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        
+        # Add a scrollbar
+        tools_scrollbar = ttk.Scrollbar(tools_frame, orient="vertical", command=tools_canvas.yview)
+        tools_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        tools_canvas.configure(yscrollcommand=tools_scrollbar.set)
+        
+        # Create a frame inside the canvas to hold the checkboxes
+        self.tools_checkboxes_frame = ttk.Frame(tools_canvas)
+        tools_canvas.create_window((0, 0), window=self.tools_checkboxes_frame, anchor="nw")
+        
+        # Configure the canvas to scroll with the content
+        self.tools_checkboxes_frame.bind("<Configure>", 
+            lambda e: tools_canvas.configure(scrollregion=tools_canvas.bbox("all")))
+        
+        # Dictionary to hold the checkbox variables
+        self.tool_vars = {}
+        
+        # Load tools and create checkboxes
+        self.load_tool_checkboxes()
+        
         # Save button
-        ttk.Button(details_frame, text="Save Agent", command=self.save_agent).grid(row=5, column=1, sticky="e", pady=(10, 0))
+        ttk.Button(details_frame, text="Save Agent", command=self.save_agent).grid(row=6, column=1, sticky="e", pady=(10, 0))
     
     def create_conversation_tab(self):
         """Create the conversation setup tab."""
@@ -383,8 +488,6 @@ class AgentConversationSimulatorGUI:
         
         # Termination condition (available for both modes)
         ttk.Label(settings_frame, text="Termination Condition:").grid(row=4, column=0, sticky="nw", pady=2)
-        ttk.Label(settings_frame, text=f"(Agents reminded every {AGENT_SETTINGS['termination_reminder_frequency']} turns)", 
-                  font=("Arial", 8, "italic")).grid(row=4, column=0, sticky="nw", pady=(25, 2))
         self.termination_condition_text = scrolledtext.ScrolledText(settings_frame, width=40, height=4)
         self.termination_condition_text.grid(row=4, column=1, sticky="ew", pady=2, padx=(10, 0))
         # Always enable termination condition input for both modes
@@ -411,48 +514,22 @@ class AgentConversationSimulatorGUI:
         self.agents_checkbox_frame = ttk.Frame(agents_frame)
         self.agents_checkbox_frame.grid(row=0, column=0, sticky="nsew")
         
-        # API Key input
-        api_frame = ttk.LabelFrame(content_frame, text="API Configuration", padding="10")
-        api_frame.grid(row=1, column=0, columnspan=2, sticky="ew", pady=(10, 0))
-        api_frame.grid_columnconfigure(1, weight=1)
-        
-        ttk.Label(api_frame, text="Google API Key:").grid(row=0, column=0, sticky="w", pady=2)
-        self.api_key_var = tk.StringVar()
-        self.api_key_entry = ttk.Entry(api_frame, textvariable=self.api_key_var, width=50, show="*")
-        self.api_key_entry.grid(row=0, column=1, sticky="ew", pady=2, padx=(10, 0))
-        
         # Control buttons
         btn_frame = ttk.Frame(content_frame)
-        btn_frame.grid(row=2, column=0, columnspan=2, pady=(20, 0))
+        btn_frame.grid(row=1, column=0, columnspan=2, pady=(20, 0))
         
         ttk.Button(btn_frame, text="Start Conversation", command=self.start_conversation).pack(side=tk.LEFT, padx=(0, 10))
     
     def _toggle_termination_condition(self):
         """Toggle the termination condition text field and agent selector API key based on invocation method."""
-        # First, clear the termination condition text if it contains only hint text
-        current_text = self.termination_condition_text.get(1.0, tk.END).strip()
-        if "Specify when the conversation should end" in current_text:
-            self.termination_condition_text.delete(1.0, tk.END)
-            
         # Always ensure termination condition is enabled for both modes
         self.termination_condition_text.config(state=tk.NORMAL)
         
-        # If Agent Selector is chosen, enable the API key field and add hint
+        # If Agent Selector is chosen, enable the API key field
         if self.invocation_method_var.get() == "agent_selector":
             self.agent_selector_api_key_entry.config(state=tk.NORMAL)
-            # Add hint for agent selector mode
-            if not self.termination_condition_text.get(1.0, tk.END).strip():
-                self.termination_condition_text.insert(1.0, "Specify when the conversation should end. The agent selector will check this condition.")
         else:
-            # For Round Robin, still enable termination condition but disable agent selector API key
-            # Add hint for round robin mode
-            if not self.termination_condition_text.get(1.0, tk.END).strip():
-                # Import the AGENT_SETTINGS from config
-                from config import AGENT_SETTINGS
-                reminder_freq = AGENT_SETTINGS["termination_reminder_frequency"]
-                hint = f"Specify when the conversation should end. Agents will be reminded every {reminder_freq} turns, and the condition will be evaluated after each complete round."
-                self.termination_condition_text.insert(1.0, hint)
-            
+            # For Round Robin, disable agent selector API key
             # Clear and disable agent selector API key for round robin
             self.agent_selector_api_key_var.set("")
             self.agent_selector_api_key_entry.config(state=tk.DISABLED)
@@ -530,9 +607,28 @@ class AgentConversationSimulatorGUI:
             
             # Load the selected conversation if one was chosen
             if selected_conversation[0]:
-                # Switch to simulation tab
-                self.notebook.select(2)  # Simulation tab
+                # Make sure the simulation tab is created and chat canvas is initialized
+                if not hasattr(self, 'chat_canvas'):
+                    print("DEBUG: Chat canvas not initialized yet, creating simulation tab")
+                    try:
+                        # Try to create the simulation tab if it doesn't exist
+                        self.create_simulation_tab()
+                    except Exception as e:
+                        print(f"ERROR: Could not create simulation tab: {e}")
+                        messagebox.showerror("Error", "Could not initialize the simulation tab. Please restart the application.")
+                        return
+                
+                # Switch to simulation tab and ensure it's visible
+                self.notebook.select(3)  # Simulation tab
+                self.root.update_idletasks()
+                self.root.update()
+                
+                # Load the selected conversation
                 self.load_selected_conversation(selected_conversation[0])
+                
+                # Ensure the tab remains visible after loading
+                if hasattr(self, 'chat_canvas'):
+                    self.chat_canvas.focus_set()
                 
         except Exception as e:
             print(f"Error in load_conversation: {e}")
@@ -637,7 +733,7 @@ class AgentConversationSimulatorGUI:
         # Load past conversations for the Past Conversations tab
         self.refresh_past_conversations()
     
-    def update_simulation_controls(self, conversation_active: bool):
+    def update_simulation_controls(self, conversation_active: bool, paused: bool = False):
         """Update the state of simulation control buttons based on conversation status."""
         if conversation_active:
             # Enable controls when conversation is active
@@ -650,6 +746,16 @@ class AgentConversationSimulatorGUI:
             # Enable scene change when conversation is active
             if hasattr(self, 'change_scene_btn'):
                 self.change_scene_btn.config(state="normal")
+        elif paused:
+            # When conversation is paused, enable resume and keep some controls available
+            self.pause_btn.config(state="disabled")
+            self.resume_btn.config(state="normal")  # Enable resume when paused
+            self.summarize_btn.config(state="normal")
+            self.stop_btn.config(state="normal")
+            self.send_btn.config(state="disabled")
+            # Disable scene change when paused
+            if hasattr(self, 'change_scene_btn'):
+                self.change_scene_btn.config(state="disabled")
         else:
             # Disable all controls when no conversation is active
             self.pause_btn.config(state="disabled")
@@ -714,10 +820,15 @@ class AgentConversationSimulatorGUI:
         self.agent_name_var.set(agent.name)
         self.agent_role_var.set(agent.role)
         self.agent_traits_var.set(", ".join(agent.personality_traits))
-        self.agent_api_key_var.set(agent.api_key or "")  # Load API key or empty string
+        self.agent_api_key_var.set(agent.api_key or "")  # Load API key
         
         self.agent_prompt_text.delete(1.0, tk.END)
         self.agent_prompt_text.insert(1.0, agent.base_prompt)
+        
+        # Set tool checkboxes
+        if hasattr(agent, 'tools') and self.tool_vars:
+            for tool_name, var in self.tool_vars.items():
+                var.set(tool_name in getattr(agent, 'tools', []))
     
     def new_agent(self):
         """Create a new agent."""
@@ -730,6 +841,10 @@ class AgentConversationSimulatorGUI:
         self.agent_traits_var.set("")
         self.agent_api_key_var.set("")  # Clear API key
         self.agent_prompt_text.delete(1.0, tk.END)
+        
+        # Clear tool checkboxes
+        for var in self.tool_vars.values():
+            var.set(False)
     
     def edit_agent(self):
         """Edit the selected agent."""
@@ -771,6 +886,9 @@ class AgentConversationSimulatorGUI:
         # Parse personality traits
         traits = [t.strip() for t in traits_str.split(",") if t.strip()] if traits_str else []
         
+        # Get selected tools
+        selected_tools = [name for name, var in self.tool_vars.items() if var.get()]
+        
         # Check if editing existing agent
         selection = self.agents_listbox.curselection()
         if selection:
@@ -780,19 +898,20 @@ class AgentConversationSimulatorGUI:
                 agent = agents[selection[0]]
                 agent.name = name
                 agent.role = role
-                agent.base_prompt
+                agent.base_prompt = prompt  # Fix: Set base_prompt
                 agent.personality_traits = traits
                 agent.api_key = api_key if api_key else None  # Set API key
+                agent.tools = selected_tools  # Save selected tools
                 self.data_manager.save_agent(agent)
                 self.update_status(f"Agent '{name}' updated.")
             else:
                 # Create new agent
-                agent = Agent.create_new(name, role, prompt, traits, api_key=api_key if api_key else None)
+                agent = Agent.create_new(name, role, prompt, traits, api_key=api_key if api_key else None, tools=selected_tools)
                 self.data_manager.save_agent(agent)
                 self.update_status(f"Agent '{name}' created.")
         else:
             # Create new agent
-            agent = Agent.create_new(name, role, prompt, traits, api_key=api_key if api_key else None)
+            agent = Agent.create_new(name, role, prompt, traits, api_key=api_key if api_key else None, tools=selected_tools)
             self.data_manager.save_agent(agent)
             self.update_status(f"Agent '{name}' created.")
         
@@ -804,14 +923,9 @@ class AgentConversationSimulatorGUI:
         title = self.conv_title_var.get().strip()
         environment = self.conv_env_var.get().strip()
         scene = self.conv_scene_text.get(1.0, tk.END).strip()
-        api_key = self.api_key_var.get().strip()
         
         if not all([title, environment, scene]):
             messagebox.showerror("Missing Information", "Please fill in title, environment and scene description.")
-            return
-        
-        if not api_key:
-            messagebox.showwarning("API Key Required", "Please enter your Google API key to start the conversation. You can get one from https://console.cloud.google.com/")
             return
         
         # Get selected agents
@@ -829,8 +943,8 @@ class AgentConversationSimulatorGUI:
             # Show loading message
             self.update_status("Starting conversation...")
             
-            # Initialize conversation engine
-            self.conversation_engine = ConversationSimulatorEngine(api_key)            # Initialize agent colors dictionary
+            # Initialize conversation engine (no default API key - agents will use their own)
+            self.conversation_engine = ConversationSimulatorEngine()            # Initialize agent colors dictionary
             self.agent_colors = {}
               # Assign unique colors to agents from the predefined palette
             available_colors = list(UI_COLORS["agent_colors"])
@@ -873,6 +987,7 @@ class AgentConversationSimulatorGUI:
                     print(f"DEBUG: Agent '{agent.name}' API key starts with: {agent.api_key[:10]}...")
                 
                 agents_config.append({
+                    "id": agent.id,  # Add agent ID for tool loading
                     "name": agent.name,
                     "role": agent.role,
                     "base_prompt": agent.base_prompt,
@@ -905,8 +1020,30 @@ class AgentConversationSimulatorGUI:
             self.update_simulation_controls(True)
             self.current_env_label.config(text=environment)
             
-            # Switch to the simulation tab
-            self.notebook.select(2)  # Simulation tab is index 2
+            # Make sure the simulation tab is created and chat canvas is initialized
+            if not hasattr(self, 'chat_canvas'):
+                print("DEBUG: Chat canvas not initialized yet, creating simulation tab")
+                try:
+                    # Try to create the simulation tab if it doesn't exist
+                    self.create_simulation_tab()
+                except Exception as e:
+                    print(f"ERROR: Could not create simulation tab: {e}")
+                    messagebox.showerror("Error", "Could not initialize the simulation tab. Please restart the application.")
+                    return
+                    
+            # Switch to the simulation tab and ensure it's visible
+            self.notebook.select(3)  # Simulation tab is index 3
+            self.root.update_idletasks()
+            self.root.update()
+            
+            # Verify the chat canvas is initialized
+            if not hasattr(self, 'chat_canvas') or not self.chat_canvas:
+                print("ERROR: Chat canvas not initialized")
+                messagebox.showerror("Error", "Chat canvas not initialized. Please restart the application.")
+                return
+                
+            # Force focus to ensure the tab switch is visible
+            self.chat_canvas.focus_set()
             
             # Clear existing messages
             self.chat_canvas.clear()
@@ -921,7 +1058,7 @@ class AgentConversationSimulatorGUI:
             self.chat_canvas.add_bubble("System", header_text, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
             
             # Switch to simulation tab
-            self.notebook.select(2)
+            self.notebook.select(3)
             
             self.update_status(f"Conversation '{title}' started successfully!")
             
@@ -1035,7 +1172,7 @@ class AgentConversationSimulatorGUI:
             try:
                 self.conversation_engine.pause_conversation(self.current_conversation_id)
                 self.conversation_active = False
-                self.update_simulation_controls(False)
+                self.update_simulation_controls(False, paused=True)  # Pass paused=True
                 self.update_status("Conversation paused.")
                 
                 # Add system message about pause
@@ -1155,13 +1292,8 @@ class AgentConversationSimulatorGUI:
         """Restart a terminated conversation with a new termination condition."""
         try:
             # Initialize conversation engine if needed
-            api_key = self.api_key_var.get().strip()
-            if not api_key:
-                messagebox.showerror("Error", "Please enter your Google API key to resume the conversation.")
-                return
-            
             if not self.conversation_engine:
-                self.conversation_engine = ConversationSimulatorEngine(api_key)
+                self.conversation_engine = ConversationSimulatorEngine()
             
             # Get agent configs for the conversation
             all_agents = self.data_manager.load_agents()
@@ -1212,7 +1344,7 @@ class AgentConversationSimulatorGUI:
                 self.chat_canvas.add_bubble("System", restart_msg, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
                 
                 # Switch to simulation tab
-                self.notebook.select(2)
+                self.notebook.select(3)
                 
                 self.update_status(f"Conversation '{conversation.title}' restarted with new termination condition!")
                 
@@ -1467,8 +1599,6 @@ class AgentConversationSimulatorGUI:
         
         # Termination condition
         ttk.Label(edit_form_frame, text="Termination Condition:").grid(row=3, column=0, sticky="nw", pady=5)
-        ttk.Label(edit_form_frame, text=f"(Agents reminded every {AGENT_SETTINGS['termination_reminder_frequency']} turns)", 
-                  font=("Arial", 8, "italic")).grid(row=3, column=0, sticky="nw", pady=(28, 5))
         self.edit_termination_condition_text = scrolledtext.ScrolledText(edit_form_frame, width=40, height=4)
         self.edit_termination_condition_text.grid(row=3, column=1, sticky="ew", pady=5, padx=(10, 0))
         
@@ -1494,24 +1624,13 @@ class AgentConversationSimulatorGUI:
         self.past_conv_edit_frame.grid_remove()
     def _toggle_edit_termination_condition(self):
         """Toggle the termination condition and API key fields in edit mode."""
-        # Import the AGENT_SETTINGS from config
-        from config import AGENT_SETTINGS
-        
         if self.edit_invocation_method_var.get() == "agent_selector":
             # For agent selector, enable both termination condition and API key fields
             self.edit_termination_condition_text.config(state=tk.NORMAL)
             self.edit_agent_selector_api_key_entry.config(state=tk.NORMAL)
-            # Add hint for agent selector mode if empty
-            if not self.edit_termination_condition_text.get(1.0, tk.END).strip():
-                self.edit_termination_condition_text.insert(1.0, "Specify when the conversation should end. The agent selector will check this condition.")
         else:
             # For Round Robin, enable termination condition but disable agent selector API key
             self.edit_termination_condition_text.config(state=tk.NORMAL)
-            # Add hint for round robin mode if empty
-            if not self.edit_termination_condition_text.get(1.0, tk.END).strip():
-                reminder_freq = AGENT_SETTINGS["termination_reminder_frequency"]
-                hint = f"Specify when the conversation should end. Agents will be reminded every {reminder_freq} turns, and the condition will be evaluated after each complete round."
-                self.edit_termination_condition_text.insert(1.0, hint)
             
             # Clear and disable agent selector API key for round robin
             self.edit_agent_selector_api_key_var.set("")
@@ -1606,38 +1725,36 @@ class AgentConversationSimulatorGUI:
             messagebox.showerror("Error", "No conversation data available.")
             print("DEBUG: No conversation data available")
             return
+            
+        # Make sure the simulation tab is created and chat canvas is initialized
+        if not hasattr(self, 'chat_canvas'):
+            print("DEBUG: Chat canvas not initialized yet, creating simulation tab")
+            try:
+                # Try to create the simulation tab if it doesn't exist
+                self.create_simulation_tab()
+                # Force UI update
+                self.root.update_idletasks()
+                self.root.update()
+            except Exception as e:
+                print(f"ERROR: Could not create simulation tab: {e}")
+                messagebox.showerror("Error", "Could not initialize the simulation tab. Please restart the application.")
+                return
         
         try:
             conversation = self.past_conversations_data[selection[0]]
             print(f"DEBUG: Selected conversation: {conversation.title}")
             
-            # Check if API key is available
-            api_key = self.api_key_var.get().strip()
-            if not api_key:
-                api_key = os.getenv("GOOGLE_API_KEY")
-                if not api_key:
-                    # Show message box asking for API key
-                    result = messagebox.askokcancel(
-                        "API Key Required",
-                        "To load this conversation, a Google API key is required. Would you like to enter an API key now?",
-                        icon=messagebox.WARNING
-                    )
-                    if result:
-                        # Switch to conversation setup tab to let user enter API key
-                        self.notebook.select(1)
-                        self.api_key_entry.focus()
-                        print("DEBUG: API key required, switching to setup tab")
-                        return
-                    else:
-                        return
-            
-            print("DEBUG: API key available, proceeding with conversation loading")
+            print("DEBUG: Proceeding with conversation loading")
             print("DEBUG: Switching to simulation tab")
             # First switch to the simulation tab so UI updates are visible
-            self.notebook.select(2)  # Simulation tab is index 2
-            # Force UI update
-            self.root.update()
+            self.notebook.select(3)  # Simulation tab is index 3
+            # Force UI update in the correct order
             self.root.update_idletasks()
+            self.root.update()
+            
+            # Give focus to the chat canvas to ensure the tab is visible
+            if hasattr(self, 'chat_canvas'):
+                self.chat_canvas.focus_set()
             
             # Add some delay to ensure UI is updated before loading conversation
             # This can help with UI responsiveness
@@ -1650,8 +1767,23 @@ class AgentConversationSimulatorGUI:
     def _load_conversation_after_delay(self, conversation):
         """Helper method to load a conversation after a short delay."""
         print("DEBUG: _load_conversation_after_delay called")
+        
+        # Verify the chat canvas is initialized
+        if not hasattr(self, 'chat_canvas') or not self.chat_canvas:
+            print("ERROR: Chat canvas still not initialized after delay")
+            messagebox.showerror("Error", "Chat canvas not initialized. Please restart the application.")
+            return
+            
         # Now load the conversation
         self.load_selected_conversation(conversation)
+        
+        # After loading the conversation, ensure the tab is visible again
+        self.notebook.select(3)  # Ensure simulation tab is still selected
+        self.root.update_idletasks()
+        self.root.update()
+        # Give focus to a UI element in the simulation tab
+        if hasattr(self, 'chat_canvas'):
+            self.chat_canvas.focus_set()
     
     def save_conversation_edits(self):
         """Save the edited conversation settings."""
@@ -1692,7 +1824,13 @@ class AgentConversationSimulatorGUI:
     def load_selected_conversation(self, conversation):
         """Load a selected conversation into the simulation tab."""
         try:
-            print(f"DEBUG: load_selected_conversation called for {conversation.title}")
+            print(f"DEBUG: ===== LOADING EXISTING CONVERSATION =====")
+            print(f"DEBUG: Conversation: {conversation.title}")
+            print(f"DEBUG: Conversation ID: {conversation.id}")
+            print(f"DEBUG: Number of existing messages: {len(conversation.messages)}")
+            print(f"DEBUG: Conversation status: {conversation.status}")
+            print(f"DEBUG: ===== END LOADING INFO =====")
+            
             # Store the current conversation ID
             self.current_conversation_id = conversation.id
             
@@ -1712,19 +1850,9 @@ class AgentConversationSimulatorGUI:
                 print("DEBUG: No valid agents found")
                 return
             
-            # Try UI API key first, then environment variable
-            default_api_key = self.api_key_var.get().strip()
-            if not default_api_key:
-                default_api_key = os.getenv("GOOGLE_API_KEY")
-            
-            if not default_api_key:
-                messagebox.showerror("API Key Required", "Please enter your Google API key in the Conversation Setup tab.")
-                print("DEBUG: API key not found")
-                return
-            
-            print("DEBUG: Using API key to initialize conversation engine")
+            print("DEBUG: Initializing conversation engine")
                 
-            self.conversation_engine = ConversationSimulatorEngine(default_api_key)
+            self.conversation_engine = ConversationSimulatorEngine()
             
             # Prepare agent configs with their individual API keys
             agents_config = []
@@ -1743,6 +1871,7 @@ class AgentConversationSimulatorGUI:
                     print(f"DEBUG: Agent '{agent.name}' API key starts with: {agent.api_key[:10]}...")
                 
                 agents_config.append({
+                    "id": agent.id,  # Add agent ID for tool loading
                     "name": agent.name,
                     "role": agent.role,
                     "base_prompt": agent.base_prompt,
@@ -1766,6 +1895,39 @@ class AgentConversationSimulatorGUI:
                 termination_condition=getattr(conversation, 'termination_condition', None),
                 agent_selector_api_key=agent_selector_api_key
             )
+            
+            # Restore agent_sending_messages and conversation state if they exist
+            if hasattr(conversation, 'agent_sending_messages') and conversation.agent_sending_messages:
+                print(f"DEBUG: Restoring agent_sending_messages for {len(conversation.agent_sending_messages)} agents")
+                if conversation.id in self.conversation_engine.active_conversations:
+                    conv_data = self.conversation_engine.active_conversations[conversation.id]
+                    conv_data["agent_sending_messages"] = conversation.agent_sending_messages
+                    print("DEBUG: Agent context restored successfully")
+            else:
+                print("DEBUG: No stored agent_sending_messages found, will use conversation messages")
+            
+            # Restore the conversation messages to the engine's internal state
+            if hasattr(conversation, 'messages') and conversation.messages:
+                print(f"DEBUG: Restoring {len(conversation.messages)} messages to engine state")
+                if conversation.id in self.conversation_engine.active_conversations:
+                    conv_data = self.conversation_engine.active_conversations[conversation.id]
+                    # Convert from storage format to internal format
+                    internal_messages = []
+                    for msg in conversation.messages:
+                        if isinstance(msg, dict) and 'sender' in msg and 'content' in msg:
+                            internal_messages.append({
+                                "agent_name": msg['sender'],
+                                "message": msg['content']
+                            })
+                    conv_data["messages"] = internal_messages
+                    print(f"DEBUG: Restored {len(internal_messages)} messages to engine")
+                    
+                    # If no agent_sending_messages exist, update them now
+                    if not hasattr(conversation, 'agent_sending_messages') or not conversation.agent_sending_messages:
+                        print("DEBUG: Generating agent_sending_messages from conversation history")
+                        for agent_name in conv_data["agent_names"]:
+                            self.conversation_engine._update_agent_sending_messages(conversation.id, agent_name)
+                        print("DEBUG: Generated agent context from existing messages")
                   # Register callback for message updates
             self.conversation_engine.register_message_callback(
                 conversation.id, self.on_message_received
@@ -1780,10 +1942,16 @@ class AgentConversationSimulatorGUI:
                 print("ERROR: chat_canvas not initialized!")
                 messagebox.showerror("Error", "Chat canvas not initialized. Please try restarting the application.")
                 return
+            else:
+                # Force the notebook to stay on the simulation tab and give it focus
+                self.notebook.select(3)  # Simulation tab
+                self.root.update_idletasks()
+                self.root.update()
+                self.chat_canvas.focus_set()
             
             # Make sure we're on the simulation tab and it's visible
             print("DEBUG: Selecting simulation tab")
-            self.notebook.select(2)  # Simulation tab is index 2
+            self.notebook.select(3)  # Simulation tab is index 3
             
             # Force UI updates
             self.root.update()
@@ -1791,9 +1959,15 @@ class AgentConversationSimulatorGUI:
             # Clear existing messages and reload from conversation
             print("DEBUG: Clearing chat canvas before loading conversation messages")
             try:
-                self.chat_canvas.clear()
-                self.root.update()
-                self.root.update_idletasks()  # Force UI update after clearing
+                # Double-check that chat_canvas is initialized
+                if hasattr(self, 'chat_canvas') and self.chat_canvas:
+                    self.chat_canvas.clear()
+                    self.root.update()
+                    self.root.update_idletasks()  # Force UI update after clearing
+                else:
+                    print("WARNING: Cannot clear chat canvas - not initialized")
+                    messagebox.showerror("Error", "Chat canvas not initialized. Please restart the application.")
+                    return
             except Exception as e:
                 print(f"ERROR during UI update: {e}")
             
@@ -1872,22 +2046,76 @@ class AgentConversationSimulatorGUI:
             print(f"Error in load_selected_conversation: {e}")
             messagebox.showerror("Error", f"Failed to load conversation: {str(e)}")
 
-# Add main entry point to create and run the GUI application
-if __name__ == "__main__":
-    # Set the API key from environment variables if available
-    print("Starting Agent Conversation Simulator...")
-    if "GOOGLE_API_KEY" in os.environ:
-        print("Found GOOGLE_API_KEY in environment variables")
-    else:
-        print("GOOGLE_API_KEY not set in environment. Please provide it in the UI.")
+    def load_tool_checkboxes(self):
+        """Load tools from tools.json and create checkboxes."""
+        try:
+            # Clear existing checkboxes
+            for widget in self.tools_checkboxes_frame.winfo_children():
+                widget.destroy()
+            
+            # Reset tool vars
+            self.tool_vars = {}
+            
+            # Load tools from tools.json
+            tools_file = os.path.join(os.path.dirname(__file__), "tools.json")
+            with open(tools_file, 'r') as f:
+                tools_data = json.load(f)
+                
+            # Create a checkbox for each tool
+            for i, tool in enumerate(tools_data.get('tools', [])):
+                var = tk.BooleanVar(value=False)
+                self.tool_vars[tool['name']] = var
+                
+                # Create frame for each tool
+                tool_frame = ttk.Frame(self.tools_checkboxes_frame)
+                tool_frame.pack(fill="x", expand=True, padx=5, pady=2)
+                
+                # Add checkbox with tool name
+                cb = ttk.Checkbutton(tool_frame, text=tool['name'], variable=var)
+                cb.pack(side="left", anchor="w")
+                
+                # Add tooltip/help icon
+                help_button = ttk.Label(tool_frame, text="ℹ️")
+                help_button.pack(side="left", padx=5)
+                
+                # Bind tooltip to show description
+                tool_tip_text = tool['description']
+                help_button.bind("<Enter>", lambda event, text=tool_tip_text: self.show_tooltip(event, text))
+                help_button.bind("<Leave>", self.hide_tooltip)
+                
+        except Exception as e:
+            print(f"Error loading tools: {e}")
+            messagebox.showerror("Error", f"Failed to load tools: {e}")
     
+    def show_tooltip(self, event, text):
+        """Display tooltip near the widget."""
+        x, y, _, _ = event.widget.bbox("insert")
+        x += event.widget.winfo_rootx() + 25
+        y += event.widget.winfo_rooty() + 25
+        
+        # Create a toplevel window
+        self.tooltip = tk.Toplevel(event.widget)
+        self.tooltip.wm_overrideredirect(True)
+        self.tooltip.wm_geometry(f"+{x}+{y}")
+        
+        label = ttk.Label(self.tooltip, text=text, wraplength=300, 
+                         background="#ffffe0", relief="solid", borderwidth=1,
+                         padding=5)
+        label.pack()
+    
+    def hide_tooltip(self, event=None):
+        """Hide the tooltip."""
+        if hasattr(self, "tooltip") and self.tooltip:
+            self.tooltip.destroy()
+            self.tooltip = None
+
+if __name__ == "__main__":
+    """Main entry point for the application."""
     try:
-        print("Initializing AgentConversationSimulatorGUI...")
+        # Create and run the application
         app = AgentConversationSimulatorGUI()
-        print("GUI initialized, starting mainloop...")
         app.root.mainloop()
-        print("Mainloop ended")  # This will only print when the application is closed
     except Exception as e:
-        print(f"ERROR starting application: {str(e)}")
+        print(f"Error starting application: {e}")
         import traceback
         traceback.print_exc()

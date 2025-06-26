@@ -18,10 +18,11 @@ class Agent:
     created_at: str
     color: Optional[str] = None  # Color for the agent's messages
     api_key: Optional[str] = None  # API key for the agent's model
+    tools: List[str] = field(default_factory=list)  # List of tool names assigned to this agent
     
     @classmethod
     def create_new(cls, name: str, role: str, base_prompt: str, personality_traits: List[str], 
-                   color: str = None, api_key: str = None) -> 'Agent':
+                   color: str = None, api_key: str = None, tools: List[str] = None) -> 'Agent':
         """Create a new agent with auto-generated ID and timestamp."""
         return cls(
             id=f"agent_{uuid.uuid4().hex[:8]}",
@@ -31,7 +32,8 @@ class Agent:
             personality_traits=personality_traits,
             created_at=datetime.now().isoformat(),
             color=color,
-            api_key=api_key
+            api_key=api_key,
+            tools=tools or []
         )
 
 
@@ -53,6 +55,7 @@ class Conversation:
     invocation_method: str = "round_robin"  # "round_robin" or "agent_selector"
     termination_condition: Optional[str] = None  # Condition for agent-selector to determine when to end conversation
     agent_selector_api_key: Optional[str] = None  # API key for the agent selector
+    agent_sending_messages: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)  # Maps agent names to their context messages (summary + recent)
     
     @classmethod
     def create_new(cls, title: str, environment: str, scene_description: str, agent_ids: List[str],
@@ -74,7 +77,8 @@ class Conversation:
             thread_id=f"thread_{uuid.uuid4().hex[:8]}",
             invocation_method=invocation_method,
             termination_condition=termination_condition,
-            agent_selector_api_key=agent_selector_api_key
+            agent_selector_api_key=agent_selector_api_key,
+            agent_sending_messages={}  # Initialize empty agent context messages
         )
 
 

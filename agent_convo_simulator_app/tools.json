@@ -1,0 +1,28 @@
+{
+  "tools": [
+    {
+      "name": "internet_search_tool",
+      "description": "Search the internet for information to answer questions about current events or general knowledge."
+    },
+    {
+      "name": "search_internet_strucutred_output",
+      "description": "Search the internet and return comprehensive structured output with detailed search results including knowledge graphs, organic results, related questions, and more."
+    },
+    {
+      "name": "search_images_from_internet",
+      "description": "Search the internet specifically for images on a given topic, returning detailed image metadata and source information."
+    },
+    {
+      "name": "search_news_from_internet",
+      "description": "Search for news articles on a specific topic with customizable time range, returning structured results with article metadata."
+    },
+    {
+      "name": "search_places_from_internet",
+      "description": "Search for places, businesses, and locations, returning structured geographic and business data including ratings, contact information, and coordinates."
+    },
+    {
+      "name": "browser_manipulation_toolkit",
+      "description": "A comprehensive toolkit for browser automation including navigation, clicking elements, extracting content, filling forms, taking screenshots, and other webpage interactions."
+    }
+  ]
+}

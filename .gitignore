@@ -1,2 +1,18 @@
 venv
 .env
+
+agent_convo_simulator_app\.env
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
+
+# IDE specific files
+.vscode/
+.idea/
