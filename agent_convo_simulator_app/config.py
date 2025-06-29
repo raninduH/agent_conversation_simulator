@@ -65,7 +65,7 @@ AGENT_SETTINGS = {
     
     # Frequency of reminding agents about termination condition
     # (every X invocations for each agent)
-    "termination_reminder_frequency": 2
+    "termination_reminder_frequency": 4
 }
 
 # Gemini model settings

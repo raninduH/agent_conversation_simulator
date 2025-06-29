@@ -3293,144 +3293,358 @@
       ],
       "messages": [
         {
-          "sender": "Jason",
-          "content": "\"Okay, okay, no flexing,\" I say quickly, backing off a little. I can see she's really uncomfortable now, and I don't want to push it too far. \"But...thanks, Mom. Seriously. That was...really cool.\" I try to smile reassuringly, hoping I haven't ruined everything. \"So, about those pancakes...are they almost ready? I'm starving.\" I try to change the subject, hoping to ease the tension. Maybe I can still salvage this morning.",
-          "timestamp": "2025-06-26T19:12:33.154836",
-          "type": "ai"
-        },
-        {
-          "sender": "Sarah",
-          "content": "(Sarah sighs in relief as Jason changes the subject, her shoulders visibly relaxing. She manages a weak smile, though her cheeks are still flushed.) \"Yes, they're almost ready,\" she says, her voice regaining some of its usual softness. \"Just give me a minute to get them plated up.\" She turns back to the stove, busying herself with the pancakes, a small, almost mischievous glint returning to her eyes. \"And Jason?\" she adds, her voice suddenly lower and more playful. \"Don't think I've forgotten about that room of yours...\" She glances at him over her shoulder, a hint of a smirk playing on her lips. The prank is about to begin.",
-          "timestamp": "2025-06-26T19:12:33.154845",
-          "type": "ai"
-        },
-        {
-          "sender": "Jason",
-          "content": "\"Ugh, don't remind me,\" I groan, rolling my eyes. \"I'll get to it...eventually.\" I try to sound nonchalant, but a shiver of dread runs down my spine. She's definitely planning something. \"So, uh...what kind of toppings do we have for these pancakes?\" I ask, trying to distract her. \"Please tell me we have chocolate chips.\" I watch her warily, trying to decipher the look in her eyes. Something's definitely up.",
-          "timestamp": "2025-06-26T19:12:33.154851",
-          "type": "ai"
-        },
-        {
-          "sender": "Sarah",
-          "content": "(Sarah chuckles softly, a light and airy sound that sends a shiver down Jason's spine. She carefully plates the pancakes, her movements deliberate and controlled.) \"Of course, we have chocolate chips, sweetie,\" she says, her voice sweet and innocent. \"But first... how about I carry these to the table for you?\" She picks up both plates, laden high with pancakes, with seemingly effortless ease. \"Unless you think they're too heavy for me, of course.\" She raises an eyebrow, a mischievous glint sparkling in her eyes. The emasculation has begun.",
-          "timestamp": "2025-06-26T19:12:33.154857",
-          "type": "ai"
-        },
-        {
-          "sender": "System",
-          "content": "Termination condition reached.",
-          "timestamp": "2025-06-26T19:12:33.154862",
-          "type": "ai"
-        },
-        {
-          "sender": "Sarah",
-          "content": "(Jason yawns loudly as he enters the kitchen, rubbing his eyes) \"Morning, Mom. What's for breakfast? I'm starving.\"",
-          "timestamp": "2025-06-26T19:12:33.154868",
-          "type": "ai"
-        },
-        {
-          "sender": "Jason",
-          "content": "\"Morning, Mom. What's for breakfast? I'm starving.\"\n\nUgh, morning... smells good. You working out again? What, you gonna make me do push-ups before I get any food or something?",
-          "timestamp": "2025-06-26T19:12:33.154873",
-          "type": "ai"
-        },
-        {
-          "sender": "Sarah",
-          "content": "(Sarah blushes slightly, fiddling with the spatula) \"Just making some pancakes, sweetie. And no, no push-ups... unless you *want* to, of course?\" (She gives him a teasing little smile, hiding her growing biceps behind her back.)",
-          "timestamp": "2025-06-26T19:12:33.154879",
-          "type": "ai"
-        },
-        {
-          "sender": "Jason",
-          "content": "\"Just making some pancakes, sweetie. And no, no push-ups... unless you *want* to, of course?\" (She gives him a teasing little smile, hiding her growing biceps behind her back.)\n\nPancakes are good. And no, no push-ups. I'd probably just collapse after one anyway. What's with the weird smile? You up to something?",
-          "timestamp": "2025-06-26T19:12:33.154884",
-          "type": "ai"
-        },
-        {
-          "sender": "Sarah",
-          "content": "(Sarah's smile widens slightly, but she still avoids direct eye contact) \"Weird smile? Oh, I'm just happy to see my favorite sleepyhead. And maybe I'm just... feeling strong today.\" (She casually lifts a heavy pot with one hand, then quickly sets it down, blushing again.)",
-          "timestamp": "2025-06-26T19:12:33.154889",
-          "type": "ai"
-        },
-        {
-          "sender": "Sarah",
-          "content": "(Sarah giggles, trying to hide her smirk) \"Feeling strong, yes. But mostly, just happy to make you breakfast, sweetie. Now, go sit down before I decide you need to earn those pancakes with some cleaning.\"",
-          "timestamp": "2025-06-26T19:12:33.154894",
-          "type": "ai"
-        },
-        {
-          "sender": "Jason",
-          "content": "Feeling strong, huh? You gonna challenge me to an arm wrestle for breakfast now? I'm still not doing dishes, by the way.",
-          "timestamp": "2025-06-26T19:12:33.154900",
-          "type": "ai"
-        },
-        {
           "sender": "Sarah",
           "content": "\"Alright, alright, I'm going!\" (Sarah grabs the chocolate chips, a playful glint in her eyes) \"Just trying to keep you motivated, sweetie. You know, build some character...and maybe some muscles of your own someday.\"",
-          "timestamp": "2025-06-26T19:12:33.154905",
+          "timestamp": "2025-06-27T18:48:58.924586",
           "type": "ai"
         },
         {
           "sender": "Jason",
           "content": "Cleaning? Seriously? I just woke up! Fine, fine, I'm going, I'm going. Just promise me those pancakes are worth it.",
-          "timestamp": "2025-06-26T19:12:33.154910",
+          "timestamp": "2025-06-27T18:48:58.924588",
           "type": "ai"
         },
         {
           "sender": "Sarah",
           "content": "(Sarah laughs, shaking her head) \"Arm wrestle for breakfast? Oh, honey, I think you've had enough excitement for one morning. Besides, I wouldn't want to embarrass you again so soon.\"",
-          "timestamp": "2025-06-26T19:12:33.154915",
+          "timestamp": "2025-06-27T18:48:58.924590",
           "type": "ai"
         },
         {
           "sender": "Jason",
           "content": "Muscles? Please, you know I'm genetically predisposed to be a twig. Just get the pancakes ready, Mom. Character building can wait until after I've had my chocolate chips.",
-          "timestamp": "2025-06-26T19:12:33.154920",
+          "timestamp": "2025-06-27T18:48:58.924592",
           "type": "ai"
         },
         {
           "sender": "Jason",
           "content": "Muscles? Please, you know I'm genetically predisposed to be a twig. Just get the pancakes ready, Mom. Character building can wait until after I've had my chocolate chips.",
-          "timestamp": "2025-06-26T19:12:33.154925",
+          "timestamp": "2025-06-27T18:48:58.924594",
           "type": "ai"
         },
         {
           "sender": "Jason",
           "content": "Embarrass me again? When was the first time? Just get the pancakes on the table, Mom. I'm too hungry to deal with your jokes right now.",
-          "timestamp": "2025-06-26T19:12:33.154931",
+          "timestamp": "2025-06-27T18:48:58.924595",
           "type": "ai"
         },
         {
           "sender": "Jason",
           "content": "Embarrass me again? When was the first time? Just get the pancakes on the table, Mom. I'm too hungry to deal with your jokes right now.",
-          "timestamp": "2025-06-26T19:12:33.154936",
+          "timestamp": "2025-06-27T18:48:58.924597",
           "type": "ai"
         },
         {
           "sender": "Jason",
           "content": "\"Yeah, yeah, genetically predisposed,\" I mumble, rolling my eyes. \"Just means I gotta work smarter, not harder... which is why I'm delegating pancake-making to you. Now, chop chop, I'm starving!\"",
-          "timestamp": "2025-06-26T19:12:33.154941",
+          "timestamp": "2025-06-27T18:48:58.924598",
           "type": "ai"
         },
         {
           "sender": "Jason",
           "content": "\"Fine, fine, but if I pass out from hunger, it's on you. And hey, after breakfast, maybe we *could* arm wrestle...just for fun, you know? No pressure or anything.\" I try to sound casual, but I'm already regretting suggesting it.",
-          "timestamp": "2025-06-26T19:12:33.154946",
+          "timestamp": "2025-06-27T18:48:58.924600",
           "type": "ai"
         },
         {
           "sender": "Jason",
           "content": "\"Fine, fine, but if I pass out from hunger, it's on you. And hey, after breakfast, maybe we *could* arm wrestle...just for fun, you know? No pressure or anything.\" I try to sound casual, but I'm already regretting suggesting it.",
+          "timestamp": "2025-06-27T18:48:58.924601",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Just forget I said anything about the arm wrestle, okay? Pancakes. Focus on the pancakes, Mom. That's all I care about right now.\"",
+          "timestamp": "2025-06-27T18:48:58.924603",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Look, I know I'm not exactly Mr. Universe over here, but you don't have to rub it in. Just make the damn pancakes, Mom. Please?\" I give her my most pathetic, puppy-dog eyes, hoping it'll work.",
+          "timestamp": "2025-06-27T18:48:58.924604",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "I groan dramatically. \"Fine, whatever. Just... hurry. My stomach's eating itself.\" I slouch onto a kitchen chair, trying to look as pathetic as possible. Maybe guilt will speed things up.",
+          "timestamp": "2025-06-27T18:48:58.924606",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "I groan dramatically. \"Fine, whatever. Just... hurry. My stomach's eating itself.\" I slouch onto a kitchen chair, trying to look as pathetic as possible. Maybe guilt will speed things up.",
           "type": "ai",
-          "timestamp": "2025-06-26T19:12:33.217710",
+          "timestamp": "2025-06-27T18:48:58.980106",
           "color": "#CAE8BD"
         }
       ],
-      "status": "stopped",
+      "status": "active",
       "created_at": "2025-06-26T17:59:54.764380",
-      "last_updated": "2025-06-26T19:12:50.341604",
+      "last_updated": "2025-06-27T18:48:58.983993",
       "summary": null,
       "thread_id": "thread_8376e8c9",
+      "agent_colors": {
+        "Jason": "#CAE8BD",
+        "Sarah": "#FFE8CD"
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "after all 3 of the following happens. 1. Json begs and begs and after some phsical pushing and deep conversaton Sarah let him arm wrrestle her. 2. After arm wrestling Json begs and begs and after some phsical pushing and deep conversaton Sarah let him see her veins and feel her bicep. 3. after this show off, Sarah gets a mischevious and pull a slowly growing prank where at the end of the prank JSON gets shivering scared. She use her muscles and strngth to do this. First she emasclate him, then next she humiliate him and then use body to scare him.",
+      "agent_selector_api_key": null,
+      "agent_sending_messages": {}
+    },
+    {
+      "id": "conv_3dd2a7ce",
+      "title": "Talking about news",
+      "environment": "Park",
+      "scene_description": "David and Clara begins to talk about the most recent events in the world.",
+      "agents": [
+        "agent_clara",
+        "agent_david"
+      ],
+      "messages": [
+        {
+          "sender": "David",
+          "content": "Totally! It's like these towns are undergoing a collective identity makeover! I wonder if search_news_from_internet can find anything about the impact on local culture and traditions, too?",
+          "timestamp": "2025-06-27T16:38:03.127607",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Okay, let's do it! Should we start with a broad search like \"urban revitalization projects\" and then narrow it down from there? Or do you have a specific angle in mind?",
+          "timestamp": "2025-06-27T16:38:03.127617",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Yes, exactly! It's so important to preserve those cultural roots while embracing new growth! Let's see what treasures search_news_from_internet can unearth for us on that front!",
+          "timestamp": "2025-06-27T16:38:03.127623",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "That's a great point about the local culture and traditions, David. Maybe we could start with \"urban revitalization AND cultural preservation\" to see if anything comes up? It might give us a more nuanced perspective from the start.",
+          "timestamp": "2025-06-27T16:38:03.127628",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "I think starting broad is a great idea, Clara! Then maybe we can add some keywords like \"culture\" or \"community traditions\" to narrow it down and see if we can find some real gems! What do you think?",
+          "timestamp": "2025-06-27T16:38:03.127633",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Okay, I'm excited to see what we find! Should we also specify a time period, or leave it open to see the evolution of these projects over time?",
+          "timestamp": "2025-06-27T16:38:03.127639",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "\"Urban revitalization AND cultural preservation\" sounds like a fantastic starting point, Clara! It's like we're setting the stage for a global treasure hunt of inspiring stories! Let's see what search_news_from_internet brings back!",
+          "timestamp": "2025-06-27T16:38:03.127644",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Leaving it open might be best to start, that way we can see how the approach to revitalization has changed over the years. It could be really insightful to see the evolution!",
+          "timestamp": "2025-06-27T16:38:03.127650",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Ooh, that's a great question, Clara! I think leaving the time period open could be really interesting - like watching these projects evolve and adapt over the years! It might give us a better sense of what works long-term, you know?",
+          "timestamp": "2025-06-27T16:38:03.127655",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Alright, let's unleash the power of search_news_from_internet then! I'm really curious to see what kind of projects are out there. It's always inspiring to see how people are shaping their communities.",
+          "timestamp": "2025-06-27T16:38:03.127660",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Okay, Clara, I'm on board! Let's leave the time period open and see what fascinating transformations search_news_from_internet can show us! I'm so excited to see what we discover! Should we run the search now?",
+          "timestamp": "2025-06-27T16:38:03.127665",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Okay, David, let's use search_news_from_internet with the query \"urban revitalization AND cultural preservation\" and see what we discover! I'm excited to see what comes up!",
+          "timestamp": "2025-06-27T16:38:03.127671",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Alright, Clara, it looks like search_news_from_internet has given us a recent article about Saudi Arabia's Diriyah Company and UAE's G42 being named among TIME100 Most Influential Companies! The snippet mentions something about urban revitalization, that sounds promising! Should we dig into that and see what it's all about?",
+          "timestamp": "2025-06-27T16:38:03.127676",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Yes, let's do it! I'm ready to see the results. Hopefully, we'll find some inspiring examples of communities preserving their unique identities while adapting to the future.",
+          "timestamp": "2025-06-27T16:38:03.127681",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Absolutely, Clara! It sounds like a great lead! Maybe we can use search_news_from_internet again, this time focusing on \"Diriyah Company urban revitalization\" to get more specific information? What do you think?",
+          "timestamp": "2025-06-27T16:38:03.127686",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Definitely! It sounds like it could be a large-scale project, so it would be interesting to see how they're balancing modernization with preserving the local heritage. I wonder what specific strategies they're using?",
+          "timestamp": "2025-06-27T16:38:03.127691",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Definitely! It sounds like it could be a large-scale project, so it would be interesting to see how they're balancing modernization with preserving the local heritage. I wonder what specific strategies they're using?",
+          "type": "ai",
+          "timestamp": "2025-06-27T16:38:03.264197",
+          "color": "#CAE8BD"
+        }
+      ],
+      "status": "active",
+      "created_at": "2025-06-27T16:01:35.437332",
+      "last_updated": "2025-06-27T16:38:03.267234",
+      "summary": null,
+      "thread_id": "thread_60264cd8",
+      "agent_colors": {
+        "Clara": "#CAE8BD",
+        "David": "#FFE8CD"
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": null,
+      "agent_selector_api_key": null,
+      "agent_sending_messages": {}
+    },
+    {
+      "id": "conv_d03ca5b4",
+      "title": "Kitchen 12",
+      "environment": "Kitchen",
+      "scene_description": "Sarah is in the kitchen doing dishes. He casual home clothes are now tightly fitting to her. She is thinking about being strict to json on showing off her muscles or leting him see her strength. She is suspicious whether he has a thing for muscular women. Then JSON enters the kitchen with some mischeivous thoughts to get to make her show off the muscles and to test the strength. but he acts non-chalant first.",
+      "agents": [
+        "agent_7562c7c3",
+        "agent_aaddf470"
+      ],
+      "messages": [
+        {
+          "sender": "User",
+          "content": "Hello everyone! Let's start our conversation.",
+          "timestamp": "2025-06-27T19:04:06.850768",
+          "type": "ai"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Oh, hi Jason... just finishing up these dishes. What's up?",
+          "timestamp": "2025-06-27T19:04:06.850771",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Hey mom, just wondering if there's anything to eat. I'm starving, as usual.\"",
+          "timestamp": "2025-06-27T19:04:06.850773",
+          "type": "ai"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Nothing much, mom. Just wondering what's for dinner tonight? I'm starving!",
+          "timestamp": "2025-06-27T19:04:06.850774",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"So, whatcha making? Hope it's not one of your 'healthy' meals again.\" I say with a playful eye roll.",
+          "timestamp": "2025-06-27T19:04:06.850776",
+          "type": "ai"
+        },
+        {
+          "sender": "Sarah",
+          "content": "I was thinking of making spaghetti and meatballs, does that sound good? You can always grab a snack if you're really hungry right now.",
+          "timestamp": "2025-06-27T19:04:06.850778",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "I lean against the counter, trying to look casual. \"Maybe we could order pizza? My treat, if I can find enough cash in my wallet.\"",
+          "timestamp": "2025-06-27T19:04:06.850779",
+          "type": "ai"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Hey! Spaghetti and meatballs isn't exactly a health food, you know. But if you're that hungry, there are some carrot sticks in the fridge... *I say with a small smirk.*",
+          "timestamp": "2025-06-27T19:04:06.850781",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Spaghetti and meatballs are okay, I guess,\" I say, trying not to sound too disappointed. \"But, hey, since you're cooking, think you could, uh, open that jar of pickles for me? I can't seem to get a grip on it.\" *I smirk inwardly, this is my chance!*",
+          "timestamp": "2025-06-27T19:04:06.850782",
+          "type": "ai"
+        },
+        {
+          "sender": "Sarah",
+          "content": "Pizza sounds good too, but I already started thawing the meat. Maybe next time? Unless... you're trying to avoid my amazing meatball skills? *I raise an eyebrow, teasing him.*",
+          "timestamp": "2025-06-27T19:04:06.850784",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Carrot sticks? Seriously? I'm good, I can wait for the spaghetti... but about that pickle jar? You're so much stronger than me, mom. It'd be no problem for you.\" *I try to sound as pathetic as possible.*",
+          "timestamp": "2025-06-27T19:04:06.850786",
+          "type": "ai"
+        },
+        {
+          "sender": "Sarah",
+          "content": "*I chuckle softly.* \"Oh, suddenly you need my help? I thought you were so strong.\" *I turn, grab the jar of pickles, and effortlessly twist the lid open.* \"Here you go. Anything else you need, tough guy?\" *I hand him the jar with a playful smile, hiding my growing biceps.*",
+          "timestamp": "2025-06-27T19:04:06.850800",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Meatball skills? Mom, your meatballs are legendary...ly average,\" I joke, then quickly add, \"But seriously, that pickle jar is mocking me. It's like it *knows* I'm weak. Just a quick twist, please?\" *I give her my best puppy-dog eyes.*",
+          "timestamp": "2025-06-27T19:04:06.850801",
+          "type": "ai"
+        },
+        {
+          "sender": "Sarah",
+          "content": "*I narrow my eyes playfully.* \"You know, all this talk about strength... are you trying to challenge me to something, Jason? Is my baby boy finally trying to show off?\" *I cross my arms, a smirk playing on my lips.*",
+          "timestamp": "2025-06-27T19:04:06.850803",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "I take the jar, trying not to stare at her arm for too long. \"Thanks, Mom. You're a lifesaver... and way stronger than you let on.\" I pop a pickle in my mouth, trying to play it cool. \"So, uh, you been working out or something?\" *Nailed it. Casual.*",
+          "timestamp": "2025-06-27T19:04:06.850804",
+          "type": "ai"
+        },
+        {
+          "sender": "Sarah",
+          "content": "\"Show off? Please, Mom, I just want a pickle!\" *I roll my eyes, but a small smile plays on my lips.* \"But... if you're offering a *friendly* competition... maybe an arm wrestle?\" *I flex my non-existent bicep jokingly.*",
+          "timestamp": "2025-06-27T19:04:06.850806",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Challenge you? Nah, Mom, I know my limits,\" I say, trying to sound nonchalant, even though my heart is pounding a little faster. \"Unless... you're offering? Like, an arm wrestling match? Just for fun, of course.\" *I try to look confident, but I'm probably failing miserably.*",
+          "timestamp": "2025-06-27T19:04:06.850807",
+          "type": "ai"
+        },
+        {
+          "sender": "Jason",
+          "content": "\"Challenge you? Nah, Mom, I know my limits,\" I say, trying to sound nonchalant, even though my heart is pounding a little faster. \"Unless... you're offering? Like, an arm wrestling match? Just for fun, of course.\" *I try to look confident, but I'm probably failing miserably.*",
+          "type": "ai",
+          "timestamp": "2025-06-27T19:04:06.911366",
+          "color": "#CAE8BD"
+        }
+      ],
+      "status": "paused",
+      "created_at": "2025-06-27T19:01:37.965387",
+      "last_updated": "2025-06-27T19:04:06.913912",
+      "summary": null,
+      "thread_id": "thread_e01357a4",
       "agent_colors": {
         "Jason": "#CAE8BD",
         "Sarah": "#FFE8CD"

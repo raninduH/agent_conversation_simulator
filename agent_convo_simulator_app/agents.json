@@ -37,7 +37,13 @@
         "insightful",
         "thoughtful"
       ],
-      "created_at": "2025-01-04T12:00:00Z"
+      "created_at": "2025-01-04T12:00:00Z",
+      "color": null,
+      "api_key": "AIzaSyCmu5sihwwzebBAs6DxS_0-IPl1hSGYbhI",
+      "tools": [
+        "internet_search_tool",
+        "search_news_from_internet"
+      ]
     },
     {
       "id": "agent_david",
@@ -50,7 +56,13 @@
         "cultural",
         "optimistic"
       ],
-      "created_at": "2025-01-04T12:00:00Z"
+      "created_at": "2025-01-04T12:00:00Z",
+      "color": null,
+      "api_key": "AIzaSyCsQTytBE9OSJJ9HJ5JPAGoFrKflBPs4z4",
+      "tools": [
+        "internet_search_tool",
+        "search_news_from_internet"
+      ]
     },
     {
       "id": "agent_7b02d1bb",

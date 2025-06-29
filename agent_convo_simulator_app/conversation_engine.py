@@ -130,7 +130,7 @@ Recent conversation messages:
                           scene_description: str, messages: List[Dict[str, str]], 
                           all_agents: List[str], termination_condition: Optional[str] = None,
                           should_remind_termination: bool = False, conversation_id: Optional[str] = None,
-                          agent_name: Optional[str] = None) -> str:
+                          agent_name: Optional[str] = None, available_tools: List[str] = None) -> str:
         """
         Create the prompt for an agent including scene, participants, and conversation history.
         
@@ -138,12 +138,13 @@ Recent conversation messages:
             agent_config: Agent configuration
             environment: Current environment
             scene_description: Scene description
-            messages: Current messages list (fallback if no stored agent messages)
+            messages: Current messages list
             all_agents: List of all agent names
             termination_condition: Optional termination condition for the conversation
             should_remind_termination: Whether to include termination condition reminder
-            conversation_id: Conversation ID to load stored agent context
+            conversation_id: Conversation ID (unused, kept for compatibility)
             agent_name: Agent name to load specific context for
+            available_tools: List of available tool names for this agent
             
         Returns:
             Formatted prompt string
@@ -162,51 +163,41 @@ SCENE DESCRIPTION: {scene_description}
 
 PARTICIPANTS: {', '.join(all_agents)}
 
+Tool Usage: Use your tools freely in the first instance you feel,  just like a noraml person using their mobile phone as a tool. No need to get permsission from other agents. But when it's necessary discuss with other agents how the tools should be used.
+
 """
         
-        # Try to load stored agent context messages first
-        agent_context_messages = None
-        if conversation_id and conversation_id in self.active_conversations:
-            conv_data = self.active_conversations[conversation_id]
-            agent_sending_messages = conv_data.get("agent_sending_messages", {})
-            agent_context_messages = agent_sending_messages.get(agent_name)
+        # Always use the current messages list as the single source of truth
+        print(f"DEBUG: Using current messages for '{agent_name}' ({len(messages)} items)")
+        if messages:
+            if messages[0].get("past_convo_summary"):
+                prompt += f"PREVIOUS CONVERSATION SUMMARY: {messages[0]['past_convo_summary']}\n\n"
+                recent_messages = messages[1:]
+            else:
+                recent_messages = messages
             
-        if agent_context_messages:
-            print(f"DEBUG: Using stored agent context for '{agent_name}' ({len(agent_context_messages)} items)")
-            # Use the stored context messages
-            for context_item in agent_context_messages:
-                if context_item["type"] == "summary":
-                    prompt += f"PREVIOUS CONVERSATION SUMMARY: {context_item['content']}\n\n"
-                elif context_item["type"] == "message":
-                    if not prompt.endswith("CONVERSATION SO FAR:\n"):
-                        prompt += "CONVERSATION SO FAR:\n"
-                    prompt += f"{context_item['agent_name']}: {context_item['message']}\n"
-            
-            if any(item["type"] == "message" for item in agent_context_messages):
+            if recent_messages:
+                prompt += "CONVERSATION SO FAR:\n"
+                for msg in recent_messages:
+                    if "agent_name" in msg and "message" in msg:
+                        prompt += f"{msg['agent_name']}: {msg['message']}\n"
                 prompt += "\n"
-        else:
-            print(f"DEBUG: No stored agent context for '{agent_name}', using current messages")
-            # Fallback to current messages
-            if messages:
-                if messages[0].get("past_convo_summary"):
-                    prompt += f"PREVIOUS CONVERSATION SUMMARY: {messages[0]['past_convo_summary']}\n\n"
-                    recent_messages = messages[1:]
-                else:
-                    recent_messages = messages
-                
-                if recent_messages:
-                    prompt += "CONVERSATION SO FAR:\n"
-                    for msg in recent_messages:
-                        if "agent_name" in msg and "message" in msg:
-                            prompt += f"{msg['agent_name']}: {msg['message']}\n"
-                    prompt += "\n"
         
         # Add termination condition reminder if appropriate
         if should_remind_termination and termination_condition:
             prompt += f"""TERMINATION CONDITION REMINDER: The conversation should end when the following condition is met:
 {termination_condition}
 
-Keep this condition in mind while participating in the conversation.
+Keep this condition in mind while participating in the conversation. Naturally deviate the conversation into the direction where the condition will be met. and stay true to your personality traits.
+
+"""
+        
+        # Add tool information if available
+        if available_tools:
+            prompt += f"""AVAILABLE TOOLS: You have access to the following tools: {', '.join(available_tools)}
+Use these tools when they can help you respond more effectively to the conversation.
+Only use tools when they are relevant to the current conversation context.
+Don't mention the tools explicitly unless asked about your capabilities.
 
 """
         
@@ -346,7 +337,71 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
         
         # Apply message summarization before creating prompt
         conv_data["messages"] = self.message_list_summarization(conv_data["messages"])
-          # Create prompt for current agent
+        
+        # Load agent tools first to include in prompt
+        agent_tools = []
+        tool_names = []
+        
+        try:
+            # Import tools module at the function level
+            import tools as tools_module
+            
+            # Get the Agent object from our data_manager using agent name
+            agent_id = current_agent_config.get("id")
+            agent_obj = None
+            
+            # Load agent data from data manager
+            if not hasattr(self, 'agents_data'):
+                # We need to initialize this first
+                from data_manager import DataManager
+                data_manager = DataManager(os.path.dirname(__file__))
+                self.agents_data = {agent.id: agent for agent in data_manager.load_agents()}
+            
+            # Get the agent object
+            agent_obj = self.agents_data.get(agent_id)
+            
+            # Check if agent has tools
+            if agent_obj and hasattr(agent_obj, 'tools') and agent_obj.tools:
+                print(f"DEBUG: Loading {len(agent_obj.tools)} tools for agent '{current_agent_name}': {agent_obj.tools}")
+                
+                for tool_name in agent_obj.tools:
+                    try:
+                        # Get the tool object by name from tools module
+                        if tool_name == "browser_manipulation_toolkit":
+                            # Special case for browser toolkit which is a list of tools
+                            browser_tools = tools_module.get_browser_tools()
+                            if browser_tools:  # Only add if tools were successfully loaded
+                                agent_tools.extend(browser_tools)
+                                # Add individual tool names from the toolkit
+                                for bt in browser_tools:
+                                    if hasattr(bt, 'name'):
+                                        tool_names.append(bt.name)
+                                    elif hasattr(bt, '__name__'):
+                                        tool_names.append(bt.__name__)
+                                print(f"DEBUG: ✓ Added browser toolkit ({len(browser_tools)} tools) for agent {current_agent_name}")
+                            else:
+                                print(f"DEBUG: ⚠ Browser toolkit could not be loaded for agent {current_agent_name}")
+                        elif hasattr(tools_module, tool_name):
+                            tool_obj = getattr(tools_module, tool_name)
+                            agent_tools.append(tool_obj)
+                            if hasattr(tool_obj, 'name'):
+                                tool_names.append(tool_obj.name)
+                            elif hasattr(tool_obj, '__name__'):
+                                tool_names.append(tool_obj.__name__)
+                            else:
+                                tool_names.append(tool_name)
+                            print(f"DEBUG: ✓ Added tool '{tool_name}' for agent {current_agent_name}")
+                        else:
+                            print(f"WARNING: ✗ Tool '{tool_name}' not found in tools module")
+                    except Exception as e:
+                        print(f"ERROR: ✗ Failed to add tool '{tool_name}': {e}")
+            else:
+                print(f"DEBUG: Agent '{current_agent_name}' has no tools assigned")
+                
+            print(f"DEBUG: Agent '{current_agent_name}' loaded with {len(agent_tools)} total tools")
+        except Exception as e:
+            print(f"ERROR: Failed to load tools for agent {current_agent_name}: {e}")
+          # Create prompt for current agent (now with tool information)
         prompt = self.create_agent_prompt(
             current_agent_config,
             conv_data["environment"],
@@ -356,13 +411,12 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             termination_condition,
             should_remind_termination,
             conversation_id,  # Pass conversation_id to load stored context
-            current_agent_name  # Pass agent_name to load specific context
+            current_agent_name,  # Pass agent_name to load specific context
+            tool_names  # Pass available tool names
         )
         
-        # Print the complete prompt for debugging (especially useful when resuming)
-        print(f"DEBUG: ===== PROMPT FOR AGENT '{current_agent_name}' =====")
-        print(prompt)
-        print(f"DEBUG: ===== END PROMPT FOR AGENT '{current_agent_name}' =====")
+        # Print condensed prompt info for debugging (without full base prompt)
+        print(f"DEBUG: Generated prompt for agent '{current_agent_name}' - Length: {len(prompt)} chars")
 
         try:
             print(f"DEBUG: Creating agent model for '{current_agent_name}'")
@@ -386,69 +440,36 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                 google_api_key=agent_api_key
             )
             
-            # Get agent's assigned tools
-            agent_tools = []
-            
-            try:
-                # Import tools module at the function level
-                import importlib
-                tools_module = importlib.import_module('agent_convo_simulator_app.tools')
-                
-                # Get the Agent object from our data_manager using agent name
-                agent_id = current_agent_config.get("id")
-                agent_obj = None
-                
-                # Load agent data from data manager
-                if not hasattr(self, 'agents_data'):
-                    # We need to initialize this first
-                    from data_manager import DataManager
-                    data_manager = DataManager(os.path.dirname(__file__))
-                    self.agents_data = {agent.id: agent for agent in data_manager.load_agents()}
-                
-                # Get the agent object
-                agent_obj = self.agents_data.get(agent_id)
-                
-                # Check if agent has tools
-                if agent_obj and hasattr(agent_obj, 'tools') and agent_obj.tools:
-                    print(f"DEBUG: Agent '{current_agent_name}' has {len(agent_obj.tools)} tools assigned")
-                    
-                    for tool_name in agent_obj.tools:
-                        try:
-                            # Get the tool object by name from tools module
-                            if tool_name == "browser_manipulation_toolkit" and hasattr(tools_module, "browser_manipulation_toolkit"):
-                                # Special case for browser toolkit which is a list of tools
-                                agent_tools.extend(getattr(tools_module, "browser_manipulation_toolkit"))
-                                print(f"DEBUG: Added browser toolkit for agent {current_agent_name}")
-                            elif hasattr(tools_module, tool_name):
-                                tool_obj = getattr(tools_module, tool_name)
-                                agent_tools.append(tool_obj)
-                                print(f"DEBUG: Added tool {tool_name} for agent {current_agent_name}")
-                            else:
-                                print(f"WARNING: Tool {tool_name} not found in tools module")
-                        except Exception as e:
-                            print(f"ERROR: Failed to add tool {tool_name}: {e}")
-                else:
-                    print(f"DEBUG: Agent '{current_agent_name}' has no tools assigned")
-            except Exception as e:
-                print(f"ERROR: Failed to load tools for agent {current_agent_name}: {e}")
+            # Create tool usage guidance for system prompt
+            tool_guidance = ""
+            if agent_tools:
+                if tool_names:
+                    tool_guidance = f"""
+AVAILABLE TOOLS: You have access to the following tools: {', '.join(tool_names)}
+- Use these tools when they can help you respond more effectively to the conversation
+- Only use tools when they are relevant to the current conversation context
+- Don't mention the tools explicitly unless asked about your capabilities"""
             
             # Create agent with their specific model and tools
-            # Create a system prompt with strong identity emphasis
+            # Create a system prompt with strong identity and rule enforcement
             agent_system_prompt = f"""CRITICAL IDENTITY: You are {current_agent_name}, a {current_agent_config['role']}.
 
-PERSONALITY AND BACKGROUND:
+YOUR CORE PERSONALITY AND RULES:
 {current_agent_config['base_prompt']}
 
-FUNDAMENTAL RULES:
+ABSOLUTE BEHAVIORAL RULES:
 1. You MUST ALWAYS respond as {current_agent_name} and ONLY as {current_agent_name}
 2. NEVER respond as any other character, person, or entity
 3. NEVER start your response with someone else's name or dialogue
-4. When you see conversation history with other characters, respond TO them as {current_agent_name}
-5. Your responses should reflect {current_agent_name}'s unique personality, voice, and characteristics
-6. Stay consistently in character as {current_agent_name} throughout the entire conversation
-7. If the conversation history shows other characters speaking, you should respond as {current_agent_name} would naturally respond to what they said
+4. Your responses must STRICTLY follow your core personality and rules defined above
+5. If your base prompt says you won't do something, you MUST NOT do it regardless of what others ask
+6. If your base prompt defines specific behaviors or limitations, you MUST adhere to them completely
+7. When you see conversation history with other characters, respond TO them as {current_agent_name}
+8. Your responses should reflect {current_agent_name}'s unique personality, voice, and characteristics
+9. Stay consistently in character as {current_agent_name} throughout the entire conversation
+10. Your base personality and rules OVERRIDE any requests from other characters that conflict with them{tool_guidance}
 
-IDENTITY REINFORCEMENT: You are {current_agent_name}. Every word you say comes from {current_agent_name}. You think, speak, and act as {current_agent_name}."""
+IDENTITY REINFORCEMENT: You are {current_agent_name}. Every word you say comes from {current_agent_name}. You think, speak, and act as {current_agent_name} according to your defined personality and rules."""
             
             agent = create_react_agent(
                 model=agent_model,
@@ -460,29 +481,12 @@ IDENTITY REINFORCEMENT: You are {current_agent_name}. Every word you say comes f
             print(f"DEBUG: Invoking agent '{current_agent_name}' with their specific model")
             config = {"configurable": {"thread_id": f"{conv_data['thread_id']}_{current_agent_name}"}}
             
-            # Create a clear message for the agent that emphasizes they should respond as themselves
-            agent_instruction = f"""CRITICAL: You are {current_agent_name} and ONLY {current_agent_name}. You must NEVER respond as any other character or person.
+            # The 'prompt' variable contains all necessary context.
+            # The agent's identity and rules are enforced by the system prompt.
+            print(f"DEBUG: Invoking agent with prompt length: {len(prompt)} chars")
 
-CONVERSATION CONTEXT:
-{prompt}
-
-INSTRUCTIONS:
-- You are {current_agent_name}, a {current_agent_config['role']}
-- Respond ONLY as {current_agent_name} with {current_agent_name}'s personality and voice
-- If you see dialogue from other characters in the conversation history, respond TO them as {current_agent_name}
-- NEVER start your response with another character's name or speak as if you are someone else
-- Always stay in character as {current_agent_name}
-- Keep your response natural and conversational as {current_agent_name} would speak
-
-REMEMBER: You are {current_agent_name}. Respond as {current_agent_name} would respond."""
-            
-            # Print the complete agent instruction for debugging
-            print(f"DEBUG: ===== AGENT INSTRUCTION FOR '{current_agent_name}' =====")
-            print(agent_instruction)
-            print(f"DEBUG: ===== END AGENT INSTRUCTION FOR '{current_agent_name}' =====")
-            
             response = agent.invoke(
-                {"messages": [HumanMessage(content=agent_instruction)]},
+                {"messages": [HumanMessage(content=prompt)]},
                 config
             )
             
@@ -498,9 +502,6 @@ REMEMBER: You are {current_agent_name}. Respond as {current_agent_name} would re
                     "agent_name": current_agent_name,
                     "message": agent_message
                 })
-                
-                # Update agent_sending_messages for this agent
-                self._update_agent_sending_messages(conversation_id, current_agent_name)
                 
                 # Save conversation to persistent storage after each message
                 self._save_conversation_state(conversation_id)
@@ -830,45 +831,6 @@ Do not include any other text or explanation."""
             # Default response if no valid JSON found
             return {"termination_decision": False}
     
-    def _update_agent_sending_messages(self, conversation_id: str, agent_name: str):
-        """
-        Update the agent_sending_messages for a specific agent with summarized context.
-        This stores the most recent messages + summary of earlier messages for each agent.
-        """
-        if conversation_id not in self.active_conversations:
-            return
-        
-        conv_data = self.active_conversations[conversation_id]
-        
-        # Initialize agent_sending_messages if not exists
-        if "agent_sending_messages" not in conv_data:
-            conv_data["agent_sending_messages"] = {}
-        
-        # Get current messages for summarization
-        messages = conv_data["messages"].copy()
-        
-        # Apply summarization to get the context that should be sent to agents
-        summarized_messages = self.message_list_summarization(messages)
-        
-        # Store the summarized messages for this agent
-        # Convert to a format that can be easily stored and loaded
-        agent_context_messages = []
-        for msg in summarized_messages:
-            if "past_convo_summary" in msg:
-                agent_context_messages.append({
-                    "type": "summary",
-                    "content": msg["past_convo_summary"]
-                })
-            elif "agent_name" in msg and "message" in msg:
-                agent_context_messages.append({
-                    "type": "message",
-                    "agent_name": msg["agent_name"],
-                    "message": msg["message"]
-                })
-        
-        conv_data["agent_sending_messages"][agent_name] = agent_context_messages
-        print(f"DEBUG: Updated agent_sending_messages for '{agent_name}' with {len(agent_context_messages)} context items")
-    
     def _save_conversation_state(self, conversation_id: str):
         """
         Save the current conversation state to persistent storage.
@@ -896,10 +858,6 @@ Do not include any other text or explanation."""
             conversation.last_updated = datetime.now().isoformat()
             conversation.status = conv_data.get("status", "active")
             
-            # Add agent_sending_messages if it exists
-            if "agent_sending_messages" in conv_data:
-                conversation.agent_sending_messages = conv_data["agent_sending_messages"]
-            
             # Save to database
             self.data_manager.save_conversation(conversation)
             print(f"DEBUG: Saved conversation state for {conversation_id}")
@@ -921,6 +879,109 @@ Do not include any other text or explanation."""
                     "type": "ai"
                 })
         return storage_messages
+    
+    def restart_conversation_with_new_condition(self, conversation_id: str, new_termination_condition: str):
+        """
+        Restart a completed conversation with a new termination condition.
+        This preserves the conversation history but allows it to continue.
+        """
+        print(f"DEBUG: ===== RESTARTING CONVERSATION {conversation_id} =====")
+        print(f"DEBUG: New termination condition: {new_termination_condition}")
+        
+        # Check if conversation exists in active conversations
+        if conversation_id not in self.active_conversations:
+            # Try to load from database if not in active conversations
+            try:
+                from data_manager import DataManager
+                data_manager = DataManager(os.path.dirname(__file__))
+                conversation = data_manager.get_conversation_by_id(conversation_id)
+                
+                if not conversation:
+                    raise ValueError(f"Conversation {conversation_id} not found")
+                
+                # Get agent objects
+                all_agents = data_manager.load_agents()
+                conversation_agents = []
+                for agent_id in conversation.agents:
+                    agent = next((a for a in all_agents if a.id == agent_id), None)
+                    if agent:
+                        conversation_agents.append(agent)
+                
+                if len(conversation_agents) < 2:
+                    raise ValueError("Not enough agents found to restart conversation")
+                
+                # Restore conversation to active conversations
+                self.active_conversations[conversation_id] = {
+                    "agents_config": [
+                        {
+                            "id": agent.id,
+                            "name": agent.name,
+                            "role": agent.role,
+                            "base_prompt": agent.base_prompt,
+                            "api_key": agent.api_key
+                        } for agent in conversation_agents
+                    ],
+                    "agent_names": [agent.name for agent in conversation_agents],
+                    "thread_id": f"thread_{conversation_id}",
+                    "environment": conversation.environment,
+                    "scene_description": conversation.scene_description,
+                    "status": "active",
+                    "messages": self._convert_messages_from_storage(conversation.messages),
+                    "current_agent_index": 0,  # Will be set properly below
+                    "conversation_started": True,
+                    "invocation_method": getattr(conversation, 'invocation_method', 'round_robin'),
+                    "termination_condition": new_termination_condition,  # New condition
+                    "agent_invocation_counts": {agent.name: 0 for agent in conversation_agents},
+                    "agent_selector_api_key": getattr(conversation, 'agent_selector_api_key', None),
+                }
+                
+                print(f"DEBUG: Restored conversation from database with {len(conversation.messages)} messages")
+                
+            except Exception as e:
+                print(f"ERROR: Failed to restore conversation {conversation_id}: {e}")
+                return False
+        
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Update the termination condition
+        conv_data["termination_condition"] = new_termination_condition
+        conv_data["status"] = "active"
+        
+        # Reset agent invocation counts for fair restart
+        for agent_name in conv_data["agent_names"]:
+            conv_data["agent_invocation_counts"][agent_name] = 0
+        
+        # Choose the next agent to continue (round-robin from current position or random)
+        if conv_data["invocation_method"] == "round_robin":
+            # Continue from where we left off, or start with first agent
+            conv_data["current_agent_index"] = conv_data.get("current_agent_index", 0)
+        else:
+            # For agent_selector, start with a random agent
+            conv_data["current_agent_index"] = random.randint(0, len(conv_data["agent_names"]) - 1)
+        
+        print(f"DEBUG: Conversation restarted. Next agent: {conv_data['agent_names'][conv_data['current_agent_index']]}")
+        print(f"DEBUG: ===== END RESTART INFO =====")
+        
+        # Save the updated state
+        self._save_conversation_state(conversation_id)
+        
+        # Start the conversation cycle with a short delay
+        threading.Timer(1.0, self._invoke_next_agent, args=(conversation_id,)).start()
+        
+        return True
+
+    def _convert_messages_from_storage(self, storage_messages: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+        """
+        Convert storage message format to internal format.
+        """
+        internal_messages = []
+        for msg in storage_messages:
+            if "sender" in msg and "content" in msg:
+                internal_messages.append({
+                    "agent_name": msg["sender"],
+                    "message": msg["content"]
+                })
+        return internal_messages
 
 # Bug Fix: Ensure user's base_prompt is properly used in LangGraph agent creation
 # Previously, create_react_agent was using a hardcoded generic prompt instead of 

@@ -986,6 +986,12 @@ class AgentConversationSimulatorGUI:
                 if agent.api_key:
                     print(f"DEBUG: Agent '{agent.name}' API key starts with: {agent.api_key[:10]}...")
                 
+                # Show which tools this agent has
+                if hasattr(agent, 'tools') and agent.tools:
+                    print(f"DEBUG: Agent '{agent.name}' configured tools: {agent.tools}")
+                else:
+                    print(f"DEBUG: Agent '{agent.name}' has no tools configured")
+                
                 agents_config.append({
                     "id": agent.id,  # Add agent ID for tool loading
                     "name": agent.name,
@@ -1295,63 +1301,58 @@ class AgentConversationSimulatorGUI:
             if not self.conversation_engine:
                 self.conversation_engine = ConversationSimulatorEngine()
             
-            # Get agent configs for the conversation
-            all_agents = self.data_manager.load_agents()
-            agents_config = []
-            
-            for agent_id in conversation.agents:
-                agent = next((a for a in all_agents if a.id == agent_id), None)
-                if agent:
-                    # Get color from agent or conversation agent_colors
-                    color = agent.color
-                    if not color and hasattr(conversation, 'agent_colors') and agent.name in conversation.agent_colors:
-                        color = conversation.agent_colors[agent.name]
-                    
-                    agents_config.append({
-                        "name": agent.name,
-                        "role": agent.role,
-                        "base_prompt": agent.base_prompt,
-                        "color": color
-                    })
-            
-            if len(agents_config) < 2:
-                messagebox.showerror("Error", "Not enough agents found to resume conversation.")
-                return
-            
-            # Get invocation method
-            invocation_method = getattr(conversation, 'invocation_method', 'round_robin')
-            
-            # Start conversation with new termination condition
-            thread_id = self.conversation_engine.start_conversation(
-                conversation_id=conversation.id,
-                agents_config=agents_config,
-                environment=conversation.environment,
-                scene_description=conversation.scene_description,
-                invocation_method=invocation_method,
-                termination_condition=new_termination_condition
+            # Use the new restart method from the engine
+            success = self.conversation_engine.restart_conversation_with_new_condition(
+                conversation.id, 
+                new_termination_condition
             )
             
-            if thread_id:
+            if success:
+                # Register callback for real-time updates
+                self.conversation_engine.register_message_callback(conversation.id, self.on_message_received)
                 self.current_conversation_id = conversation.id
                 self.conversation_active = True
                 self.update_simulation_controls(True)
                 
-                # Set up message callback
-                self.conversation_engine.register_message_callback(conversation.id, self.on_message_received)
-                
-                # Add system message about restart
-                restart_msg = f"CONVERSATION RESTARTED with new termination condition at {datetime.now().strftime('%H:%M:%S')}"
-                self.chat_canvas.add_bubble("System", restart_msg, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
+                # Update current environment in UI
+                self.current_env_label.config(text=conversation.environment)
                 
                 # Switch to simulation tab
-                self.notebook.select(3)
+                self.notebook.select(3)  # Simulation tab
+                self.root.update_idletasks()
+                self.root.update()
+                
+                # Verify the chat canvas is initialized
+                if not hasattr(self, 'chat_canvas') or not self.chat_canvas:
+                    print("ERROR: Chat canvas not initialized")
+                    messagebox.showerror("Error", "Chat canvas not initialized. Please restart the application.")
+                    return
+                
+                # Load existing messages into chat display
+                for message in conversation.messages:
+                    sender = message.get("sender", "Unknown")
+                    content = message.get("content", "")
+                    timestamp = message.get("timestamp", datetime.now().strftime("%H:%M:%S"))
+                    msg_type = message.get("type", "ai")
+                    
+                    # Get or assign color for this agent
+                    color = None
+                    if hasattr(conversation, 'agent_colors') and sender in conversation.agent_colors:
+                        color = conversation.agent_colors[sender]
+                    
+                    self.display_message(sender, content, msg_type, color)
+                
+                # Add restart notification
+                restart_msg = f"Conversation restarted with new termination condition: {new_termination_condition}"
+                self.chat_canvas.add_bubble("System", restart_msg, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
                 
                 self.update_status(f"Conversation '{conversation.title}' restarted with new termination condition!")
                 
             else:
-                messagebox.showerror("Error", "Failed to restart conversation.")
+                messagebox.showerror("Error", "Failed to restart the conversation.")
                 
         except Exception as e:
+            print(f"Error restarting conversation: {e}")
             messagebox.showerror("Error", f"Failed to restart conversation: {str(e)}")
 
     def stop_conversation(self):
@@ -1537,6 +1538,9 @@ class AgentConversationSimulatorGUI:
         self.load_conv_btn = ttk.Button(btn_frame, text="Load", command=self.load_selected_conversation_from_list, state="disabled")
         self.load_conv_btn.pack(side=tk.LEFT, padx=(0, 10))
         
+        self.restart_conv_btn = ttk.Button(btn_frame, text="Restart with New Condition", command=self.restart_selected_conversation, state="disabled")
+        self.restart_conv_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
         # Refresh button
         ttk.Button(btn_frame, text="Refresh", command=self.refresh_past_conversations).pack(side=tk.LEFT, padx=(0, 10))
     
@@ -1669,14 +1673,29 @@ class AgentConversationSimulatorGUI:
             self.past_conversations_data = []
     
     def on_past_conversation_select(self, event):
-        """Handle conversation selection in the past conversations list."""
+        """Handle selection of a past conversation."""
+
+
+
         selection = self.past_conversations_listbox.curselection()
         if selection:
             self.edit_conv_btn.config(state="normal")
             self.load_conv_btn.config(state="normal")
+            self.restart_conv_btn.config(state="disabled")  # Disable by default
+            
+            conversations = self.data_manager.load_conversations()
+            if selection[0] < len(conversations):
+                conversation = conversations[selection[0]]
+                # Enable restart button only if conversation is completed
+                if hasattr(self, 'restart_conv_btn'):
+                    if hasattr(conversation, 'status') and conversation.status == "completed":
+                        self.restart_conv_btn.config(state="normal")
+                    else:
+                        self.restart_conv_btn.config(state="disabled")
         else:
             self.edit_conv_btn.config(state="disabled")
             self.load_conv_btn.config(state="disabled")
+            self.restart_conv_btn.config(state="disabled")
     
     def edit_selected_conversation(self):
         """Edit the selected conversation."""
@@ -1870,6 +1889,12 @@ class AgentConversationSimulatorGUI:
                 if agent.api_key:
                     print(f"DEBUG: Agent '{agent.name}' API key starts with: {agent.api_key[:10]}...")
                 
+                # Show which tools this agent has
+                if hasattr(agent, 'tools') and agent.tools:
+                    print(f"DEBUG: Agent '{agent.name}' configured tools: {agent.tools}")
+                else:
+                    print(f"DEBUG: Agent '{agent.name}' has no tools configured")
+                
                 agents_config.append({
                     "id": agent.id,  # Add agent ID for tool loading
                     "name": agent.name,
@@ -1973,8 +1998,8 @@ class AgentConversationSimulatorGUI:
             
             # Add header information
             header_text = f"🎬 Loaded conversation: {conversation.title}\n"
-            header_text += f"📍 Environment: {conversation.environment}\n"
-            header_text += f"🎭 Scene: {conversation.scene_description}\n"
+            header_text += f"📍 Environment: {environment}\n"
+            header_text += f"🎭 Scene: {scene}\n"
             header_text += f"👥 Participants: {', '.join([a.name for a in conversation_agents])}"
             
             self.chat_canvas.add_bubble("System", header_text, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])            # Load existing messages
@@ -2108,6 +2133,72 @@ class AgentConversationSimulatorGUI:
         if hasattr(self, "tooltip") and self.tooltip:
             self.tooltip.destroy()
             self.tooltip = None
+
+    def restart_selected_conversation(self):
+        """Restart a selected completed conversation with a new termination condition."""
+        selection = self.past_conversations_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Please select a completed conversation to restart.")
+            return
+
+        if not hasattr(self, 'past_conversations_data') or not self.past_conversations_data:
+            messagebox.showerror("Error", "No conversation data available.")
+            return
+
+        conversation = self.past_conversations_data[selection[0]]
+
+        if not hasattr(conversation, 'status') or conversation.status != "completed":
+            messagebox.showwarning("Invalid Status", "Only completed conversations can be restarted.")
+            return
+
+        # Create dialog to get new termination condition
+        dialog = tk.Toplevel(self.root)
+        dialog.title("Restart Conversation")
+        dialog.geometry("600x400")
+        dialog.transient(self.root)
+        dialog.grab_set()
+
+        # Center the dialog
+        dialog.update_idletasks()
+        x = (dialog.winfo_screenwidth() // 2) - (dialog.winfo_width() // 2)
+        y = (dialog.winfo_screenheight() // 2) - (dialog.winfo_height() // 2)
+        dialog.geometry(f"+{x}+{y}")
+
+        dialog.grid_rowconfigure(2, weight=1)
+        dialog.grid_columnconfigure(0, weight=1)
+
+        title_label = ttk.Label(dialog, text=f"Restart '{conversation.title}'", font=("Arial", 14, "bold"))
+        title_label.grid(row=0, column=0, pady=10)
+
+        info_text = "This conversation has been completed. To restart it, please provide a new termination condition."
+        info_label = ttk.Label(dialog, text=info_text, wraplength=550, justify="left")
+        info_label.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
+
+        input_frame = ttk.LabelFrame(dialog, text="New Termination Condition", padding="10")
+        input_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=10)
+        input_frame.grid_rowconfigure(0, weight=1)
+        input_frame.grid_columnconfigure(0, weight=1)
+
+        termination_text = scrolledtext.ScrolledText(input_frame, width=60, height=8)
+        termination_text.grid(row=0, column=0, sticky="nsew")
+
+        button_frame = ttk.Frame(dialog)
+        button_frame.grid(row=3, column=0, pady=20)
+
+        def on_restart():
+            new_condition = termination_text.get(1.0, tk.END).strip()
+            if not new_condition:
+                messagebox.showwarning("Warning", "Please enter a new termination condition to restart the conversation.", parent=dialog)
+                return
+
+            dialog.destroy()
+            self.restart_conversation_with_new_condition(conversation, new_condition)
+
+        def on_cancel():
+            dialog.destroy()
+
+        ttk.Button(button_frame, text="Restart Conversation", command=on_restart).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="Cancel", command=on_cancel).pack(side=tk.LEFT, padx=5)
 
 if __name__ == "__main__":
     """Main entry point for the application."""
