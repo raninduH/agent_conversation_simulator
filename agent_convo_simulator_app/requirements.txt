@@ -8,6 +8,14 @@ langchain-google-genai
 # Additional dependencies
 python-dotenv
 
+# Knowledge Base Dependencies
+pinecone-client
+sentence-transformers
+PyPDF2
+llama-index
+llama-index-vector-stores-pinecone
+llama-index-embeddings-huggingface
+
 # Note: Supervisor agent has been removed for simplified direct agent interaction
 # The application now uses round-robin agent selection instead of a supervisor
 
@@ -21,10 +29,3 @@ python-dotenv
 # uuid - UUID generation (built-in)
 # dataclasses - Data classes (built-in Python 3.7+)
 # random - Random number generation (built-in)
-# threading - Multi-threading support (built-in)
-# json - JSON parsing (built-in)
-# os - Operating system interface (built-in)
-# datetime - Date and time utilities (built-in)
-# typing - Type hints (built-in)
-# uuid - UUID generation (built-in)
-# dataclasses - Data classes (built-in Python 3.7+)

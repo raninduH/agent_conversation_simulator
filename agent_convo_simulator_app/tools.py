@@ -1,12 +1,16 @@
 from langchain_community.utilities import GoogleSerperAPIWrapper
 import pprint
 import os
+import time
+from datetime import datetime
 from dotenv import load_dotenv
 from langchain_community.agent_toolkits import PlayWrightBrowserToolkit
 from langchain_core.tools import Tool, tool
 from langchain_community.tools.playwright.utils import (
     create_async_playwright_browser,  # A synchronous browser is available, though it isn't compatible with jupyter.\n",	  },
 )
+from typing import List, Dict, Any
+from knowledge_manager import KnowledgeManager
 
 load_dotenv()
 
@@ -68,6 +72,73 @@ def search_places_from_internet(query: str) -> dict:
     results = search.results(query)
     return results
 
+
+
+# Initialize KnowledgeManager
+knowledge_manager = KnowledgeManager()
+
+@tool("knowledge_base_retriever")
+def knowledge_base_retriever(query: str, agent_id: str) -> List[Dict[str, Any]]:
+    """
+    Retrieves the top 3 most relevant results from the agent's knowledge base.
+
+    Args:
+        query: The query to search for in the knowledge base.
+        agent_id: The ID of the agent performing the search.
+
+    Returns:
+        A list of dictionaries, where each dictionary contains the content
+        and score of a relevant document.
+    """
+    print(f"\n🔍 KNOWLEDGE BASE SEARCH INITIATED")
+    print(f"   🤖 Agent: {agent_id}")
+    print(f"   🔎 Query: '{query}'")
+    print(f"   📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    
+    if not agent_id:
+        print(f"   ❌ Error: agent_id must be provided")
+        return [{"error": "agent_id must be provided"}]
+    
+    if not query or not query.strip():
+        print(f"   ❌ Error: query cannot be empty")
+        return [{"error": "query cannot be empty"}]
+    
+    try:
+        # The agent_id corresponds to the Pinecone index name
+        # Convert to proper index format (lowercase, with dashes)
+        index_name = f"agent-kb-{agent_id.lower().replace('_', '-')}"
+        print(f"   📋 Target index: {index_name}")
+        
+        # Query the knowledge base
+        print(f"   ⏳ Searching knowledge base...")
+        search_start = time.time()
+        
+        results = knowledge_manager.query_pinecone(index_name, query, top_k=3)
+        
+        search_time = time.time() - search_start
+        print(f"   ⏱️  Search completed in {search_time:.2f} seconds")
+        print(f"   📊 Results found: {len(results)}")
+        
+        if not results:
+            no_results_msg = "No relevant information found in the knowledge base."
+            print(f"   ℹ️  {no_results_msg}")
+            return [{"message": no_results_msg}]
+        
+        # Log result summary
+        print(f"   ✅ Returning {len(results)} relevant result(s):")
+        for i, result in enumerate(results, 1):
+            score = result.get('score', 0.0)
+            content_preview = result.get('content', '')[:100] + '...' if len(result.get('content', '')) > 100 else result.get('content', '')
+            print(f"      {i}. Score: {score:.4f} | Preview: {content_preview}")
+            
+        return results
+        
+    except Exception as e:
+        error_msg = f"Failed to retrieve information from knowledge base. {str(e)}"
+        print(f"   ❌ Search failed: {error_msg}")
+        import traceback
+        traceback.print_exc()
+        return [{"error": error_msg}]
 
 
 # Lazy loading for browser toolkit to avoid async/threading issues

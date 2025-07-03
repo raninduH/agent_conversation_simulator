@@ -11,8 +11,10 @@ from typing import Dict, List, Any, Optional, Callable
 from datetime import datetime
 import threading
 import time
+from functools import partial
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
+from langchain_core.tools import Tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import MemorySaver
@@ -130,7 +132,8 @@ Recent conversation messages:
                           scene_description: str, messages: List[Dict[str, str]], 
                           all_agents: List[str], termination_condition: Optional[str] = None,
                           should_remind_termination: bool = False, conversation_id: Optional[str] = None,
-                          agent_name: Optional[str] = None, available_tools: List[str] = None) -> str:
+                          agent_name: Optional[str] = None, available_tools: List[str] = None,
+                          agent_obj: Optional[Any] = None) -> str:
         """
         Create the prompt for an agent including scene, participants, and conversation history.
         
@@ -198,6 +201,21 @@ Keep this condition in mind while participating in the conversation. Naturally d
 Use these tools when they can help you respond more effectively to the conversation.
 Only use tools when they are relevant to the current conversation context.
 Don't mention the tools explicitly unless asked about your capabilities.
+
+"""
+        
+        # Add knowledge base information if agent has documents
+        if agent_obj and hasattr(agent_obj, 'knowledge_base') and agent_obj.knowledge_base:
+            knowledge_descriptions = []
+            for doc in agent_obj.knowledge_base:
+                knowledge_descriptions.append(f"- {doc['doc_name']}: {doc['description']}")
+            
+            prompt += f"""PERSONAL KNOWLEDGE BASE: You have access to a personal knowledge base containing the following documents:
+{chr(10).join(knowledge_descriptions)}
+
+Use the knowledge_base_retriever tool to search through these documents when relevant to the conversation. 
+This knowledge base contains specialized information that can help you stay true to your role and provide more informed responses.
+Only search your knowledge base when the conversation topic relates to the content of your documents.
 
 """
         
@@ -366,8 +384,30 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                 
                 for tool_name in agent_obj.tools:
                     try:
+                        if tool_name == "knowledge_base_retriever":
+                            # Only add knowledge_base_retriever if agent has documents in knowledge_base
+                            if hasattr(agent_obj, 'knowledge_base') and agent_obj.knowledge_base:
+                                if hasattr(tools_module, "knowledge_base_retriever"):
+                                    retriever_tool_func = getattr(tools_module, "knowledge_base_retriever").func
+                                    
+                                    # Create a partial function with agent_id
+                                    partial_func = partial(retriever_tool_func, agent_id=agent_id)
+                                    
+                                    # Create a new tool that only expects a query
+                                    new_tool = Tool(
+                                        name="knowledge_base_retriever",
+                                        func=partial_func,
+                                        description="Retrieves the top 3 most relevant results from your personal knowledge base to help answer questions. Input should be a search query."
+                                    )
+                                    agent_tools.append(new_tool)
+                                    tool_names.append(new_tool.name)
+                                    print(f"DEBUG: ✓ Added knowledge_base_retriever tool for agent {current_agent_name} (has {len(agent_obj.knowledge_base)} documents)")
+                                else:
+                                    print(f"WARNING: ✗ Tool 'knowledge_base_retriever' not found in tools module")
+                            else:
+                                print(f"DEBUG: ⚠ Skipping knowledge_base_retriever for agent {current_agent_name} (no documents in knowledge base)")
                         # Get the tool object by name from tools module
-                        if tool_name == "browser_manipulation_toolkit":
+                        elif tool_name == "browser_manipulation_toolkit":
                             # Special case for browser toolkit which is a list of tools
                             browser_tools = tools_module.get_browser_tools()
                             if browser_tools:  # Only add if tools were successfully loaded
@@ -412,7 +452,8 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             should_remind_termination,
             conversation_id,  # Pass conversation_id to load stored context
             current_agent_name,  # Pass agent_name to load specific context
-            tool_names  # Pass available tool names
+            tool_names,  # Pass available tool names
+            agent_obj  # Pass agent object for knowledge base info
         )
         
         # Print condensed prompt info for debugging (without full base prompt)
