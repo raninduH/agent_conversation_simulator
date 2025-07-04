@@ -289,7 +289,8 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             "invocation_method": invocation_method,
             "termination_condition": termination_condition,
             "agent_invocation_counts": {name: 0 for name in agent_names},  # Track invocations per agent
-            "agent_selector_api_key": agent_selector_api_key  # Store agent selector API key
+            "agent_selector_api_key": agent_selector_api_key,  # Store agent selector API key
+            "agent_sending_messages": {name: [] for name in agent_names}  # Initialize per-agent message lists
         }
             # Start the conversation automatically after a short delay
         threading.Timer(CONVERSATION_TIMING["start_delay"], self._start_conversation_cycle, args=(conversation_id,)).start()
@@ -353,8 +354,8 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             if should_remind_termination:
                 print(f"DEBUG: Agent '{current_agent_name}' will be reminded about termination condition (invocation #{current_count})")
         
-        # Apply message summarization before creating prompt
-        conv_data["messages"] = self.message_list_summarization(conv_data["messages"])
+        # Apply per-agent message summarization before creating prompt
+        self._update_agent_sending_messages(conversation_id, current_agent_name)
         
         # Load agent tools first to include in prompt
         agent_tools = []
@@ -441,12 +442,13 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             print(f"DEBUG: Agent '{current_agent_name}' loaded with {len(agent_tools)} total tools")
         except Exception as e:
             print(f"ERROR: Failed to load tools for agent {current_agent_name}: {e}")
-          # Create prompt for current agent (now with tool information)
+          # Create prompt for current agent (now with agent-specific message context)
+        agent_messages = self._get_agent_context_messages(conversation_id, current_agent_name)
         prompt = self.create_agent_prompt(
             current_agent_config,
             conv_data["environment"],
             conv_data["scene_description"],
-            conv_data["messages"],
+            agent_messages,  # Use agent-specific messages instead of global messages
             conv_data["agent_names"],
             termination_condition,
             should_remind_termination,
@@ -899,6 +901,11 @@ Do not include any other text or explanation."""
             conversation.last_updated = datetime.now().isoformat()
             conversation.status = conv_data.get("status", "active")
             
+            # Save agent_sending_messages if they exist
+            if "agent_sending_messages" in conv_data:
+                conversation.agent_sending_messages = conv_data["agent_sending_messages"]
+                print(f"DEBUG: Saved agent_sending_messages for {len(conv_data['agent_sending_messages'])} agents")
+            
             # Save to database
             self.data_manager.save_conversation(conversation)
             print(f"DEBUG: Saved conversation state for {conversation_id}")
@@ -976,6 +983,11 @@ Do not include any other text or explanation."""
                     "agent_selector_api_key": getattr(conversation, 'agent_selector_api_key', None),
                 }
                 
+                # Restore agent_sending_messages if they exist
+                if hasattr(conversation, 'agent_sending_messages') and conversation.agent_sending_messages:
+                    self.active_conversations[conversation_id]["agent_sending_messages"] = conversation.agent_sending_messages
+                    print(f"DEBUG: Restored agent_sending_messages for {len(conversation.agent_sending_messages)} agents")
+                
                 print(f"DEBUG: Restored conversation from database with {len(conversation.messages)} messages")
                 
             except Exception as e:
@@ -1024,6 +1036,106 @@ Do not include any other text or explanation."""
                 })
         return internal_messages
 
+    def _update_agent_sending_messages(self, conversation_id: str, agent_name: str):
+        """
+        Update the agent-specific message list with summarization when needed.
+        
+        This method:
+        1. Maintains per-agent message lists in agent_sending_messages
+        2. Adds new global messages to each agent's list
+        3. Applies summarization when an agent's message count exceeds threshold
+        4. Updates the agent's context with summary + recent messages
+        
+        Args:
+            conversation_id: The conversation identifier
+            agent_name: The agent whose context we're updating
+        """
+        if conversation_id not in self.active_conversations:
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Initialize agent_sending_messages if not exists (for backward compatibility)
+        if "agent_sending_messages" not in conv_data:
+            conv_data["agent_sending_messages"] = {name: [] for name in conv_data["agent_names"]}
+            print(f"DEBUG: Initialized agent_sending_messages for backward compatibility")
+        
+        # Initialize this agent's message list if not exists
+        if agent_name not in conv_data["agent_sending_messages"]:
+            conv_data["agent_sending_messages"][agent_name] = []
+            print(f"DEBUG: Initialized agent_sending_messages for '{agent_name}'")
+        
+        agent_messages = conv_data["agent_sending_messages"][agent_name]
+        global_messages = conv_data["messages"]
+        
+        # Find new messages that haven't been added to this agent's list yet
+        # We'll compare based on message content and sender to avoid duplicates
+        existing_message_signatures = set()
+        for msg in agent_messages:
+            if "agent_name" in msg and "message" in msg:
+                signature = f"{msg['agent_name']}:{msg['message']}"
+                existing_message_signatures.add(signature)
+        
+        new_messages = []
+        for msg in global_messages:
+            if "agent_name" in msg and "message" in msg:
+                signature = f"{msg['agent_name']}:{msg['message']}"
+                if signature not in existing_message_signatures:
+                    new_messages.append(msg)
+        
+        # Add new messages to agent's list
+        if new_messages:
+            agent_messages.extend(new_messages)
+            print(f"DEBUG: Added {len(new_messages)} new messages to agent '{agent_name}' (total: {len(agent_messages)})")
+        
+        # Check if summarization is needed for this agent
+        max_messages = MESSAGE_SETTINGS["max_messages_before_summary"]
+        messages_to_keep = MESSAGE_SETTINGS["messages_to_keep_after_summary"]
+        
+        if len(agent_messages) > max_messages:
+            print(f"DEBUG: Agent '{agent_name}' message count ({len(agent_messages)}) exceeds threshold ({max_messages}), applying summarization")
+            
+            # Apply summarization to this agent's messages
+            summarized_messages = self.message_list_summarization(agent_messages, max_messages)
+            
+            # Update the agent's message list
+            conv_data["agent_sending_messages"][agent_name] = summarized_messages
+            
+            print(f"DEBUG: Agent '{agent_name}' messages summarized from {len(agent_messages)} to {len(summarized_messages)}")
+        else:
+            print(f"DEBUG: Agent '{agent_name}' message count ({len(agent_messages)}) below threshold ({max_messages}), no summarization needed")
+    
+    def _get_agent_context_messages(self, conversation_id: str, agent_name: str) -> List[Dict[str, str]]:
+        """
+        Get the appropriate message context for a specific agent.
+        
+        This returns the agent's personal message list which may include:
+        - A summary of older conversations (if summarization occurred)
+        - Recent messages within the agent's memory limit
+        
+        Args:
+            conversation_id: The conversation identifier
+            agent_name: The agent whose context we want
+            
+        Returns:
+            List of messages appropriate for this agent's context
+        """
+        if conversation_id not in self.active_conversations:
+            return []
+        
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Get agent-specific messages if they exist, otherwise fall back to global messages
+        if ("agent_sending_messages" in conv_data and 
+            agent_name in conv_data["agent_sending_messages"]):
+            agent_messages = conv_data["agent_sending_messages"][agent_name]
+            print(f"DEBUG: Using agent-specific messages for '{agent_name}' ({len(agent_messages)} items)")
+            return agent_messages
+        else:
+            # Fallback to global messages (backward compatibility)
+            global_messages = conv_data["messages"]
+            print(f"DEBUG: Falling back to global messages for '{agent_name}' ({len(global_messages)} items)")
+            return global_messages
 # Bug Fix: Ensure user's base_prompt is properly used in LangGraph agent creation
 # Previously, create_react_agent was using a hardcoded generic prompt instead of 
 # the user's custom base_prompt. Now the full formatted prompt (which includes the

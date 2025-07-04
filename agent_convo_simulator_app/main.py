@@ -44,7 +44,7 @@ except ImportError as e:
 class ChatBubble(tk.Frame):
     """Represents a chat message bubble in the conversation UI."""
     
-    def __init__(self, parent, sender, message, timestamp, msg_type="ai", color=None, **kwargs):
+    def __init__(self, parent, sender, message, timestamp, msg_type="ai", color=None, align_right=False, **kwargs):
         """Initialize the chat bubble.
         
         Args:
@@ -54,6 +54,7 @@ class ChatBubble(tk.Frame):
             timestamp: Time the message was sent
             msg_type: Type of message (user, system, ai)
             color: Background color for the bubble
+            align_right: If True, align bubble to the right with right-aligned text
         """
         # Choose appropriate color
         if color is None:
@@ -67,14 +68,40 @@ class ChatBubble(tk.Frame):
         
         # Initialize frame with appropriate background
         super().__init__(parent, bg=UI_COLORS["chat_background"], **kwargs)
-          # Create bubble layout
-        self.bubble_frame = tk.Frame(self, bg=color, padx=10, pady=5)
-        self.bubble_frame.pack(fill="x", padx=10, pady=6, anchor="w" if msg_type != "user" else "e")
+        
+        # Create container for precise width control
+        container_frame = tk.Frame(self, bg=UI_COLORS["chat_background"])
+        container_frame.pack(fill="x")
+        
+        # Configure the container with proper weights for 75% bubble width
+        container_frame.grid_columnconfigure(1, weight=3)  # 75% for bubble
+        if align_right:
+            container_frame.grid_columnconfigure(0, weight=1)  # 25% left spacer
+            container_frame.grid_columnconfigure(2, weight=0)  # No right spacer
+            
+            # Left spacer for right alignment
+            left_spacer = tk.Frame(container_frame, bg=UI_COLORS["chat_background"])
+            left_spacer.grid(row=0, column=0, sticky="ew")
+            
+            # Bubble frame takes 75% width, positioned on the right
+            self.bubble_frame = tk.Frame(container_frame, bg=color, padx=15, pady=8)
+            self.bubble_frame.grid(row=0, column=1, sticky="ew", pady=6)
+        else:
+            container_frame.grid_columnconfigure(0, weight=0)  # No left spacer
+            container_frame.grid_columnconfigure(2, weight=1)  # 25% right spacer
+            
+            # Bubble frame takes 75% width, positioned on the left
+            self.bubble_frame = tk.Frame(container_frame, bg=color, padx=15, pady=8)
+            self.bubble_frame.grid(row=0, column=1, sticky="ew", pady=6)
+            
+            # Right spacer for left alignment
+            right_spacer = tk.Frame(container_frame, bg=UI_COLORS["chat_background"])
+            right_spacer.grid(row=0, column=2, sticky="ew")
         
         # Add rounded corners by using themed frame
         self.bubble_frame.config(highlightbackground=color, highlightthickness=1, bd=0)
         
-        # Add sender name with timestamp
+        # Add sender name with timestamp (different layout for right-aligned)
         header_frame = tk.Frame(self.bubble_frame, bg=color)
         header_frame.pack(fill="x", expand=True)
         
@@ -85,37 +112,77 @@ class ChatBubble(tk.Frame):
             icon = "🤖"
         else:
             icon = "🎭"
+        
+        if align_right:
+            # For right-aligned bubbles: time on left, sender on right
+            time_label = tk.Label(
+                header_frame, 
+                text=timestamp, 
+                font=("Arial", 8),
+                bg=color,
+                fg="gray",
+                anchor="w"
+            )
+            time_label.pack(side="left")
             
-        sender_label = tk.Label(
-            header_frame, 
-            text=f"{icon} {sender}", 
-            font=("Arial", 9, "bold"),
-            bg=color,
-            anchor="w"
-        )
-        sender_label.pack(side="left")
+            sender_label = tk.Label(
+                header_frame, 
+                text=f"{sender} {icon}", 
+                font=("Arial", 9, "bold"),
+                bg=color,
+                anchor="e"
+            )
+            sender_label.pack(side="right")
+        else:
+            # For left-aligned bubbles: sender on left, time on right (original layout)
+            sender_label = tk.Label(
+                header_frame, 
+                text=f"{icon} {sender}", 
+                font=("Arial", 9, "bold"),
+                bg=color,
+                anchor="w"
+            )
+            sender_label.pack(side="left")
+            
+            time_label = tk.Label(
+                header_frame, 
+                text=timestamp, 
+                font=("Arial", 8),
+                bg=color,
+                fg="gray",
+                anchor="e"
+            )
+            time_label.pack(side="right")
         
-        time_label = tk.Label(
-            header_frame, 
-            text=timestamp, 
-            font=("Arial", 8),
-            bg=color,
-            fg="gray",
-            anchor="e"
-        )
-        time_label.pack(side="right")
-        
-        # Add message content with word wrapping
-        message_label = tk.Label(
-            self.bubble_frame, 
-            text=message, 
-            font=("Arial", 10),
-            bg=color,
-            justify="left",
-            anchor="w",
-            wraplength=400
-        )
-        message_label.pack(fill="x", pady=(5, 0))
+        # Add message content with word wrapping - use container for proper text positioning
+        if align_right:
+            # For right-aligned bubbles: create a container for the text that can be positioned
+            text_container = tk.Frame(self.bubble_frame, bg=color)
+            text_container.pack(fill="x", pady=(5, 0))
+            
+            # Left-justify text within the container, but position container on the right
+            message_label = tk.Label(
+                text_container, 
+                text=message, 
+                font=("Arial", 10),
+                bg=color,
+                justify="left",   # Left-justify text lines within the container
+                anchor="w",       # Anchor text to the left within the container
+                wraplength=400
+            )
+            message_label.pack(side="right")  # Position the text block to the right within container
+        else:
+            # For left-aligned bubbles: left-align the text content (default)
+            message_label = tk.Label(
+                self.bubble_frame, 
+                text=message, 
+                font=("Arial", 10),
+                bg=color,
+                justify="left",   # Left-align text content for left bubbles
+                anchor="w",       # Anchor text to the left
+                wraplength=400
+            )
+            message_label.pack(fill="x", pady=(5, 0))
         
     @staticmethod
     def get_message_height(message, width=400):
@@ -167,7 +234,7 @@ class ChatCanvas(tk.Canvas):
         """Update scroll region when the inner frame changes size."""
         self.configure(scrollregion=self.bbox("all"))
         
-    def add_bubble(self, sender, message, timestamp, msg_type="ai", color=None):
+    def add_bubble(self, sender, message, timestamp, msg_type="ai", color=None, align_right=False):
         """Add a new chat bubble to the canvas."""
         
         # Add extra spacing between messages from different senders
@@ -184,8 +251,10 @@ class ChatCanvas(tk.Canvas):
             message, 
             timestamp,
             msg_type,
-            color
+            color,
+            align_right=align_right
         )
+        # Pack with fill="x" but the bubble frame inside handles the width limitation
         bubble.pack(fill="x", expand=True)
         
         # Force update to ensure proper sizing and positioning
@@ -1567,6 +1636,20 @@ class AgentConversationSimulatorGUI:
         # Format timestamp
         timestamp = datetime.now().strftime("%H:%M:%S")
         
+        # Determine alignment based on agent temp number
+        align_right = False
+        if msg_type == "ai" and self.current_conversation_id:
+            # Get the current conversation to access agent temp numbers
+            conversation = self.data_manager.get_conversation_by_id(self.current_conversation_id)
+            if conversation and hasattr(conversation, 'agent_temp_numbers'):
+                # Find agent by sender name
+                all_agents = self.data_manager.load_agents()
+                sender_agent = next((agent for agent in all_agents if agent.name == sender), None)
+                if sender_agent and sender_agent.id in conversation.agent_temp_numbers:
+                    agent_temp_number = conversation.agent_temp_numbers[sender_agent.id]
+                    # Even temp numbers get right alignment
+                    align_right = (agent_temp_number % 2 == 0)
+        
         # Determine message color based on type and agent
         if msg_type == "user":
             bubble_color = UI_COLORS["user_bubble"]
@@ -1594,8 +1677,8 @@ class AgentConversationSimulatorGUI:
             
             bubble_color = self.agent_colors.get(sender, color)
         
-        # Add the bubble to the chat canvas
-        self.chat_canvas.add_bubble(sender, content, timestamp, msg_type, bubble_color)
+        # Add the bubble to the chat canvas with alignment
+        self.chat_canvas.add_bubble(sender, content, timestamp, msg_type, bubble_color, align_right=align_right)
         
         # Save message to conversation
         if self.current_conversation_id:
@@ -2289,6 +2372,14 @@ class AgentConversationSimulatorGUI:
             # Store the current conversation ID
             self.current_conversation_id = conversation.id
             
+            # Initialize agent temp numbers if they don't exist (for old conversations)
+            if not hasattr(conversation, 'agent_temp_numbers') or not conversation.agent_temp_numbers:
+                conversation.agent_temp_numbers = {}
+                for i, agent_id in enumerate(conversation.agents, 1):
+                    conversation.agent_temp_numbers[agent_id] = i
+                # Save the updated conversation
+                self.data_manager.save_conversation(conversation)
+            
             # Get the agents for this conversation
             all_agents = self.data_manager.load_agents()  # Use cached agents for loading conversation
             conversation_agents = []
@@ -2384,12 +2475,14 @@ class AgentConversationSimulatorGUI:
                     conv_data["messages"] = internal_messages
                     print(f"DEBUG: Restored {len(internal_messages)} messages to engine")
                     
-                    # If no agent_sending_messages exist, update them now
+                    # If no agent_sending_messages exist, initialize them from conversation history
                     if not hasattr(conversation, 'agent_sending_messages') or not conversation.agent_sending_messages:
-                        print("DEBUG: Generating agent_sending_messages from conversation history")
+                        print("DEBUG: Initializing agent_sending_messages from conversation history")
+                        # Initialize empty agent_sending_messages - this will be populated as the conversation progresses
+                        conversation.agent_sending_messages = {}
                         for agent_name in conv_data["agent_names"]:
-                            self.conversation_engine._update_agent_sending_messages(conversation.id, agent_name)
-                        print("DEBUG: Generated agent context from existing messages")
+                            conversation.agent_sending_messages[agent_name] = []
+                        print("DEBUG: Initialized agent_sending_messages for all agents")
                   # Register callback for message updates
             self.conversation_engine.register_message_callback(
                 conversation.id, self.on_message_received

@@ -54,6 +54,7 @@ class Conversation:
     summary: Optional[str]
     thread_id: str
     agent_colors: Dict[str, str] = field(default_factory=dict)  # Maps agent names to color codes
+    agent_temp_numbers: Dict[str, int] = field(default_factory=dict)  # Maps agent IDs to temporary numbers for bubble alignment
     invocation_method: str = "round_robin"  # "round_robin" or "agent_selector"
     termination_condition: Optional[str] = None  # Condition for agent-selector to determine when to end conversation
     agent_selector_api_key: Optional[str] = None  # API key for the agent selector
@@ -65,6 +66,12 @@ class Conversation:
                   agent_selector_api_key: Optional[str] = None) -> 'Conversation':
         """Create a new conversation with auto-generated ID and timestamps."""
         now = datetime.now().isoformat()
+        
+        # Assign temporary numbers to agents starting from 1
+        agent_temp_numbers = {}
+        for i, agent_id in enumerate(agent_ids, 1):
+            agent_temp_numbers[agent_id] = i
+        
         return cls(
             id=f"conv_{uuid.uuid4().hex[:8]}",
             title=title,
@@ -77,6 +84,7 @@ class Conversation:
             last_updated=now,
             summary=None,
             thread_id=f"thread_{uuid.uuid4().hex[:8]}",
+            agent_temp_numbers=agent_temp_numbers,
             invocation_method=invocation_method,
             termination_condition=termination_condition,
             agent_selector_api_key=agent_selector_api_key,
@@ -220,9 +228,11 @@ class DataManager:
                     'summary': conv_data.get('summary'),
                     'thread_id': conv_data.get('thread_id', ''),
                     'agent_colors': conv_data.get('agent_colors', {}),
+                    'agent_temp_numbers': conv_data.get('agent_temp_numbers', {}),
                     'invocation_method': conv_data.get('invocation_method', 'round_robin'),
                     'termination_condition': conv_data.get('termination_condition'),
-                    'agent_selector_api_key': conv_data.get('agent_selector_api_key')
+                    'agent_selector_api_key': conv_data.get('agent_selector_api_key'),
+                    'agent_sending_messages': conv_data.get('agent_sending_messages', {})
                 }
                 conversations.append(Conversation(**conversation_fields))
             except Exception as e:
