@@ -65,7 +65,10 @@ AGENT_SETTINGS = {
     
     # Frequency of reminding agents about termination condition
     # (every X invocations for each agent)
-    "termination_reminder_frequency": 4
+    "termination_reminder_frequency": 4,
+    
+    # Timeout for parallel agent responses in human-like-chat mode (seconds)
+    "parallel_response_timeout": 30.0
 }
 
 # Gemini model settings

@@ -7,11 +7,14 @@ import os
 import random
 import json
 import re
+import traceback
 from typing import Dict, List, Any, Optional, Callable
 from datetime import datetime
 import threading
 import time
 from functools import partial
+import concurrent.futures
+import asyncio
 
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from langchain_core.tools import Tool
@@ -26,6 +29,7 @@ load_dotenv()
 # Import configuration settings
 from config import CONVERSATION_TIMING, MESSAGE_SETTINGS, AGENT_SETTINGS, MODEL_SETTINGS
 from agent_selector import AgentSelector
+from utility import extract_json_from_markdown
 
 
 class ConversationSimulatorEngine:
@@ -99,10 +103,7 @@ class ConversationSimulatorEngine:
         
         # Create summarization prompt
         if existing_summary:
-            summary_prompt = f"""Previous conversation summary: {existing_summary}
-
-Recent conversation messages:
-"""
+            summary_prompt = f"Previous conversation summary: {existing_summary}\n\nRecent conversation messages:\n"
         else:
             summary_prompt = "Conversation messages to summarize:\n"
           # Add messages to summarize
@@ -290,7 +291,10 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             "termination_condition": termination_condition,
             "agent_invocation_counts": {name: 0 for name in agent_names},  # Track invocations per agent
             "agent_selector_api_key": agent_selector_api_key,  # Store agent selector API key
-            "agent_sending_messages": {name: [] for name in agent_names}  # Initialize per-agent message lists
+            "agent_sending_messages": {name: [] for name in agent_names},  # Initialize per-agent message lists
+            "round_counter": 0,  # Track rounds for human-like-chat mode
+            "last_round_participants": [],  # Track who participated in the last round
+            "current_round_responses": {}  # Track responses in current round for parallel processing
         }
             # Start the conversation automatically after a short delay
         threading.Timer(CONVERSATION_TIMING["start_delay"], self._start_conversation_cycle, args=(conversation_id,)).start()
@@ -309,16 +313,22 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
         # Mark conversation as started
         conv_data["conversation_started"] = True
         
-        # Choose random first agent
-        conv_data["current_agent_index"] = random.randint(0, len(conv_data["agent_names"]) - 1)
-        first_agent = conv_data["agent_names"][conv_data["current_agent_index"]]
+        invocation_method = conv_data.get("invocation_method", "round_robin")
         
-        print(f"DEBUG: ===== STARTING CONVERSATION CYCLE =====")
-        print(f"DEBUG: First agent selected: {first_agent} (index {conv_data['current_agent_index']})")
-        print(f"DEBUG: ===== STARTING FIRST AGENT INVOCATION =====")
-        
-        # Start the conversation
-        self._invoke_next_agent(conversation_id)
+        if invocation_method == "human_like_chat":
+            print(f"DEBUG: ===== STARTING HUMAN-LIKE-CHAT CONVERSATION =====")
+            # Use agent selector to choose the first agent
+            self._start_human_like_chat(conversation_id)
+        else:
+            print(f"DEBUG: ===== STARTING CONVERSATION CYCLE =====")
+            # Choose random first agent for round_robin and agent_selector methods
+            conv_data["current_agent_index"] = random.randint(0, len(conv_data["agent_names"]) - 1)
+            first_agent = conv_data["agent_names"][conv_data["current_agent_index"]]
+            print(f"DEBUG: First agent selected: {first_agent} (index {conv_data['current_agent_index']})")
+            print(f"DEBUG: ===== STARTING FIRST AGENT INVOCATION =====")
+            
+            # Start the conversation
+            self._invoke_next_agent(conversation_id)
     
     def _invoke_next_agent(self, conversation_id: str):
         """Invoke the next agent in the cycle."""
@@ -332,6 +342,26 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
         if conv_data["status"] != "active":
             print(f"DEBUG: Conversation {conversation_id} status is {conv_data['status']}, not active")
             return
+        
+        # Check if this is human-like-chat mode
+        invocation_method = conv_data.get("invocation_method", "round_robin")
+        if invocation_method == "human_like_chat":
+            # For human-like-chat, after the first agent speaks, switch to round-based mode
+            if len(conv_data["messages"]) == 0:
+                # This is the initial agent invocation, proceed normally
+                self._invoke_next_agent_regular(conversation_id)
+            else:
+                # Switch to round-based human-like-chat mode
+                print("DEBUG: Switching to human-like-chat round mode")
+                self._start_human_like_chat_round(conversation_id)
+            return
+        
+        # Handle regular round_robin and agent_selector modes
+        self._invoke_next_agent_regular(conversation_id)
+    
+    def _invoke_next_agent_regular(self, conversation_id: str):
+        """Invoke the next agent using regular (non-human-like-chat) logic."""
+        conv_data = self.active_conversations[conversation_id]
         
         # Get current agent
         current_agent_name = conv_data["agent_names"][conv_data["current_agent_index"]]
@@ -1136,6 +1166,1145 @@ Do not include any other text or explanation."""
             global_messages = conv_data["messages"]
             print(f"DEBUG: Falling back to global messages for '{agent_name}' ({len(global_messages)} items)")
             return global_messages
+    
+    def _start_human_like_chat(self, conversation_id: str):
+        """
+        Start human-like-chat mode by using agent selector to choose the first agent.
+        """
+        if conversation_id not in self.active_conversations:
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        if conv_data["status"] != "active":
+            return
+        
+        print("DEBUG: Using agent selector to choose initial agent for human-like-chat")
+        
+        # Use GOOGLE_API_KEY from environment for agent selector
+        env_api_key = os.getenv("GOOGLE_API_KEY")
+        if not env_api_key:
+            print("ERROR: GOOGLE_API_KEY not found in environment for human-like-chat agent selector")
+            # Fallback to regular round robin
+            conv_data["current_agent_index"] = random.randint(0, len(conv_data["agent_names"]) - 1)
+            self._invoke_next_agent_regular(conversation_id)
+            return
+        
+        # Create agent selector
+        agent_selector = AgentSelector(google_api_key=env_api_key)
+        
+        # Use agent selector to choose the first agent
+        selection_result = agent_selector.select_next_agent(
+            messages=[],  # No messages yet
+            environment=conv_data["environment"],
+            scene=conv_data["scene_description"],
+            agents=conv_data["agents_config"],
+            termination_condition=conv_data.get("termination_condition"),
+            agent_invocation_counts=conv_data.get("agent_invocation_counts", {})
+        )
+        
+        first_agent = selection_result.get("next_response", "error_parsing")
+        print(f"DEBUG: Agent selector chose initial agent: {first_agent}")
+        
+        if first_agent == "error_parsing" or first_agent not in conv_data["agent_names"]:
+            print("DEBUG: Agent selector error, choosing random first agent")
+            conv_data["current_agent_index"] = random.randint(0, len(conv_data["agent_names"]) - 1)
+        else:
+            # Find the index of the selected agent
+            for i, name in enumerate(conv_data["agent_names"]):
+                if name == first_agent:
+                    conv_data["current_agent_index"] = i
+                    break
+        
+        print(f"DEBUG: Starting human-like-chat with agent: {conv_data['agent_names'][conv_data['current_agent_index']]}")
+        
+        # Invoke the selected first agent
+        self._invoke_next_agent_regular(conversation_id)
+    
+    def _start_human_like_chat_round(self, conversation_id: str):
+        """
+        Start a new round in human-like-chat mode with parallel agent invocation.
+        """
+        if conversation_id not in self.active_conversations:
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        if conv_data["status"] != "active":
+            return
+        
+        conv_data["round_counter"] = conv_data.get("round_counter", 0) + 1
+        current_round = conv_data["round_counter"]
+        
+        print(f"DEBUG: ===== STARTING HUMAN-LIKE-CHAT ROUND {current_round} =====")
+        
+        # Determine which agents to invoke based on last round participation
+        agents_to_invoke = self._determine_agents_for_human_like_chat_round(conversation_id)
+        
+        if not agents_to_invoke:
+            print("DEBUG: No agents to invoke in this round, ending conversation")
+            conv_data["status"] = "completed"
+            return
+        
+        print(f"DEBUG: Invoking {len(agents_to_invoke)} agents in parallel: {agents_to_invoke}")
+        
+        # Initialize round response tracking
+        conv_data["current_round_responses"] = {agent: None for agent in agents_to_invoke}
+        
+        # Check if we should remind about termination condition
+        termination_condition = conv_data.get("termination_condition")
+        should_remind_termination = False
+        
+        if termination_condition:
+            reminder_frequency = AGENT_SETTINGS["termination_reminder_frequency"]
+            should_remind_termination = (current_round % reminder_frequency == 0)
+            if should_remind_termination:
+                print(f"DEBUG: Round {current_round} will include termination condition reminder")
+        
+        # Invoke all agents in parallel
+        self._invoke_agents_parallel_human_like_chat(
+            conversation_id, 
+            agents_to_invoke, 
+            should_remind_termination
+        )
+    
+    def _determine_agents_for_human_like_chat_round(self, conversation_id: str) -> List[str]:
+        """
+        Determine which agents should be invoked in the current human-like-chat round.
+        
+        Rules:
+        1. Invoke all agents who did not respond in the last round
+        2. If an agent responded in last round and no other agent responded, don't invoke that agent
+        3. If an agent responded in last round and other agents also responded, invoke that agent
+        
+        Returns:
+            List of agent names to invoke
+        """
+        conv_data = self.active_conversations[conversation_id]
+        all_agents = conv_data["agent_names"]
+        last_round_participants = conv_data.get("last_round_participants", [])
+        
+        print(f"DEBUG: Last round participants: {last_round_participants}")
+        
+        if len(last_round_participants) == 0:
+            # First round after initial agent, invoke all except the last speaker
+            if len(conv_data["messages"]) > 0:
+                last_speaker = conv_data["messages"][-1].get("agent_name")
+                agents_to_invoke = [agent for agent in all_agents if agent != last_speaker]
+                print(f"DEBUG: First round, excluding last speaker '{last_speaker}'")
+                return agents_to_invoke
+            else:
+                # No messages yet, invoke all agents
+                return all_agents
+        
+        agents_to_invoke = []
+        
+        # Rule 1: Invoke all agents who did not respond in the last round
+        non_participants = [agent for agent in all_agents if agent not in last_round_participants]
+        agents_to_invoke.extend(non_participants)
+        
+        # Rule 2 & 3: Handle agents who participated in the last round
+        if len(last_round_participants) == 1:
+            # Only one agent responded, don't invoke them (Rule 2)
+            print(f"DEBUG: Only {last_round_participants[0]} responded last round, not invoking them")
+        elif len(last_round_participants) > 1:
+            # Multiple agents responded, invoke them too (Rule 3)
+            agents_to_invoke.extend(last_round_participants)
+            print(f"DEBUG: Multiple agents responded last round, invoking them too")
+        
+        return list(set(agents_to_invoke))  # Remove duplicates
+    
+    def _invoke_agents_parallel_human_like_chat(self, conversation_id: str, 
+                                               agents_to_invoke: List[str], 
+                                               should_remind_termination: bool):
+        """
+        Invoke multiple agents in parallel for human-like-chat mode.
+        """
+        if conversation_id not in self.active_conversations:
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Use ThreadPoolExecutor for parallel execution
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(agents_to_invoke)) as executor:
+            # Submit all agent invocations
+            future_to_agent = {}
+            for agent_name in agents_to_invoke:
+                future = executor.submit(
+                    self._invoke_single_agent_human_like_chat, 
+                    conversation_id, 
+                    agent_name, 
+                    should_remind_termination
+                )
+                future_to_agent[future] = agent_name
+            
+            # Wait for all agents to complete
+            for future in concurrent.futures.as_completed(future_to_agent):
+                agent_name = future_to_agent[future]
+                try:
+                    response_data = future.result()
+                    conv_data["current_round_responses"][agent_name] = response_data
+                    print(f"DEBUG: Agent '{agent_name}' completed with response: {response_data}")
+                except Exception as e:
+                    print(f"ERROR: Agent '{agent_name}' failed: {e}")
+                    conv_data["current_round_responses"][agent_name] = {"error": str(e)}
+        
+        # Process all responses once all agents have completed
+        self._process_human_like_chat_round_responses(conversation_id)
+    
+    def _invoke_single_agent_human_like_chat(self, conversation_id: str, 
+                                           agent_name: str, 
+                                           should_remind_termination: bool) -> Dict[str, Any]:
+        """
+        Invoke a single agent in human-like-chat mode and return their response.
+        """
+        if conversation_id not in self.active_conversations:
+            return {"response": "ERROR", "message": "Conversation not found"}
+        
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Find agent config
+        agent_config = next((config for config in conv_data["agents_config"] 
+                           if config["name"] == agent_name), None)
+        if not agent_config:
+            return {"response": "ERROR", "message": f"Agent {agent_name} not found"}
+        
+        try:
+            # Update agent's sending messages
+            self._update_agent_sending_messages(conversation_id, agent_name)
+            
+            # Get agent's context messages
+            agent_messages = self._get_agent_context_messages(conversation_id, agent_name)
+            
+            # Create human-like-chat specific prompt
+            prompt = self._create_human_like_chat_prompt(
+                conversation_id, 
+                agent_config, 
+                agent_messages, 
+                should_remind_termination
+            )
+            
+            # Load agent tools
+            agent_tools = self._load_agent_tools(agent_name, agent_config)
+            
+            # Create and invoke agent
+            agent_api_key = agent_config.get("api_key") or self.default_api_key
+            if not agent_api_key:
+                return {"response": "ERROR", "message": f"No API key available for agent {agent_name}"}
+            
+            agent_model = ChatGoogleGenerativeAI(
+                model=MODEL_SETTINGS["agent_model"],
+                temperature=AGENT_SETTINGS["response_temperature"],
+                max_retries=AGENT_SETTINGS["max_retries"],
+                google_api_key=agent_api_key
+            )
+            
+            agent = create_react_agent(
+                model=agent_model,
+                tools=agent_tools,
+                prompt=f"You are {agent_name}. {agent_config['base_prompt']}",
+                checkpointer=self.memory
+            )
+            
+            config = {"configurable": {"thread_id": f"{conv_data['thread_id']}_{agent_name}"}}
+            
+            response = agent.invoke(
+                {"messages": [HumanMessage(content=prompt)]},
+                config
+            )
+            
+            if response and "messages" in response and response["messages"]:
+                agent_response = response["messages"][-1].content
+                
+                # Extract JSON response using utility
+                response_data = extract_json_from_markdown(agent_response)
+                
+                if response_data and "response" in response_data:
+                    return response_data
+                else:
+                    # Fallback: treat as message if JSON extraction fails
+                    return {"response": agent_response}
+            else:
+                return {"response": "ERROR", "message": "No valid response from agent"}
+                
+        except Exception as e:
+            print(f"ERROR: Failed to invoke agent {agent_name}: {e}")
+            return {"response": "ERROR", "message": str(e)}
+    
+    def _create_human_like_chat_prompt(self, conversation_id: str, 
+                                     agent_config: Dict[str, str], 
+                                     agent_messages: List[Dict[str, str]], 
+                                     should_remind_termination: bool) -> str:
+        """
+        Create a human-like-chat specific prompt for an agent.
+        """
+        conv_data = self.active_conversations[conversation_id]
+        agent_name = agent_config["name"]
+        
+        # Separate messages from last round and previous context
+        last_round_messages = []
+        context_messages = []
+        
+        if len(agent_messages) > 0:
+            # Get the last round participants
+            last_round_participants = conv_data.get("last_round_participants", [])
+            
+            # If we have last round participants, separate those messages
+            if last_round_participants:
+                # Find where the last round starts
+                last_round_start = len(agent_messages)
+                for i in range(len(agent_messages) - 1, -1, -1):
+                    msg = agent_messages[i]
+                    if "agent_name" in msg and msg["agent_name"] in last_round_participants:
+                        last_round_start = i
+                    else:
+                        break
+                
+                context_messages = agent_messages[:last_round_start]
+                last_round_messages = agent_messages[last_round_start:]
+            else:
+                # No clear last round, treat last few messages as last round
+                if len(agent_messages) > 3:
+                    context_messages = agent_messages[:-3]
+                    last_round_messages = agent_messages[-3:]
+                else:
+                    last_round_messages = agent_messages
+        
+        # Build prompt
+        prompt = f"""The conversation is taking place in {conv_data['environment']}. The following is the initial scene: {conv_data['scene_description']}.
+        
+You are {agent_name}, and here are the others in the conversation: {', '.join([f"{name} ({next((c['role'] for c in conv_data['agents_config'] if c['name'] == name), 'Unknown role')}" for name in conv_data['agent_names'] if name != agent_name])}.
+
+"""
+        
+        # Add context messages if available
+        if context_messages:
+            prompt += "Here are previous messages for context:\n"
+            for msg in context_messages:
+                if "past_convo_summary" in msg:
+                    prompt += f"SUMMARY: {msg['past_convo_summary']}\n"
+                elif "agent_name" in msg and "message" in msg:
+                    prompt += f"{msg['agent_name']}: {msg['message']}\n"
+            prompt += "\n"
+        
+        # Add last round messages
+        if last_round_messages:
+            prompt += "Here are the latest messages from the last round:\n"
+            for msg in last_round_messages:
+                if "agent_name" in msg and "message" in msg:
+                    prompt += f"{msg['agent_name']}: {msg['message']}\n"
+            prompt += "\n"
+        
+        # Add termination condition if needed
+        if should_remind_termination and conv_data.get("termination_condition"):
+            prompt += f"""TERMINATION CONDITION REMINDER: The conversation should end when the following condition is met:
+{conv_data['termination_condition']}
+
+Keep this condition in mind while participating in the conversation.
+
+"""
+        
+        prompt += """Act as a natural human in a conversation. Following are the two options you can do. Only consider responding to latest messages from the last round. Previous messages are just for context.
+
+1. First decide whether you need to respond to any of the new messages in the last round or add anything to the conversation. If not, only return the following JSON: {"response": "NO"}
+
+2. If you need to respond to a message or add something to the conversation, generate the message and then only output the following JSON: {"response": "your message here"}
+
+Respond naturally and stay true to your character."""
+        
+        return prompt
+    
+    def _process_human_like_chat_round_responses(self, conversation_id: str):
+        """
+        Process all agent responses from a human-like-chat round.
+        """
+        if conversation_id not in self.active_conversations:
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        round_responses = conv_data.get("current_round_responses", {})
+        
+        # Process responses and add valid messages
+        current_round_participants = []
+        
+        for agent_name, response_data in round_responses.items():
+            if not response_data or "response" not in response_data:
+                continue
+            
+            response = response_data["response"]
+            
+            if response == "NO" or response == "no":
+                print(f"DEBUG: Agent '{agent_name}' chose not to respond")
+                continue
+            elif response == "ERROR":
+                print(f"ERROR: Agent '{agent_name}' had an error: {response_data.get('message', 'Unknown error')}")
+                continue
+            else:
+                # Valid response, add to conversation
+                print(f"🗣️ {agent_name}: {response}")
+                
+                conv_data["messages"].append({
+                    "agent_name": agent_name,
+                    "message": response
+                })
+                
+                # Save conversation to persistent storage after each message
+                self._save_conversation_state(conversation_id)
+                
+                # Notify callback
+                if conversation_id in self.message_callbacks:
+                    self.message_callbacks[conversation_id]({
+                        "sender": agent_name,
+                        "content": response,
+                        "timestamp": datetime.now().isoformat(),
+                        "type": "ai"
+                    })
+        
+        # Update last round participants
+        conv_data["last_round_participants"] = current_round_participants
+        
+        # Save conversation state
+        self._save_conversation_state(conversation_id)
+        
+        # Handle edge case: all agents said "NO"
+        if not current_round_participants:
+            print("DEBUG: All agents said NO, invoking random agent from last round")
+            self._handle_all_agents_no_response(conversation_id)
+        else:
+            print(f"DEBUG: Round completed with {len(current_round_participants)} participants: {current_round_participants}")
+            
+            # Check termination condition
+            if self._check_human_like_chat_termination(conversation_id):
+                print("DEBUG: Termination condition met, ending conversation")
+                conv_data["status"] = "completed"
+                if conversation_id in self.message_callbacks:
+                    self.message_callbacks[conversation_id]({
+                        "sender": "System",
+                        "content": "The conversation has reached its termination condition and has ended.",
+                        "timestamp": datetime.now().isoformat(),
+                        "type": "system"
+                    })
+                return
+            
+            # Schedule next round
+            delay = random.uniform(
+                CONVERSATION_TIMING["agent_turn_delay_min"], 
+                CONVERSATION_TIMING["agent_turn_delay_max"]
+            )
+            print(f"DEBUG: Scheduling next human-like-chat round in {delay:.2f} seconds")
+            threading.Timer(delay, self._start_human_like_chat_round, args=(conversation_id,)).start()
+    
+    def _handle_all_agents_no_response(self, conversation_id: str):
+        """
+        Handle the edge case where all agents said "NO" in a round.
+        Randomly invoke an agent who responded in the last round with a modified prompt.
+        """
+        conv_data = self.active_conversations[conversation_id]
+        last_round_participants = conv_data.get("last_round_participants", [])
+        
+        if not last_round_participants:
+            print("DEBUG: No last round participants available, ending conversation")
+            conv_data["status"] = "completed"
+            return
+        
+        # Choose random agent from last round
+        chosen_agent = random.choice(last_round_participants)
+        print(f"DEBUG: Forcing agent '{chosen_agent}' to respond to keep conversation flowing")
+        
+        # Find agent config
+        agent_config = next((config for config in conv_data["agents_config"] 
+                           if config["name"] == chosen_agent), None)
+        
+        if not agent_config:
+            print(f"ERROR: Could not find config for agent {chosen_agent}")
+            conv_data["status"] = "completed"
+            return
+        
+        try:
+            # Create modified prompt for forced response
+            agent_messages = self._get_agent_context_messages(conversation_id, chosen_agent)
+            
+            prompt = f"""The conversation is taking place in {conv_data['environment']}. The following is the initial scene: {conv_data['scene_description']}.
+
+You are {chosen_agent}, and here are the others in the conversation: {', '.join([f"{name} ({next((c['role'] for c in conv_data['agents_config'] if c['name'] == name), 'Unknown role')}" for name in conv_data['agent_names'] if name != chosen_agent])}.
+
+"""
+            
+            # Add context if available
+            if agent_messages:
+                prompt += "Here are the recent messages:\n"
+                for msg in agent_messages[-5:]:  # Last 5 messages for context
+                    if "agent_name" in msg and "message" in msg:
+                        prompt += f"{msg['agent_name']}: {msg['message']}\n"
+                prompt += "\n"
+            
+            prompt += """You responded previously, but all the other agents didn't respond back. Put some message to keep the natural human flow of the conversation.
+
+Only respond with the following JSON: {"response": "your message here"}"""
+            
+            # Load agent tools and invoke
+            agent_tools = self._load_agent_tools(chosen_agent, agent_config)
+            
+            agent_api_key = agent_config.get("api_key") or self.default_api_key
+            if not agent_api_key:
+                print(f"ERROR: No API key available for forced agent {chosen_agent}")
+                conv_data["status"] = "completed"
+                return
+            
+            agent_model = ChatGoogleGenerativeAI(
+                model=MODEL_SETTINGS["agent_model"],
+                temperature=AGENT_SETTINGS["response_temperature"],
+                max_retries=AGENT_SETTINGS["max_retries"],
+                google_api_key=agent_api_key
+            )
+            
+            agent = create_react_agent(
+                model=agent_model,
+                tools=agent_tools,
+                prompt=f"You are {chosen_agent}. {agent_config['base_prompt']}",
+                checkpointer=self.memory
+            )
+            
+            config = {"configurable": {"thread_id": f"{conv_data['thread_id']}_{chosen_agent}"}}
+            
+            response = agent.invoke(
+                {"messages": [HumanMessage(content=prompt)]},
+                config
+            )
+            
+            if response and "messages" in response and response["messages"]:
+                agent_response = response["messages"][-1].content
+                
+                # Extract JSON response
+                response_data = extract_json_from_markdown(agent_response)
+                
+                if response_data and "response" in response_data:
+                    message = response_data["response"]
+                    print(f"🗣️ {chosen_agent} (forced): {message}")
+                    
+                    conv_data["messages"].append({
+                        "agent_name": chosen_agent,
+                        "message": message
+                    })
+                    
+                    conv_data["last_round_participants"] = [chosen_agent]
+                    
+                    # Save and notify
+                    self._save_conversation_state(conversation_id)
+                    
+                    if conversation_id in self.message_callbacks:
+                        self.message_callbacks[conversation_id]({
+                            "sender": chosen_agent,
+                            "content": message,
+                            "timestamp": datetime.now().isoformat(),
+                            "type": "ai"
+                        })
+                    
+                    # Schedule next round
+                    delay = random.uniform(
+                        CONVERSATION_TIMING["agent_turn_delay_min"], 
+                        CONVERSATION_TIMING["agent_turn_delay_max"]
+                    )
+                    threading.Timer(delay, self._start_human_like_chat_round, args=(conversation_id,)).start()
+                else:
+                    print("ERROR: Could not extract valid response from forced agent")
+                    conv_data["status"] = "completed"
+            else:
+                print("ERROR: No response from forced agent")
+                conv_data["status"] = "completed"
+                
+        except Exception as e:
+            print(f"ERROR: Failed to force agent response: {e}")
+            conv_data["status"] = "completed"
+    
+    def _check_human_like_chat_termination(self, conversation_id: str) -> bool:
+        """
+        Check if the human-like-chat conversation should terminate.
+        """
+        conv_data = self.active_conversations[conversation_id]
+        termination_condition = conv_data.get("termination_condition")
+        
+        if not termination_condition:
+            return False
+        
+        # Use similar logic to round_robin termination but adapted for human-like-chat
+        messages = conv_data["messages"]
+        
+        if len(messages) < 6:  # Need at least a few messages to evaluate
+            return False
+        
+        # Check termination every few rounds
+        if conv_data["round_counter"] % 3 != 0:
+            return False
+        
+        # Get recent messages for evaluation
+        recent_messages = messages[-6:] if len(messages) >= 6 else messages
+        
+        # Format messages for the prompt
+        formatted_messages = []
+        for msg in recent_messages:
+            if "agent_name" in msg and "message" in msg:
+                formatted_messages.append(f"{msg['agent_name']}: {msg['message']}")
+        messages_str = "\n".join(formatted_messages)
+        
+        # Create termination prompt
+        prompt = f"""You are evaluating whether a human-like-chat conversation should terminate based on a specific condition.
+
+RECENT CONVERSATION MESSAGES:
+{messages_str}
+
+CURRENT SCENE: {conv_data['environment']}
+ENVIRONMENT: {conv_data['scene_description']}
+TERMINATION CONDITION: {termination_condition}
+
+Based on the conversation messages and the termination condition, determine if the conversation can terminate now.
+
+Respond with ONLY a JSON object in this exact format:
+{{ "termination_decision": true }} or {{ "termination_decision": false }}
+
+Do not include any other text or explanation."""
+        
+        try:
+            # Call LLM to check termination using the summary model
+            response = self.summary_model.invoke([HumanMessage(content=prompt)])
+            response_text = response.content.strip()
+            
+            # Parse the JSON response
+            termination_result = self._extract_termination_json(response_text)
+            return termination_result.get("termination_decision", False)
+            
+        except Exception as e:
+            print(f"Error checking human-like-chat termination condition: {e}")
+            return False
+
+    def _load_agent_tools(self, agent_name: str, agent_config: Dict[str, str]) -> List:
+        """Load tools for a specific agent."""
+        agent_tools = []
+        
+        try:
+            # Import tools module at the function level
+            import tools as tools_module
+            
+            # Get the Agent object from our data_manager using agent name
+            agent_id = agent_config.get("id")
+            agent_obj = None
+            
+            # Load agent data from data manager
+            if not hasattr(self, 'agents_data'):
+                # We need to initialize this first
+                from data_manager import DataManager
+                data_manager = DataManager(os.path.dirname(__file__))
+                self.agents_data = {agent.id: agent for agent in data_manager.load_agents()}
+            
+            # Get the agent object
+            agent_obj = self.agents_data.get(agent_id)
+            
+            if agent_obj and hasattr(agent_obj, 'tools') and agent_obj.tools:
+                for tool_name in agent_obj.tools:
+                    try:
+                        if tool_name == "knowledge_base_retriever":
+                            if hasattr(agent_obj, 'knowledge_base') and agent_obj.knowledge_base:
+                                if hasattr(tools_module, "knowledge_base_retriever"):
+                                    retriever_tool_func = getattr(tools_module, "knowledge_base_retriever").func
+                                    partial_func = partial(retriever_tool_func, agent_id=agent_id)
+                                    
+                                    new_tool = Tool(
+                                        name="knowledge_base_retriever",
+                                        func=partial_func,
+                                        description="Retrieves the top 3 most relevant results from your personal knowledge base to help answer questions. Input should be a search query."
+                                    )
+                                    agent_tools.append(new_tool)
+                        elif tool_name == "browser_manipulation_toolkit":
+                            browser_tools = tools_module.get_browser_tools()
+                            if browser_tools:
+                                agent_tools.extend(browser_tools)
+                        elif hasattr(tools_module, tool_name):
+                            tool_obj = getattr(tools_module, tool_name)
+                            agent_tools.append(tool_obj)
+                    except Exception as e:
+                        print(f"ERROR: Failed to load tool '{tool_name}' for agent {agent_name}: {e}")
+        except Exception as e:
+            print(f"ERROR: Failed to load tools for agent {agent_name}: {e}")
+        
+        return agent_tools
+
+    def _start_human_like_chat(self, conversation_id: str):
+        """Start human-like-chat mode by using agent selector to choose the first agent."""
+        if conversation_id not in self.active_conversations:
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        if conv_data["status"] != "active":
+            return
+        
+        print("DEBUG: Using agent selector to choose initial agent for human-like-chat")
+        
+        # Use GOOGLE_API_KEY from environment for agent selector
+        env_api_key = os.getenv("GOOGLE_API_KEY")
+        if not env_api_key:
+            print("ERROR: GOOGLE_API_KEY not found in environment for human-like-chat agent selector")
+            # Fallback to regular round robin
+            conv_data["current_agent_index"] = random.randint(0, len(conv_data["agent_names"]) - 1)
+            self._invoke_next_agent_regular(conversation_id)
+            return
+        
+        # Create agent selector
+        agent_selector = AgentSelector(google_api_key=env_api_key)
+        
+        # Use agent selector to choose the first agent
+        selection_result = agent_selector.select_next_agent(
+            messages=[],  # No messages yet
+            environment=conv_data["environment"],
+            scene=conv_data["scene_description"],
+            agents=conv_data["agents_config"],
+            termination_condition=conv_data.get("termination_condition"),
+            agent_invocation_counts=conv_data.get("agent_invocation_counts", {})
+        )
+        
+        first_agent = selection_result.get("next_response", "error_parsing")
+        print(f"DEBUG: Agent selector chose initial agent: {first_agent}")
+        
+        if first_agent == "error_parsing" or first_agent not in conv_data["agent_names"]:
+            print("DEBUG: Agent selector error, choosing random first agent")
+            conv_data["current_agent_index"] = random.randint(0, len(conv_data["agent_names"]) - 1)
+        else:
+            # Find the index of the selected agent
+            for i, name in enumerate(conv_data["agent_names"]):
+                if name == first_agent:
+                    conv_data["current_agent_index"] = i
+                    break
+        
+        print(f"DEBUG: Starting human-like-chat with agent: {conv_data['agent_names'][conv_data['current_agent_index']]}")
+        
+        # Invoke the selected first agent
+        self._invoke_next_agent_regular(conversation_id)
+
+    def _start_human_like_chat_round(self, conversation_id: str):
+        """Start a human-like-chat round with parallel agent invocation."""
+        if conversation_id not in self.active_conversations:
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        if conv_data["status"] != "active":
+            return
+        
+        # Increment round counter
+        conv_data["round_counter"] += 1
+        print(f"DEBUG: Starting human-like-chat round #{conv_data['round_counter']}")
+        
+        # Determine which agents to invoke based on human-like-chat rules
+        agents_to_invoke = self._determine_human_like_chat_agents(conversation_id)
+        
+        print(f"DEBUG: Invoking {len(agents_to_invoke)} agents in parallel: {agents_to_invoke}")
+        
+        # Initialize current round responses
+        conv_data["current_round_responses"] = {}
+        
+        # Invoke agents in parallel
+        self._invoke_agents_parallel_human_like_chat(conversation_id, agents_to_invoke)
+
+    def _determine_human_like_chat_agents(self, conversation_id: str) -> List[str]:
+        """Determine which agents to invoke in the current human-like-chat round."""
+        conv_data = self.active_conversations[conversation_id]
+        last_round_participants = conv_data.get("last_round_participants", [])
+        all_agents = conv_data["agent_names"]
+        
+        # Find the last round messages (messages since the last round boundary)
+        last_round_messages = self._get_last_round_messages(conversation_id)
+        last_round_speakers = [msg["agent_name"] for msg in last_round_messages if msg["agent_name"] != "System"]
+        
+        agents_to_invoke = []
+        
+        # Rule 1: Invoke all agents who did not put any messages in the last round
+        for agent in all_agents:
+            if agent not in last_round_speakers:
+                agents_to_invoke.append(agent)
+        
+        # Rule 2 & 3: Handle agents who responded in the last round
+        agents_who_responded = [agent for agent in last_round_speakers if agent in all_agents]
+        
+        if len(agents_who_responded) > 1:
+            # Rule 3: If multiple agents responded, invoke all of them
+            for agent in agents_who_responded:
+                if agent not in agents_to_invoke:
+                    agents_to_invoke.append(agent)
+        # Rule 2: If only one agent responded and no others responded, don't invoke that agent
+        # (This is handled automatically since they won't be in agents_to_invoke)
+        
+        print(f"DEBUG: Last round speakers: {last_round_speakers}")
+        print(f"DEBUG: Agents to invoke: {agents_to_invoke}")
+        
+        return agents_to_invoke
+
+    def _get_last_round_messages(self, conversation_id: str) -> List[Dict[str, str]]:
+        """Get messages from the last round only."""
+        conv_data = self.active_conversations[conversation_id]
+        messages = conv_data["messages"]
+        
+        # For now, we'll consider the last round as the last few messages
+        # This is a simplified approach - in a more sophisticated version,
+        # we could track round boundaries more precisely
+        
+        # Get the last N messages where N is reasonable for one round
+        max_round_size = len(conv_data["agent_names"]) * 2  # Allow up to 2 messages per agent per round
+        last_round_messages = messages[-max_round_size:] if len(messages) > max_round_size else messages
+        
+        return last_round_messages
+
+    def _invoke_agents_parallel_human_like_chat(self, conversation_id: str, agents_to_invoke: List[str]):
+        """Invoke multiple agents in parallel for human-like-chat mode."""
+        if not agents_to_invoke:
+            print("DEBUG: No agents to invoke, checking edge case")
+            self._handle_human_like_chat_edge_case(conversation_id)
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        
+        print(f"DEBUG: Starting parallel invocation of {len(agents_to_invoke)} agents")
+        
+        # Use ThreadPoolExecutor for parallel execution
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(agents_to_invoke)) as executor:
+            # Submit all agent invocation tasks
+            future_to_agent = {}
+            for agent_name in agents_to_invoke:
+                future = executor.submit(self._invoke_single_agent_human_like_chat, conversation_id, agent_name)
+                future_to_agent[future] = agent_name
+            
+            # Wait for all agents to complete
+            for future in concurrent.futures.as_completed(future_to_agent):
+                agent_name = future_to_agent[future]
+                try:
+                    result = future.result()
+                    print(f"DEBUG: Agent {agent_name} completed with result: {result}")
+                except Exception as e:
+                    print(f"ERROR: Agent {agent_name} failed: {e}")
+                    # Store error result
+                    conv_data["current_round_responses"][agent_name] = {"response": "ERROR", "error": str(e)}
+        
+        print(f"DEBUG: All agents completed, processing round results")
+        self._process_human_like_chat_round_results(conversation_id)
+
+    def _invoke_single_agent_human_like_chat(self, conversation_id: str, agent_name: str) -> Dict[str, Any]:
+        """Invoke a single agent in human-like-chat mode with JSON response parsing."""
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Find agent config
+        agent_config = next((config for config in conv_data["agents_config"] 
+                            if config["name"] == agent_name), None)
+        if not agent_config:
+            return {"response": "ERROR", "error": "Agent config not found"}
+        
+        print(f"DEBUG: Invoking agent '{agent_name}' in human-like-chat mode")
+        
+        try:
+            # Create human-like-chat specific prompt
+            prompt = self._create_human_like_chat_prompt(conversation_id, agent_name)
+            
+            # Get agent's API key
+            agent_api_key = agent_config.get("api_key") or self.default_api_key
+            if not agent_api_key:
+                return {"response": "ERROR", "error": "No API key available"}
+            
+            # Create agent model
+            agent_model = ChatGoogleGenerativeAI(
+                model=MODEL_SETTINGS["agent_model"],
+                temperature=AGENT_SETTINGS["response_temperature"],
+                max_retries=AGENT_SETTINGS["max_retries"],
+                google_api_key=agent_api_key
+            )
+            
+            # Invoke the model
+            response = agent_model.invoke([HumanMessage(content=prompt)])
+            response_text = response.content.strip()
+            
+            print(f"DEBUG: Agent '{agent_name}' raw response: {response_text[:200]}...")
+            
+            # Parse JSON response using utility function
+            try:
+                json_result = extract_json_from_markdown(response_text)
+                if json_result and "response" in json_result:
+                    result = {"response": json_result["response"]}
+                    print(f"DEBUG: Agent '{agent_name}' parsed response: {result}")
+                    
+                    # Store the result
+                    conv_data["current_round_responses"][agent_name] = result
+                    return result
+                else:
+                    print(f"WARNING: Agent '{agent_name}' response missing 'response' field")
+                    return {"response": "ERROR", "error": "Invalid JSON format"}
+            except Exception as e:
+                print(f"ERROR: Failed to parse JSON from agent '{agent_name}': {e}")
+                return {"response": "ERROR", "error": f"JSON parsing failed: {e}"}
+                
+        except Exception as e:
+            print(f"ERROR: Failed to invoke agent '{agent_name}': {e}")
+            return {"response": "ERROR", "error": str(e)}
+
+    def _create_human_like_chat_prompt(self, conversation_id: str, agent_name: str) -> str:
+        """Create a prompt for human-like-chat mode."""
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Find agent config
+        agent_config = next((config for config in conv_data["agents_config"] 
+                            if config["name"] == agent_name), None)
+        
+        # Get agent's context messages (with summarization)
+        agent_messages = self._get_agent_context_messages(conversation_id, agent_name)
+        
+        # Separate last round messages from previous context
+        last_round_messages = self._get_last_round_messages(conversation_id)
+        
+        # Remove last round messages from context to avoid duplication
+        context_messages = []
+        last_round_signatures = set()
+        for msg in last_round_messages:
+            if "agent_name" in msg and "message" in msg:
+                signature = f"{msg['agent_name']}:{msg['message']}"
+                last_round_signatures.add(signature)
+        
+        for msg in agent_messages:
+            if "agent_name" in msg and "message" in msg:
+                signature = f"{msg['agent_name']}:{msg['message']}"
+                if signature not in last_round_signatures:
+                    context_messages.append(msg)
+        
+        # Build the prompt
+        prompt = f"The conversation is taking place in {conv_data['environment']}. The following is the initial scene: {conv_data['scene_description']}.\n\n"
+        
+        # Add previous context if available
+        if context_messages:
+            prompt += "Here are previous messages for context:\n"
+            for msg in context_messages:
+                if "past_convo_summary" in msg:
+                    prompt += f"SUMMARY: {msg['past_convo_summary']}\n"
+                elif "agent_name" in msg and "message" in msg:
+                    prompt += f"{msg['agent_name']}: {msg['message']}\n"
+            prompt += "\n"
+        
+        # Add last round messages
+        if last_round_messages:
+            prompt += "Here are the latest messages from the last round:\n"
+            for msg in last_round_messages:
+                if "agent_name" in msg and "message" in msg:
+                    prompt += f"{msg['agent_name']}: {msg['message']}\n"
+            prompt += "\n"
+        
+        # Add agent identity and other participants
+        other_agents = [name for name in conv_data["agent_names"] if name != agent_name]
+        prompt += f"You are {agent_name}, a {agent_config['role']}. {agent_config['base_prompt']}\n\nYou are now in this conversation and here are the others in the conversation:\n"
+        for other_agent in other_agents:
+            other_config = next((config for config in conv_data["agents_config"] 
+                               if config["name"] == other_agent), None)
+            if other_config:
+                prompt += f"- {other_agent}: {other_config['role']}\n"
+        
+        prompt += f"\nAct as a natural human in a conversation. Following are the two options you can do. Only consider responding to latest messages from the last round. Previous messages are just for context.\n\n"
+        prompt += f"1. First decide whether you need to respond to any of the new messages in the last round or add anything to the conversation. If not, only return the following JSON: {{\"response\": \"NO\"}}\n\n"
+        prompt += f"2. If you need to respond to a message or add something to the conversation, generate the message and then only output the following JSON: {{\"response\": \"your message here\"}}\n\n"
+        prompt += f"Remember to stay true to your character and personality. Respond naturally as {agent_name}."
+        
+        # Add termination condition reminder if needed
+        termination_condition = conv_data.get("termination_condition")
+        if termination_condition and conv_data["round_counter"] % AGENT_SETTINGS["termination_reminder_frequency"] == 0:
+            prompt += f"\n\nTERMINATION CONDITION REMINDER: The conversation should end when the following condition is met:\n{termination_condition}\nKeep this in mind while participating in the conversation."
+        
+        return prompt
+
+    def _process_human_like_chat_round_results(self, conversation_id: str):
+        """Process the results from a human-like-chat round."""
+        conv_data = self.active_conversations[conversation_id]
+        round_responses = conv_data.get("current_round_responses", {})
+        
+        print(f"DEBUG: Processing round results for {len(round_responses)} agents")
+        
+        # Track who participated in this round
+        this_round_participants = []
+        
+        # Process each response
+        for agent_name, result in round_responses.items():
+            response = result.get("response", "ERROR")
+            
+            if response == "NO":
+                print(f"DEBUG: Agent '{agent_name}' chose not to respond")
+            elif response == "ERROR":
+                error = result.get("error", "Unknown error")
+                print(f"ERROR: Agent '{agent_name}' had an error: {error}")
+            else:
+                # Agent provided a message
+                print(f"DEBUG: Agent '{agent_name}' responded: {response[:100]}...")
+                
+                # Add to global messages
+                conv_data["messages"].append({
+                    "agent_name": agent_name,
+                    "message": response
+                })
+                
+                # Add to agent's personal message list
+                self._update_agent_sending_messages(conversation_id, agent_name)
+                
+                # Track participant
+                this_round_participants.append(agent_name)
+                
+                # Notify callback
+                if conversation_id in self.message_callbacks:
+                    self.message_callbacks[conversation_id]({
+                        "sender": agent_name,
+                        "content": response,
+                        "timestamp": datetime.now().isoformat(),
+                        "type": "ai"
+                    })
+        
+        # Update last round participants
+        conv_data["last_round_participants"] = this_round_participants
+        
+        # Save conversation state
+        self._save_conversation_state(conversation_id)
+        
+        # Check if no one responded (edge case)
+        if not this_round_participants:
+            print("DEBUG: No agents responded in this round, handling edge case")
+            self._handle_human_like_chat_edge_case(conversation_id)
+        else:
+            print(f"DEBUG: Round completed with {len(this_round_participants)} participants")
+            # Schedule next round
+            delay = random.uniform(
+                CONVERSATION_TIMING["agent_turn_delay_min"], 
+                CONVERSATION_TIMING["agent_turn_delay_max"]
+            )
+            print(f"DEBUG: Scheduling next human-like-chat round in {delay:.2f} seconds")
+            threading.Timer(delay, self._start_human_like_chat_round, args=(conversation_id,)).start()
+
+    def _handle_human_like_chat_edge_case(self, conversation_id: str):
+        """Handle the edge case where all agents said 'NO' in human-like-chat mode."""
+        conv_data = self.active_conversations[conversation_id]
+        last_round_participants = conv_data.get("last_round_participants", [])
+        
+        if not last_round_participants:
+            print("DEBUG: No previous participants, selecting random agent for edge case")
+            # If no one participated in the last round, pick a random agent
+            selected_agent = random.choice(conv_data["agent_names"])
+        else:
+            # Pick a random agent from those who responded in the last round
+            selected_agent = random.choice(last_round_participants)
+        
+        print(f"DEBUG: Edge case - forcing agent '{selected_agent}' to respond")
+        
+        # Create edge case prompt
+        agent_config = next((config for config in conv_data["agents_config"] 
+                            if config["name"] == selected_agent), None)
+        
+        try:
+            prompt = self._create_human_like_chat_edge_case_prompt(conversation_id, selected_agent)
+            
+            # Get agent's API key
+            agent_api_key = agent_config.get("api_key") or self.default_api_key
+            if not agent_api_key:
+                print(f"ERROR: No API key available for edge case agent '{selected_agent}'")
+                return
+            
+            # Create agent model
+            agent_model = ChatGoogleGenerativeAI(
+                model=MODEL_SETTINGS["agent_model"],
+                temperature=AGENT_SETTINGS["response_temperature"],
+                max_retries=AGENT_SETTINGS["max_retries"],
+                google_api_key=agent_api_key
+            )
+            
+            # Invoke the model
+            response = agent_model.invoke([HumanMessage(content=prompt)])
+            response_text = response.content.strip()
+            
+            # Parse JSON response
+            json_result = extract_json_from_markdown(response_text)
+            if json_result and "response" in json_result:
+                message = json_result["response"]
+                
+                print(f"DEBUG: Edge case agent '{selected_agent}' responded: {message[:100]}...")
+                
+                # Add to global messages
+                conv_data["messages"].append({
+                    "agent_name": selected_agent,
+                    "message": message
+                })
+                
+                # Update agent's personal message list
+                self._update_agent_sending_messages(conversation_id, selected_agent)
+                
+                # Update last round participants
+                conv_data["last_round_participants"] = [selected_agent]
+                
+                # Save conversation state
+                self._save_conversation_state(conversation_id)
+                
+                # Notify callback
+                if conversation_id in self.message_callbacks:
+                    self.message_callbacks[conversation_id]({
+                        "sender": selected_agent,
+                        "content": message,
+                        "timestamp": datetime.now().isoformat(),
+                        "type": "ai"
+                    })
+                
+                # Schedule next round
+                delay = random.uniform(
+                    CONVERSATION_TIMING["agent_turn_delay_min"], 
+                    CONVERSATION_TIMING["agent_turn_delay_max"]
+                )
+                print(f"DEBUG: Scheduling next round after edge case in {delay:.2f} seconds")
+                threading.Timer(delay, self._start_human_like_chat_round, args=(conversation_id,)).start()
+            else:
+                print(f"ERROR: Edge case agent '{selected_agent}' returned invalid JSON")
+                
+        except Exception as e:
+            print(f"ERROR: Failed to handle edge case with agent '{selected_agent}': {e}")
+
+    def _create_human_like_chat_edge_case_prompt(self, conversation_id: str, agent_name: str) -> str:
+        """Create a prompt for the human-like-chat edge case."""
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Find agent config
+        agent_config = next((config for config in conv_data["agents_config"] 
+                            if config["name"] == agent_name), None)
+        
+        # Get agent's context messages
+        agent_messages = self._get_agent_context_messages(conversation_id, agent_name)
+        last_round_messages = self._get_last_round_messages(conversation_id)
+        
+        # Build the prompt
+        prompt = f"The conversation is taking place in {conv_data['environment']}. The following is the initial scene: {conv_data['scene_description']}.\n\n"
+        
+        # Add context messages
+        if agent_messages:
+            prompt += "Here are previous messages for context:\n"
+            for msg in agent_messages:
+                if "past_convo_summary" in msg:
+                    prompt += f"SUMMARY: {msg['past_convo_summary']}\n"
+                elif "agent_name" in msg and "message" in msg:
+                    prompt += f"{msg['agent_name']}: {msg['message']}\n"
+            prompt += "\n"
+        
+        # Add last round messages
+        if last_round_messages:
+            prompt += "Here are the latest messages from the last round:\n"
+            for msg in last_round_messages:
+                if "agent_name" in msg and "message" in msg:
+                    prompt += f"{msg['agent_name']}: {msg['message']}\n"
+            prompt += "\n"
+        
+        # Add agent identity
+        other_agents = [name for name in conv_data["agent_names"] if name != agent_name]
+        prompt += f"You are {agent_name}, a {agent_config['role']}. {agent_config['base_prompt']}\n\nYou are now in this conversation and here are the others in the conversation:\n"
+        for other_agent in other_agents:
+            other_config = next((config for config in conv_data["agents_config"] 
+                               if config["name"] == other_agent), None)
+            if other_config:
+                prompt += f"- {other_agent}: {other_config['role']}\n"
+        
+        prompt += f"\nYou responded previously, but all the other agents didn't respond back. Put some message to keep the natural human flow of the conversation.\n\n"
+        prompt += f"Only respond with the following JSON: {{\"response\": \"your message here\"}}\n\n"
+        prompt += f"Remember to stay true to your character and personality. Respond naturally as {agent_name}."
+        
+        return prompt
+
+
 # Bug Fix: Ensure user's base_prompt is properly used in LangGraph agent creation
 # Previously, create_react_agent was using a hardcoded generic prompt instead of 
 # the user's custom base_prompt. Now the full formatted prompt (which includes the
