@@ -4,7 +4,7 @@ A desktop application for simulating group conversations between AI agents using
 """
 
 import tkinter as tk
-from tkinter import ttk, messagebox, scrolledtext
+from tkinter import ttk, messagebox, scrolledtext, simpledialog
 import threading
 import json
 import os
@@ -13,12 +13,15 @@ import time
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 import importlib
+import shutil
+from tkinter import filedialog
 
 # Import our custom modules
 try:
     from data_manager import DataManager, Agent, Conversation
     from conversation_engine import ConversationSimulatorEngine
     from config import UI_COLORS, AGENT_SETTINGS
+    import knowledge_manager # Import the new module
     LANGGRAPH_AVAILABLE = True
 except ImportError as e:
     print(f"LangGraph dependencies not available: {e}")
@@ -41,7 +44,7 @@ except ImportError as e:
 class ChatBubble(tk.Frame):
     """Represents a chat message bubble in the conversation UI."""
     
-    def __init__(self, parent, sender, message, timestamp, msg_type="ai", color=None, **kwargs):
+    def __init__(self, parent, sender, message, timestamp, msg_type="ai", color=None, align_right=False, **kwargs):
         """Initialize the chat bubble.
         
         Args:
@@ -51,6 +54,7 @@ class ChatBubble(tk.Frame):
             timestamp: Time the message was sent
             msg_type: Type of message (user, system, ai)
             color: Background color for the bubble
+            align_right: If True, align bubble to the right with right-aligned text
         """
         # Choose appropriate color
         if color is None:
@@ -64,14 +68,40 @@ class ChatBubble(tk.Frame):
         
         # Initialize frame with appropriate background
         super().__init__(parent, bg=UI_COLORS["chat_background"], **kwargs)
-          # Create bubble layout
-        self.bubble_frame = tk.Frame(self, bg=color, padx=10, pady=5)
-        self.bubble_frame.pack(fill="x", padx=10, pady=6, anchor="w" if msg_type != "user" else "e")
+        
+        # Create container for precise width control
+        container_frame = tk.Frame(self, bg=UI_COLORS["chat_background"])
+        container_frame.pack(fill="x")
+        
+        # Configure the container with proper weights for 75% bubble width
+        container_frame.grid_columnconfigure(1, weight=3)  # 75% for bubble
+        if align_right:
+            container_frame.grid_columnconfigure(0, weight=1)  # 25% left spacer
+            container_frame.grid_columnconfigure(2, weight=0)  # No right spacer
+            
+            # Left spacer for right alignment
+            left_spacer = tk.Frame(container_frame, bg=UI_COLORS["chat_background"])
+            left_spacer.grid(row=0, column=0, sticky="ew")
+            
+            # Bubble frame takes 75% width, positioned on the right
+            self.bubble_frame = tk.Frame(container_frame, bg=color, padx=15, pady=8)
+            self.bubble_frame.grid(row=0, column=1, sticky="ew", pady=6)
+        else:
+            container_frame.grid_columnconfigure(0, weight=0)  # No left spacer
+            container_frame.grid_columnconfigure(2, weight=1)  # 25% right spacer
+            
+            # Bubble frame takes 75% width, positioned on the left
+            self.bubble_frame = tk.Frame(container_frame, bg=color, padx=15, pady=8)
+            self.bubble_frame.grid(row=0, column=1, sticky="ew", pady=6)
+            
+            # Right spacer for left alignment
+            right_spacer = tk.Frame(container_frame, bg=UI_COLORS["chat_background"])
+            right_spacer.grid(row=0, column=2, sticky="ew")
         
         # Add rounded corners by using themed frame
         self.bubble_frame.config(highlightbackground=color, highlightthickness=1, bd=0)
         
-        # Add sender name with timestamp
+        # Add sender name with timestamp (different layout for right-aligned)
         header_frame = tk.Frame(self.bubble_frame, bg=color)
         header_frame.pack(fill="x", expand=True)
         
@@ -82,37 +112,77 @@ class ChatBubble(tk.Frame):
             icon = "🤖"
         else:
             icon = "🎭"
+        
+        if align_right:
+            # For right-aligned bubbles: time on left, sender on right
+            time_label = tk.Label(
+                header_frame, 
+                text=timestamp, 
+                font=("Arial", 8),
+                bg=color,
+                fg="gray",
+                anchor="w"
+            )
+            time_label.pack(side="left")
             
-        sender_label = tk.Label(
-            header_frame, 
-            text=f"{icon} {sender}", 
-            font=("Arial", 9, "bold"),
-            bg=color,
-            anchor="w"
-        )
-        sender_label.pack(side="left")
+            sender_label = tk.Label(
+                header_frame, 
+                text=f"{sender} {icon}", 
+                font=("Arial", 9, "bold"),
+                bg=color,
+                anchor="e"
+            )
+            sender_label.pack(side="right")
+        else:
+            # For left-aligned bubbles: sender on left, time on right (original layout)
+            sender_label = tk.Label(
+                header_frame, 
+                text=f"{icon} {sender}", 
+                font=("Arial", 9, "bold"),
+                bg=color,
+                anchor="w"
+            )
+            sender_label.pack(side="left")
+            
+            time_label = tk.Label(
+                header_frame, 
+                text=timestamp, 
+                font=("Arial", 8),
+                bg=color,
+                fg="gray",
+                anchor="e"
+            )
+            time_label.pack(side="right")
         
-        time_label = tk.Label(
-            header_frame, 
-            text=timestamp, 
-            font=("Arial", 8),
-            bg=color,
-            fg="gray",
-            anchor="e"
-        )
-        time_label.pack(side="right")
-        
-        # Add message content with word wrapping
-        message_label = tk.Label(
-            self.bubble_frame, 
-            text=message, 
-            font=("Arial", 10),
-            bg=color,
-            justify="left",
-            anchor="w",
-            wraplength=400
-        )
-        message_label.pack(fill="x", pady=(5, 0))
+        # Add message content with word wrapping - use container for proper text positioning
+        if align_right:
+            # For right-aligned bubbles: create a container for the text that can be positioned
+            text_container = tk.Frame(self.bubble_frame, bg=color)
+            text_container.pack(fill="x", pady=(5, 0))
+            
+            # Left-justify text within the container, but position container on the right
+            message_label = tk.Label(
+                text_container, 
+                text=message, 
+                font=("Arial", 10),
+                bg=color,
+                justify="left",   # Left-justify text lines within the container
+                anchor="w",       # Anchor text to the left within the container
+                wraplength=400
+            )
+            message_label.pack(side="right")  # Position the text block to the right within container
+        else:
+            # For left-aligned bubbles: left-align the text content (default)
+            message_label = tk.Label(
+                self.bubble_frame, 
+                text=message, 
+                font=("Arial", 10),
+                bg=color,
+                justify="left",   # Left-align text content for left bubbles
+                anchor="w",       # Anchor text to the left
+                wraplength=400
+            )
+            message_label.pack(fill="x", pady=(5, 0))
         
     @staticmethod
     def get_message_height(message, width=400):
@@ -164,7 +234,7 @@ class ChatCanvas(tk.Canvas):
         """Update scroll region when the inner frame changes size."""
         self.configure(scrollregion=self.bbox("all"))
         
-    def add_bubble(self, sender, message, timestamp, msg_type="ai", color=None):
+    def add_bubble(self, sender, message, timestamp, msg_type="ai", color=None, align_right=False):
         """Add a new chat bubble to the canvas."""
         
         # Add extra spacing between messages from different senders
@@ -181,8 +251,10 @@ class ChatCanvas(tk.Canvas):
             message, 
             timestamp,
             msg_type,
-            color
+            color,
+            align_right=align_right
         )
+        # Pack with fill="x" but the bubble frame inside handles the width limitation
         bubble.pack(fill="x", expand=True)
         
         # Force update to ensure proper sizing and positioning
@@ -228,6 +300,11 @@ class AgentConversationSimulatorGUI:
         # Initialize data manager
         self.data_manager = DataManager(os.path.dirname(__file__))
         
+        # Initialize knowledge manager
+        self.knowledge_files = {} # To store paths of files to be uploaded
+        self.current_editing_agent_id = None  # Track which agent is being edited
+        knowledge_manager.setup_embedding_model() # Setup embedding model on start
+
         # Initialize conversation engine (will be created when needed)
         self.conversation_engine = None
         self.current_conversation_id = None
@@ -360,7 +437,7 @@ class AgentConversationSimulatorGUI:
         btn_frame.grid(row=1, column=0, columnspan=2, pady=(10, 0))
         
         ttk.Button(btn_frame, text="New Agent", command=self.new_agent).pack(side=tk.LEFT, padx=(0, 5))
-        ttk.Button(btn_frame, text="Edit Agent", command=self.edit_agent).pack(side=tk.LEFT, padx=5)
+        ttk.Button(btn_frame, text="Clone Agent", command=self.clone_agent).pack(side=tk.LEFT, padx=5)
         ttk.Button(btn_frame, text="Delete Agent", command=self.delete_agent).pack(side=tk.LEFT, padx=5)
         
         # Right panel - Agent details
@@ -424,9 +501,20 @@ class AgentConversationSimulatorGUI:
         
         # Load tools and create checkboxes
         self.load_tool_checkboxes()
+
+        # Knowledge Base Section
+        kb_frame = ttk.LabelFrame(details_frame, text="Knowledge Base", padding="5")
+        kb_frame.grid(row=6, column=0, columnspan=2, sticky="ew", pady=(10, 0), padx=(0,0))
+        kb_frame.grid_columnconfigure(1, weight=1)
+
+        self.upload_kb_btn = ttk.Button(kb_frame, text="Upload Files (.pdf, .txt)", command=self.upload_knowledge_files, state=tk.NORMAL)
+        self.upload_kb_btn.grid(row=0, column=0, padx=5, pady=5)
+
+        self.knowledge_files_label = ttk.Label(kb_frame, text="No files selected.")
+        self.knowledge_files_label.grid(row=0, column=1, padx=5, pady=5, sticky="w")
         
         # Save button
-        ttk.Button(details_frame, text="Save Agent", command=self.save_agent).grid(row=6, column=1, sticky="e", pady=(10, 0))
+        ttk.Button(details_frame, text="Save Agent", command=self.save_agent).grid(row=7, column=1, sticky="e", pady=(10, 0))
     
     def create_conversation_tab(self):
         """Create the conversation setup tab."""
@@ -728,7 +816,8 @@ class AgentConversationSimulatorGUI:
     
     def load_data(self):
         """Load agents and conversations from JSON files."""
-        self.refresh_agents_list()
+        # Force reload at startup to ensure we have fresh data
+        self.refresh_agents_list()  # This already has force_reload=True
         self.refresh_agent_checkboxes()
         # Load past conversations for the Past Conversations tab
         self.refresh_past_conversations()
@@ -774,8 +863,11 @@ class AgentConversationSimulatorGUI:
     def refresh_agents_list(self):
         """Refresh the agents listbox."""
         self.agents_listbox.delete(0, tk.END)
-        agents = self.data_manager.load_agents()        
+        agents = self.data_manager.load_agents(force_reload=True)  # Force reload for UI refresh
+        
+        # Auto-manage knowledge_base_retriever tool for all agents
         for agent in agents:
+            self._update_knowledge_base_tool(agent)
             self.agents_listbox.insert(tk.END, f"{agent.name} ({agent.role})")
     
     def refresh_agent_checkboxes(self):
@@ -787,8 +879,11 @@ class AgentConversationSimulatorGUI:
         self.agent_checkboxes = []
         self.selected_agents = []
         
-        agents = self.data_manager.load_agents()
+        agents = self.data_manager.load_agents()  # Use cached agents for checkbox refresh
         for i, agent in enumerate(agents):
+            # Auto-manage knowledge_base_retriever tool
+            self._update_knowledge_base_tool(agent)
+            
             var = tk.BooleanVar()
             checkbox = ttk.Checkbutton(
                 self.agents_checkbox_frame,
@@ -810,13 +905,14 @@ class AgentConversationSimulatorGUI:
         """Handle agent selection in the listbox."""
         selection = self.agents_listbox.curselection()
         if selection:
-            agents = self.data_manager.load_agents()
+            agents = self.data_manager.load_agents()  # Use cached agents for selection
             if selection[0] < len(agents):
                 agent = agents[selection[0]]
                 self.load_agent_details(agent)
     
     def load_agent_details(self, agent: Agent):
         """Load agent details into the form."""
+        self.current_editing_agent_id = agent.id  # Track that we're editing this agent
         self.agent_name_var.set(agent.name)
         self.agent_role_var.set(agent.role)
         self.agent_traits_var.set(", ".join(agent.personality_traits))
@@ -825,17 +921,30 @@ class AgentConversationSimulatorGUI:
         self.agent_prompt_text.delete(1.0, tk.END)
         self.agent_prompt_text.insert(1.0, agent.base_prompt)
         
-        # Set tool checkboxes
+        # Set tool checkboxes (excluding auto-managed tools)
         if hasattr(agent, 'tools') and self.tool_vars:
             for tool_name, var in self.tool_vars.items():
-                var.set(tool_name in getattr(agent, 'tools', []))
-    
+                # Only set checkbox for user-selectable tools (knowledge_base_retriever is auto-managed)
+                if tool_name != 'knowledge_base_retriever':
+                    var.set(tool_name in getattr(agent, 'tools', []))
+
+        # Enable KB upload button and clear old file selections
+        self.upload_kb_btn.config(state=tk.NORMAL)
+        self.knowledge_files_label.config(text="No files selected.")
+        self.knowledge_files = {}
+
     def new_agent(self):
         """Create a new agent."""
         self.clear_agent_form()
+        self.current_editing_agent_id = None  # Clear editing state for new agent
         self.agent_name_entry.focus()
+        # Enable upload button for new agents
+        self.upload_kb_btn.config(state=tk.NORMAL)
+    
+    
     def clear_agent_form(self):
         """Clear the agent form."""
+        self.current_editing_agent_id = None  # Clear editing state
         self.agent_name_var.set("")
         self.agent_role_var.set("")
         self.agent_traits_var.set("")
@@ -845,15 +954,90 @@ class AgentConversationSimulatorGUI:
         # Clear tool checkboxes
         for var in self.tool_vars.values():
             var.set(False)
-    
-    def edit_agent(self):
-        """Edit the selected agent."""
+
+        # Keep KB upload button enabled for new agent creation
+        self.upload_kb_btn.config(state=tk.NORMAL)
+        self.knowledge_files_label.config(text="No files selected.")
+        # Don't clear knowledge_files completely - just clear any temporary staging
+        temp_keys = [k for k in self.knowledge_files.keys() if k.startswith("NEW_AGENT_")]
+        for temp_key in temp_keys:
+            del self.knowledge_files[temp_key]
+
+    def clone_agent(self):
+        """Clone the selected agent with a unique name."""
         selection = self.agents_listbox.curselection()
         if not selection:
-            messagebox.showwarning("No Selection", "Please select an agent to edit.")
+            messagebox.showwarning("No Selection", "Please select an agent to clone.")
             return
-        # Agent details are already loaded in the form
+        
+        agents = self.data_manager.load_agents()  # Use cached agents for cloning
+        if selection[0] < len(agents):
+            original_agent = agents[selection[0]]
+            
+            # Generate unique clone name
+            base_name = original_agent.name
+            clone_name = self._generate_clone_name(base_name, agents)
+            
+            # Create cloned agent
+            cloned_agent = Agent.create_new(
+                name=clone_name,
+                role=original_agent.role,
+                base_prompt=original_agent.base_prompt,
+                personality_traits=original_agent.personality_traits.copy(),
+                color=original_agent.color,
+                api_key=original_agent.api_key,
+                tools=original_agent.tools.copy()
+            )
+            
+            # Copy knowledge base if it exists
+            if hasattr(original_agent, 'knowledge_base') and original_agent.knowledge_base:
+                cloned_agent.knowledge_base = [doc.copy() for doc in original_agent.knowledge_base]
+            
+            # Auto-manage knowledge_base_retriever tool for the cloned agent
+            self._update_knowledge_base_tool(cloned_agent)
+            
+            # Save the cloned agent
+            self.data_manager.save_agent(cloned_agent)
+            
+            # Refresh UI
+            self.refresh_agents_list()
+            self.refresh_agent_checkboxes()
+            
+            # Select the newly cloned agent in the list
+            self._select_agent_by_name(clone_name)
+            
+            self.update_status(f"Agent '{clone_name}' cloned from '{original_agent.name}'.")
     
+    def _generate_clone_name(self, base_name: str, existing_agents: list) -> str:
+        """Generate a unique clone name following the pattern {agent_name}_clone_{i}."""
+        existing_names = {agent.name for agent in existing_agents}
+        
+        # Check for available clone number from 1 to 100
+        for i in range(1, 101):
+            clone_name = f"{base_name}_clone_{i}"
+            if clone_name not in existing_names:
+                return clone_name
+        
+        # If all clone names 1-100 are taken, fallback to timestamp-based naming
+        import time
+        timestamp = str(int(time.time()))[-4:]  # Last 4 digits of timestamp
+        return f"{base_name}_clone_{timestamp}"
+    
+    def _select_agent_by_name(self, agent_name: str):
+        """Select an agent in the listbox by name."""
+        try:
+            for i in range(self.agents_listbox.size()):
+                item_text = self.agents_listbox.get(i)
+                if agent_name in item_text:
+                    self.agents_listbox.selection_clear(0, tk.END)
+                    self.agents_listbox.selection_set(i)
+                    self.agents_listbox.see(i)
+                    # Trigger the selection event to load agent details
+                    self.agents_listbox.event_generate('<<ListboxSelect>>')
+                    break
+        except Exception as e:
+            print(f"Error selecting agent: {e}")
+
     def delete_agent(self):
         """Delete the selected agent."""
         selection = self.agents_listbox.curselection()
@@ -861,7 +1045,7 @@ class AgentConversationSimulatorGUI:
             messagebox.showwarning("No Selection", "Please select an agent to delete.")
             return
         
-        agents = self.data_manager.load_agents()
+        agents = self.data_manager.load_agents()  # Use cached agents for delete
         if selection[0] < len(agents):
             agent = agents[selection[0]]
             if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete agent '{agent.name}'?"):
@@ -870,6 +1054,105 @@ class AgentConversationSimulatorGUI:
                 self.refresh_agent_checkboxes()
                 self.clear_agent_form()
                 self.update_status(f"Agent '{agent.name}' deleted.")
+
+    def upload_knowledge_files(self):
+        """Handle uploading knowledge base files for the selected agent."""
+        print("\n" + "="*60)
+        print("📁 KNOWLEDGE BASE FILE UPLOAD STARTED")
+        print(f"📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("="*60)
+        
+        # Check if we're editing an existing agent or creating a new one
+        selection = self.agents_listbox.curselection()
+        agent_name = self.agent_name_var.get().strip()
+        
+        if selection and self.current_editing_agent_id:
+            # Editing existing agent - use the tracked agent ID
+            agent_id = self.current_editing_agent_id
+            agents = self.data_manager.load_agents()  # Use cached agents for upload
+            agent = next((a for a in agents if a.id == agent_id), None)
+            if agent:
+                agent_display_name = agent.name
+                print(f"✅ Editing existing agent:")
+            else:
+                print(f"❌ UPLOAD FAILED: Could not find agent with ID {agent_id}")
+                messagebox.showerror("Agent Not Found", "Could not find the selected agent.")
+                return
+        else:
+            # Creating new agent - use a temporary ID based on current form data
+            if not agent_name:
+                print("❌ UPLOAD FAILED: No agent name provided")
+                print("💡 Please enter an agent name before uploading knowledge files")
+                messagebox.showwarning("No Agent Name", "Please enter an agent name before uploading knowledge files.")
+                return
+            
+            # Use a special temporary ID for new agents
+            agent_id = f"NEW_AGENT_{agent_name.replace(' ', '_')}"
+            agent_display_name = agent_name
+            print(f"✅ Preparing files for new agent:")
+        
+        print(f"   🆔 Agent ID: {agent_id}")
+        print(f"   👤 Agent Name: {agent_display_name}")
+        print(f"   🆔 Agent ID: {agent_id}")
+        print(f"   👤 Agent Name: {agent_display_name}")
+
+        print(f"\n📂 Opening file dialog...")
+        file_paths = filedialog.askopenfilenames(
+            title=f"Select Knowledge Files for {agent_display_name}",
+            filetypes=[
+                ("Text files", "*.txt"),
+                ("PDF files", "*.pdf"),
+                ("All files", "*.*")
+            ]
+        )
+
+        if not file_paths:
+            print("❌ UPLOAD CANCELLED: No files selected")
+            print("="*60)
+            return
+            
+        print(f"✅ Files selected: {len(file_paths)}")
+        for i, file_path in enumerate(file_paths, 1):
+            file_name = os.path.basename(file_path)
+            file_size = os.path.getsize(file_path) if os.path.exists(file_path) else 0
+            print(f"   {i}. {file_name} ({file_size:,} bytes)")
+
+        print(f"\n💬 Collecting document descriptions...")
+        # Ask for descriptions for each file
+        file_descriptions = {}
+        for i, file_path in enumerate(file_paths, 1):
+            file_name = os.path.basename(file_path)
+            print(f"   📝 Requesting description for file {i}/{len(file_paths)}: {file_name}")
+            
+            description = simpledialog.askstring(
+                "Document Description",
+                f"Please provide a brief description of what '{file_name}' contains:",
+                initialvalue=""
+            )
+            
+            if description and description.strip():
+                file_descriptions[file_path] = description.strip()
+                print(f"      ✅ Description provided: '{description.strip()}'")
+            else:
+                default_desc = f"Document: {file_name}"
+                file_descriptions[file_path] = default_desc
+                print(f"      ⚠️  No description provided, using default: '{default_desc}'")
+        
+        print(f"\n📋 Staging files for agent {agent_id}...")
+        # Store both file paths and descriptions
+        self.knowledge_files[agent_id] = {
+            'file_paths': file_paths,
+            'descriptions': file_descriptions
+        }
+        
+        print(f"✅ FILES STAGED SUCCESSFULLY!")
+        print(f"   🎯 Agent: {agent_display_name} ({agent_id})")
+        print(f"   📁 Files staged: {len(file_paths)}")
+        print(f"   💬 Descriptions collected: {len(file_descriptions)}")
+        print(f"   ⏳ Files will be processed when agent is saved")
+        
+        self.knowledge_files_label.config(text=f"{len(file_paths)} file(s) selected for upload.")
+        print("="*60)
 
     def save_agent(self):
         """Save the current agent."""
@@ -886,38 +1169,259 @@ class AgentConversationSimulatorGUI:
         # Parse personality traits
         traits = [t.strip() for t in traits_str.split(",") if t.strip()] if traits_str else []
         
-        # Get selected tools
+        # Get selected tools (excluding knowledge_base_retriever as it's auto-managed)
         selected_tools = [name for name, var in self.tool_vars.items() if var.get()]
         
-        # Check if editing existing agent
-        selection = self.agents_listbox.curselection()
-        if selection:
-            agents = self.data_manager.load_agents()
-            if selection[0] < len(agents):
-                # Edit existing agent
-                agent = agents[selection[0]]
+        # Check if editing existing agent using the tracking variable
+        if self.current_editing_agent_id:
+            # Edit existing agent
+            agent = self.data_manager.get_agent_by_id(self.current_editing_agent_id)
+            if agent:
                 agent.name = name
                 agent.role = role
                 agent.base_prompt = prompt  # Fix: Set base_prompt
                 agent.personality_traits = traits
                 agent.api_key = api_key if api_key else None  # Set API key
                 agent.tools = selected_tools  # Save selected tools
+                
+                # Auto-manage knowledge_base_retriever tool
+                self._update_knowledge_base_tool(agent)
+                
                 self.data_manager.save_agent(agent)
                 self.update_status(f"Agent '{name}' updated.")
+                # Ingest documents after saving (use existing agent ID)
+                self.handle_knowledge_ingestion(agent.id)
             else:
-                # Create new agent
-                agent = Agent.create_new(name, role, prompt, traits, api_key=api_key if api_key else None, tools=selected_tools)
-                self.data_manager.save_agent(agent)
-                self.update_status(f"Agent '{name}' created.")
+                messagebox.showerror("Error", f"Could not find agent with ID {self.current_editing_agent_id}")
+                return
         else:
             # Create new agent
             agent = Agent.create_new(name, role, prompt, traits, api_key=api_key if api_key else None, tools=selected_tools)
+            
+            # Auto-manage knowledge_base_retriever tool
+            self._update_knowledge_base_tool(agent)
+            
             self.data_manager.save_agent(agent)
             self.update_status(f"Agent '{name}' created.")
+            
+            # Handle knowledge ingestion for new agent
+            # Check for staged files under multiple possible IDs:
+            # 1. Temporary ID for new agents
+            # 2. Any existing agent ID that might have been selected
+            
+            staged_agent_id = None
+            temp_agent_id = f"NEW_AGENT_{name.replace(' ', '_')}"
+            
+            # First check temporary ID
+            if temp_agent_id in self.knowledge_files:
+                staged_agent_id = temp_agent_id
+                print(f"🔄 Found staged files under temporary ID '{temp_agent_id}'")
+            else:
+                # Check all existing staged IDs for this agent name/files
+                for existing_id in list(self.knowledge_files.keys()):
+                    if existing_id.startswith('agent_'):  # Real agent ID format
+                        print(f"🔍 Found staged files under existing agent ID '{existing_id}', transferring to new agent '{agent.id}'")
+                        staged_agent_id = existing_id
+                        break
+            
+            # Transfer files if found
+            if staged_agent_id:
+                print(f"🔄 Transferring staged files from '{staged_agent_id}' to real agent ID '{agent.id}'")
+                self.knowledge_files[agent.id] = self.knowledge_files[staged_agent_id]
+                del self.knowledge_files[staged_agent_id]
+            else:
+                print(f"ℹ️  No staged files found for new agent '{agent.name}'")
+            
+            # Ingest documents after saving
+            self.handle_knowledge_ingestion(agent.id)
+        
+        # Clear editing state after successful save
+        self.current_editing_agent_id = None
         
         self.refresh_agents_list()
         self.refresh_agent_checkboxes()
-    
+
+    def _update_knowledge_base_tool(self, agent):
+        """Update the knowledge_base_retriever tool based on agent's knowledge_base content."""
+        has_knowledge_base = hasattr(agent, 'knowledge_base') and agent.knowledge_base and len(agent.knowledge_base) > 0
+        has_retriever_tool = 'knowledge_base_retriever' in agent.tools
+        
+        if has_knowledge_base and not has_retriever_tool:
+            # Add the tool if agent has knowledge base but doesn't have the tool
+            agent.tools.append('knowledge_base_retriever')
+            print(f"🔧 AUTO-ADDED knowledge_base_retriever tool to agent '{agent.name}' (has {len(agent.knowledge_base)} documents)")
+        elif not has_knowledge_base and has_retriever_tool:
+            # Remove the tool if agent doesn't have knowledge base but has the tool
+            agent.tools.remove('knowledge_base_retriever')
+            print(f"🔧 AUTO-REMOVED knowledge_base_retriever tool from agent '{agent.name}' (no documents)")
+        elif has_knowledge_base and has_retriever_tool:
+            print(f"✅ Agent '{agent.name}' already has knowledge_base_retriever tool ({len(agent.knowledge_base)} documents)")
+        else:
+            print(f"ℹ️  Agent '{agent.name}' has no knowledge base documents, no retriever tool needed")
+
+    def handle_knowledge_ingestion(self, agent_id: str):
+        """Handles the process of storing and ingesting knowledge base files."""
+        print("\n" + "="*70)
+        print("🔄 KNOWLEDGE BASE INGESTION PROCESS STARTED")
+        print(f"📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print(f"🎯 Agent ID: {agent_id}")
+        print("="*70)
+        
+        if agent_id not in self.knowledge_files or not self.knowledge_files[agent_id]:
+            print("ℹ️  No staged files found for this agent")
+            print("💡 Upload files first using the 'Upload Files' button")
+            print("="*70)
+            return
+            
+        data = self.knowledge_files[agent_id]
+        file_paths = data['file_paths']
+        descriptions = data['descriptions']
+        
+        print(f"📋 PROCESSING SUMMARY:")
+        print(f"   📁 Files to process: {len(file_paths)}")
+        print(f"   💬 Descriptions collected: {len(descriptions)}")
+        
+        # Create agent knowledge base directory
+        agent_kb_path = os.path.join("knowledge_base", agent_id)
+        print(f"\n📂 DIRECTORY PREPARATION:")
+        print(f"   📁 Target directory: {os.path.abspath(agent_kb_path)}")
+        
+        try:
+            os.makedirs(agent_kb_path, exist_ok=True)
+            print(f"   ✅ Directory ready")
+        except Exception as e:
+            print(f"   ❌ Failed to create directory: {e}")
+            return
+
+        # Update the agent's knowledge_base list
+        print(f"\n🗃️  AGENT METADATA UPDATE:")
+        agent = self.data_manager.get_agent_by_id(agent_id)
+        if not agent:
+            print(f"   ❌ Agent not found in database!")
+            return
+            
+        print(f"   👤 Agent: {agent.name}")
+        print(f"   📚 Current knowledge base entries: {len(agent.knowledge_base)}")
+        
+        # Add new documents to the knowledge base
+        new_docs_added = 0
+        for file_path in file_paths:
+            file_name = os.path.basename(file_path)
+            description = descriptions.get(file_path, f"Document: {file_name}")
+            
+            # Check if document already exists
+            existing_doc = next((doc for doc in agent.knowledge_base if doc['doc_name'] == file_name), None)
+            if not existing_doc:
+                agent.knowledge_base.append({
+                    'doc_name': file_name,
+                    'description': description
+                })
+                new_docs_added += 1
+                print(f"   ➕ Added: {file_name}")
+                print(f"      💬 Description: {description}")
+            else:
+                print(f"   ⚠️  Skipped (already exists): {file_name}")
+        
+        print(f"   📊 New documents added: {new_docs_added}")
+        
+        # Save the updated agent
+        try:
+            self.data_manager.save_agent(agent)
+            print(f"   ✅ Agent metadata saved successfully")
+            print(f"   📚 Total knowledge base entries: {len(agent.knowledge_base)}")
+        except Exception as e:
+            print(f"   ❌ Failed to save agent metadata: {e}")
+
+        # Copy files to the agent's knowledge base directory
+        print(f"\n📁 FILE COPYING PROCESS:")
+        copied_files = 0
+        failed_files = 0
+        
+        for i, file_path in enumerate(file_paths, 1):
+            file_name = os.path.basename(file_path)
+            target_path = os.path.join(agent_kb_path, file_name)
+            
+            print(f"   {i}/{len(file_paths)}: Copying {file_name}...")
+            
+            try:
+                # Get source file info
+                source_size = os.path.getsize(file_path)
+                print(f"      📊 Source size: {source_size:,} bytes")
+                
+                # Copy file
+                copy_start = time.time()
+                shutil.copy(file_path, agent_kb_path)
+                copy_time = time.time() - copy_start
+                
+                # Verify copy
+                if os.path.exists(target_path):
+                    target_size = os.path.getsize(target_path)
+                    print(f"      ✅ Copied successfully!")
+                    print(f"      📊 Target size: {target_size:,} bytes")
+                    print(f"      ⏱️  Copy time: {copy_time:.3f} seconds")
+                    
+                    if source_size == target_size:
+                        print(f"      ✅ Size verification passed")
+                        copied_files += 1
+                    else:
+                        print(f"      ⚠️  Size mismatch detected!")
+                        failed_files += 1
+                else:
+                    print(f"      ❌ File not found after copy!")
+                    failed_files += 1
+                    
+            except Exception as e:
+                print(f"      ❌ Copy failed: {e}")
+                failed_files += 1
+        
+        print(f"\n📊 FILE COPY SUMMARY:")
+        print(f"   ✅ Successfully copied: {copied_files}")
+        print(f"   ❌ Failed: {failed_files}")
+        print(f"   📁 Target directory: {agent_kb_path}")
+
+        # Start ingestion in a background thread
+        print(f"\n🚀 STARTING BACKGROUND INGESTION:")
+        print(f"   ⏳ Launching ingestion thread...")
+        print(f"   🎯 Agent: {agent_id}")
+        print(f"   📁 Files to ingest: {copied_files}")
+        print(f"   💡 The app will remain responsive during this process")
+        
+        # Show user notification
+        messagebox.showinfo(
+            "Ingestion Started", 
+            f"Started ingesting {copied_files} documents for {agent.name}.\n\n"
+            f"The ingestion process is running in the background.\n"
+            f"Check the terminal/console for detailed progress updates.\n\n"
+            f"The app will remain responsive during this process."
+        )
+        
+        # Start ingestion thread
+        try:
+            ingestion_thread = threading.Thread(
+                target=knowledge_manager.ingest_agent_documents,
+                args=(agent_id,),
+                daemon=True
+            )
+            ingestion_thread.start()
+            print(f"   ✅ Ingestion thread started successfully")
+        except Exception as e:
+            print(f"   ❌ Failed to start ingestion thread: {e}")
+
+        # Clear the selection for this agent
+        print(f"\n🧹 CLEANUP:")
+        try:
+            del self.knowledge_files[agent_id]
+            self.knowledge_files_label.config(text="No files selected.")
+            print(f"   ✅ Staged files cleared")
+        except Exception as e:
+            print(f"   ⚠️  Cleanup warning: {e}")
+            
+        print(f"\n✅ KNOWLEDGE BASE INGESTION PROCESS COMPLETED!")
+        print(f"   🎯 Agent: {agent.name} ({agent_id})")
+        print(f"   📁 Files processed: {copied_files}")
+        print(f"   🔄 Background ingestion: In progress")
+        print("="*70)
+
     def start_conversation(self):
         """Start a new conversation."""
         title = self.conv_title_var.get().strip()
@@ -982,9 +1486,10 @@ class AgentConversationSimulatorGUI:
                 color = available_colors[i % len(available_colors)]
                 self.agent_colors[agent.name] = color
                 
-                print(f"DEBUG: Agent '{agent.name}' has API key: {'Yes' if agent.api_key else 'No'}")
-                if agent.api_key:
-                    print(f"DEBUG: Agent '{agent.name}' API key starts with: {agent.api_key[:10]}...")
+                # Simplified debug output for new conversations
+                # print(f"DEBUG: Agent '{agent.name}' has API key: {'Yes' if agent.api_key else 'No'}")
+                # if agent.api_key:
+                #     print(f"DEBUG: Agent '{agent.name}' API key starts with: {agent.api_key[:10]}...")
                 
                 # Show which tools this agent has
                 if hasattr(agent, 'tools') and agent.tools:
@@ -1131,6 +1636,20 @@ class AgentConversationSimulatorGUI:
         # Format timestamp
         timestamp = datetime.now().strftime("%H:%M:%S")
         
+        # Determine alignment based on agent temp number
+        align_right = False
+        if msg_type == "ai" and self.current_conversation_id:
+            # Get the current conversation to access agent temp numbers
+            conversation = self.data_manager.get_conversation_by_id(self.current_conversation_id)
+            if conversation and hasattr(conversation, 'agent_temp_numbers'):
+                # Find agent by sender name
+                all_agents = self.data_manager.load_agents()
+                sender_agent = next((agent for agent in all_agents if agent.name == sender), None)
+                if sender_agent and sender_agent.id in conversation.agent_temp_numbers:
+                    agent_temp_number = conversation.agent_temp_numbers[sender_agent.id]
+                    # Even temp numbers get right alignment
+                    align_right = (agent_temp_number % 2 == 0)
+        
         # Determine message color based on type and agent
         if msg_type == "user":
             bubble_color = UI_COLORS["user_bubble"]
@@ -1158,8 +1677,8 @@ class AgentConversationSimulatorGUI:
             
             bubble_color = self.agent_colors.get(sender, color)
         
-        # Add the bubble to the chat canvas
-        self.chat_canvas.add_bubble(sender, content, timestamp, msg_type, bubble_color)
+        # Add the bubble to the chat canvas with alignment
+        self.chat_canvas.add_bubble(sender, content, timestamp, msg_type, bubble_color, align_right=align_right)
         
         # Save message to conversation
         if self.current_conversation_id:
@@ -1853,8 +2372,16 @@ class AgentConversationSimulatorGUI:
             # Store the current conversation ID
             self.current_conversation_id = conversation.id
             
+            # Initialize agent temp numbers if they don't exist (for old conversations)
+            if not hasattr(conversation, 'agent_temp_numbers') or not conversation.agent_temp_numbers:
+                conversation.agent_temp_numbers = {}
+                for i, agent_id in enumerate(conversation.agents, 1):
+                    conversation.agent_temp_numbers[agent_id] = i
+                # Save the updated conversation
+                self.data_manager.save_conversation(conversation)
+            
             # Get the agents for this conversation
-            all_agents = self.data_manager.load_agents()
+            all_agents = self.data_manager.load_agents()  # Use cached agents for loading conversation
             conversation_agents = []
             
             for agent_id in conversation.agents:
@@ -1885,9 +2412,10 @@ class AgentConversationSimulatorGUI:
                     self.agent_colors[agent.name] = color
             
             for agent in conversation_agents:
-                print(f"DEBUG: Loading agent '{agent.name}' with API key: {'Yes' if agent.api_key else 'No'}")
-                if agent.api_key:
-                    print(f"DEBUG: Agent '{agent.name}' API key starts with: {agent.api_key[:10]}...")
+                # Simplified debug output - only show when actually loading conversation
+                # print(f"DEBUG: Loading agent '{agent.name}' with API key: {'Yes' if agent.api_key else 'No'}")
+                # if agent.api_key:
+                #     print(f"DEBUG: Agent '{agent.name}' API key starts with: {agent.api_key[:10]}...")
                 
                 # Show which tools this agent has
                 if hasattr(agent, 'tools') and agent.tools:
@@ -1947,12 +2475,14 @@ class AgentConversationSimulatorGUI:
                     conv_data["messages"] = internal_messages
                     print(f"DEBUG: Restored {len(internal_messages)} messages to engine")
                     
-                    # If no agent_sending_messages exist, update them now
+                    # If no agent_sending_messages exist, initialize them from conversation history
                     if not hasattr(conversation, 'agent_sending_messages') or not conversation.agent_sending_messages:
-                        print("DEBUG: Generating agent_sending_messages from conversation history")
+                        print("DEBUG: Initializing agent_sending_messages from conversation history")
+                        # Initialize empty agent_sending_messages - this will be populated as the conversation progresses
+                        conversation.agent_sending_messages = {}
                         for agent_name in conv_data["agent_names"]:
-                            self.conversation_engine._update_agent_sending_messages(conversation.id, agent_name)
-                        print("DEBUG: Generated agent context from existing messages")
+                            conversation.agent_sending_messages[agent_name] = []
+                        print("DEBUG: Initialized agent_sending_messages for all agents")
                   # Register callback for message updates
             self.conversation_engine.register_message_callback(
                 conversation.id, self.on_message_received
@@ -1998,8 +2528,8 @@ class AgentConversationSimulatorGUI:
             
             # Add header information
             header_text = f"🎬 Loaded conversation: {conversation.title}\n"
-            header_text += f"📍 Environment: {environment}\n"
-            header_text += f"🎭 Scene: {scene}\n"
+            header_text += f"📍 Environment: {conversation.environment}\n"
+            header_text += f"🎭 Scene: {conversation.scene_description}\n"
             header_text += f"👥 Participants: {', '.join([a.name for a in conversation_agents])}"
             
             self.chat_canvas.add_bubble("System", header_text, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])            # Load existing messages

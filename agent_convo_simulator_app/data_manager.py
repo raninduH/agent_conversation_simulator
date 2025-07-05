@@ -19,6 +19,7 @@ class Agent:
     color: Optional[str] = None  # Color for the agent's messages
     api_key: Optional[str] = None  # API key for the agent's model
     tools: List[str] = field(default_factory=list)  # List of tool names assigned to this agent
+    knowledge_base: List[Dict[str, str]] = field(default_factory=list)  # List of documents with doc_name and description
     
     @classmethod
     def create_new(cls, name: str, role: str, base_prompt: str, personality_traits: List[str], 
@@ -33,7 +34,8 @@ class Agent:
             created_at=datetime.now().isoformat(),
             color=color,
             api_key=api_key,
-            tools=tools or []
+            tools=tools or [],
+            knowledge_base=[]  # Initialize empty knowledge base
         )
 
 
@@ -52,6 +54,7 @@ class Conversation:
     summary: Optional[str]
     thread_id: str
     agent_colors: Dict[str, str] = field(default_factory=dict)  # Maps agent names to color codes
+    agent_temp_numbers: Dict[str, int] = field(default_factory=dict)  # Maps agent IDs to temporary numbers for bubble alignment
     invocation_method: str = "round_robin"  # "round_robin" or "agent_selector"
     termination_condition: Optional[str] = None  # Condition for agent-selector to determine when to end conversation
     agent_selector_api_key: Optional[str] = None  # API key for the agent selector
@@ -63,6 +66,12 @@ class Conversation:
                   agent_selector_api_key: Optional[str] = None) -> 'Conversation':
         """Create a new conversation with auto-generated ID and timestamps."""
         now = datetime.now().isoformat()
+        
+        # Assign temporary numbers to agents starting from 1
+        agent_temp_numbers = {}
+        for i, agent_id in enumerate(agent_ids, 1):
+            agent_temp_numbers[agent_id] = i
+        
         return cls(
             id=f"conv_{uuid.uuid4().hex[:8]}",
             title=title,
@@ -75,6 +84,7 @@ class Conversation:
             last_updated=now,
             summary=None,
             thread_id=f"thread_{uuid.uuid4().hex[:8]}",
+            agent_temp_numbers=agent_temp_numbers,
             invocation_method=invocation_method,
             termination_condition=termination_condition,
             agent_selector_api_key=agent_selector_api_key,
@@ -89,6 +99,10 @@ class DataManager:
         self.data_dir = data_dir
         self.agents_file = os.path.join(data_dir, "agents.json")
         self.conversations_file = os.path.join(data_dir, "conversations.json")
+        
+        # Caching
+        self._agents_cache = None
+        self._agents_cache_timestamp = None
         
         # Ensure data directory exists
         os.makedirs(data_dir, exist_ok=True)
@@ -117,15 +131,40 @@ class DataManager:
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)    
     # Agent management methods
-    def load_agents(self) -> List[Agent]:
-        """Load all agents from JSON file."""
+    def load_agents(self, force_reload: bool = False) -> List[Agent]:
+        """Load all agents from JSON file with caching."""
+        # Check if we need to reload
+        try:
+            file_mtime = os.path.getmtime(self.agents_file)
+        except OSError:
+            file_mtime = 0
+        
+        # Use cache if available and file hasn't changed, unless force_reload is True
+        if (not force_reload and 
+            self._agents_cache is not None and 
+            self._agents_cache_timestamp is not None and 
+            file_mtime <= self._agents_cache_timestamp):
+            return self._agents_cache
+        
+        # Load from file
         data = self._load_json(self.agents_file)
         agents = []
         for agent_data in data.get("agents", []):
-            print(f"DEBUG: Loading agent '{agent_data.get('name')}' with API key: {agent_data.get('api_key')}")
+            # Remove debug output to reduce console spam
+            # print(f"DEBUG: Loading agent '{agent_data.get('name')}' with API key: {agent_data.get('api_key')}")
+            
+            # Ensure knowledge_base field exists, default to empty list if not present
+            if 'knowledge_base' not in agent_data:
+                agent_data['knowledge_base'] = []
+            
             agent = Agent(**agent_data)
-            print(f"DEBUG: Loaded agent '{agent.name}' with API key: {agent.api_key}")
+            # print(f"DEBUG: Loaded agent '{agent.name}' with API key: {agent.api_key}")
             agents.append(agent)
+        
+        # Update cache
+        self._agents_cache = agents
+        self._agents_cache_timestamp = file_mtime
+        
         return agents
     
     def save_agent(self, agent: Agent):
@@ -144,6 +183,10 @@ class DataManager:
         
         data["agents"] = agents
         self._save_json(self.agents_file, data)
+        
+        # Invalidate cache
+        self._agents_cache = None
+        self._agents_cache_timestamp = None
     
     def delete_agent(self, agent_id: str):
         """Delete an agent from JSON file."""
@@ -151,6 +194,10 @@ class DataManager:
         agents = data.get("agents", [])   
         data["agents"] = [a for a in agents if a["id"] != agent_id]
         self._save_json(self.agents_file, data)
+        
+        # Invalidate cache
+        self._agents_cache = None
+        self._agents_cache_timestamp = None
     
     def get_agent_by_id(self, agent_id: str) -> Optional[Agent]:
         """Retrieve an agent by its ID."""
@@ -181,9 +228,11 @@ class DataManager:
                     'summary': conv_data.get('summary'),
                     'thread_id': conv_data.get('thread_id', ''),
                     'agent_colors': conv_data.get('agent_colors', {}),
+                    'agent_temp_numbers': conv_data.get('agent_temp_numbers', {}),
                     'invocation_method': conv_data.get('invocation_method', 'round_robin'),
                     'termination_condition': conv_data.get('termination_condition'),
-                    'agent_selector_api_key': conv_data.get('agent_selector_api_key')
+                    'agent_selector_api_key': conv_data.get('agent_selector_api_key'),
+                    'agent_sending_messages': conv_data.get('agent_sending_messages', {})
                 }
                 conversations.append(Conversation(**conversation_fields))
             except Exception as e:
@@ -271,6 +320,11 @@ class DataManager:
         print(f"DataManager methods: {[method for method in dir(self) if not method.startswith('_')]}")
         return True
     
+    def clear_agents_cache(self):
+        """Manually clear the agents cache to force reload on next access."""
+        self._agents_cache = None
+        self._agents_cache_timestamp = None
+        
     def save_conversation(self, conversation: Conversation):
         """Save a single conversation to JSON file."""
         conversation.last_updated = datetime.now().isoformat()
