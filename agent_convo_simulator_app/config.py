@@ -70,7 +70,7 @@ AGENT_SETTINGS = {
     # Timeout for parallel agent responses in human-like-chat mode (seconds)
     "parallel_response_timeout": 30.0
 }
-
+#asas
 # Gemini model settings
 MODEL_SETTINGS = {
     # Model name for agent responses
