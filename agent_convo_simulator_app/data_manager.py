@@ -20,10 +20,11 @@ class Agent:
     api_key: Optional[str] = None  # API key for the agent's model
     tools: List[str] = field(default_factory=list)  # List of tool names assigned to this agent
     knowledge_base: List[Dict[str, str]] = field(default_factory=list)  # List of documents with doc_name and description
+    gender: Optional[str] = "Unspecified"  # Gender of the agent
     
     @classmethod
     def create_new(cls, name: str, role: str, base_prompt: str, personality_traits: List[str], 
-                   color: str = None, api_key: str = None, tools: List[str] = None) -> 'Agent':
+                   color: str = None, api_key: str = None, tools: List[str] = None, gender: str = "Unspecified") -> 'Agent':
         """Create a new agent with auto-generated ID and timestamp."""
         return cls(
             id=f"agent_{uuid.uuid4().hex[:8]}",
@@ -35,7 +36,8 @@ class Agent:
             color=color,
             api_key=api_key,
             tools=tools or [],
-            knowledge_base=[]  # Initialize empty knowledge base
+            knowledge_base=[],  # Initialize empty knowledge base
+            gender=gender
         )
 
 

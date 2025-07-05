@@ -1,5 +1,7 @@
 venv
 .env
+services\services_venv
+services
 
 agent_convo_simulator_app\.env
 
@@ -9,7 +11,7 @@ __pycache__/
 *$py.class
 
 # Distribution / packaging
-*.egg-info/
+*.egg-info/ 
 dist/
 build/
 

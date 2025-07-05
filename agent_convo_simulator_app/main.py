@@ -456,28 +456,35 @@ class AgentConversationSimulatorGUI:
         self.agent_role_entry = ttk.Entry(details_frame, textvariable=self.agent_role_var, width=30)
         self.agent_role_entry.grid(row=1, column=1, sticky="ew", pady=2, padx=(10, 0))
         
-        ttk.Label(details_frame, text="Personality Traits:").grid(row=2, column=0, sticky="nw", pady=2)
+        ttk.Label(details_frame, text="Gender:").grid(row=2, column=0, sticky="w", pady=2)
+        self.agent_gender_var = tk.StringVar()
+        self.agent_gender_combo = ttk.Combobox(details_frame, textvariable=self.agent_gender_var, width=27, state="readonly")
+        self.agent_gender_combo['values'] = ("Male", "Female", "Non-binary", "Other", "Unspecified")
+        self.agent_gender_combo.grid(row=2, column=1, sticky="ew", pady=2, padx=(10, 0))
+        
+        ttk.Label(details_frame, text="Personality Traits:").grid(row=3, column=0, sticky="nw", pady=2)
+        ttk.Label(details_frame, text="Personality Traits:").grid(row=3, column=0, sticky="nw", pady=2)
         self.agent_traits_var = tk.StringVar()
         self.agent_traits_entry = ttk.Entry(details_frame, textvariable=self.agent_traits_var, width=30)
-        self.agent_traits_entry.grid(row=2, column=1, sticky="ew", pady=2, padx=(10, 0))
+        self.agent_traits_entry.grid(row=3, column=1, sticky="ew", pady=2, padx=(10, 0))
         
-        ttk.Label(details_frame, text="Base Prompt:").grid(row=3, column=0, sticky="nw", pady=2)
+        ttk.Label(details_frame, text="Base Prompt:").grid(row=4, column=0, sticky="nw", pady=2)
         self.agent_prompt_text = scrolledtext.ScrolledText(details_frame, width=40, height=10)
-        self.agent_prompt_text.grid(row=3, column=1, sticky="nsew", pady=2, padx=(10, 0))
-        details_frame.grid_rowconfigure(3, weight=1)
+        self.agent_prompt_text.grid(row=4, column=1, sticky="nsew", pady=2, padx=(10, 0))
+        details_frame.grid_rowconfigure(4, weight=1)
         
-        ttk.Label(details_frame, text="API Key:").grid(row=4, column=0, sticky="w", pady=2)
+        ttk.Label(details_frame, text="API Key:").grid(row=5, column=0, sticky="w", pady=2)
         self.agent_api_key_var = tk.StringVar()
         self.agent_api_key_entry = ttk.Entry(details_frame, textvariable=self.agent_api_key_var, width=30, show="*")
-        self.agent_api_key_entry.grid(row=4, column=1, sticky="ew", pady=2, padx=(10, 0))
+        self.agent_api_key_entry.grid(row=5, column=1, sticky="ew", pady=2, padx=(10, 0))
         
         # Tools selection
-        ttk.Label(details_frame, text="Tools:").grid(row=5, column=0, sticky="nw", pady=2)
+        ttk.Label(details_frame, text="Tools:").grid(row=6, column=0, sticky="nw", pady=2)
         
         # Create a frame for tools with a scrollbar
         tools_frame = ttk.Frame(details_frame)
-        tools_frame.grid(row=5, column=1, sticky="nsew", pady=2, padx=(10, 0))
-        details_frame.grid_rowconfigure(5, weight=1)
+        tools_frame.grid(row=6, column=1, sticky="nsew", pady=2, padx=(10, 0))
+        details_frame.grid_rowconfigure(6, weight=1)
         
         # Create a canvas for scrolling
         tools_canvas = tk.Canvas(tools_frame, height=100)
@@ -504,7 +511,7 @@ class AgentConversationSimulatorGUI:
 
         # Knowledge Base Section
         kb_frame = ttk.LabelFrame(details_frame, text="Knowledge Base", padding="5")
-        kb_frame.grid(row=6, column=0, columnspan=2, sticky="ew", pady=(10, 0), padx=(0,0))
+        kb_frame.grid(row=7, column=0, columnspan=2, sticky="ew", pady=(10, 0), padx=(0,0))
         kb_frame.grid_columnconfigure(1, weight=1)
 
         self.upload_kb_btn = ttk.Button(kb_frame, text="Upload Files (.pdf, .txt)", command=self.upload_knowledge_files, state=tk.NORMAL)
@@ -514,7 +521,7 @@ class AgentConversationSimulatorGUI:
         self.knowledge_files_label.grid(row=0, column=1, padx=5, pady=5, sticky="w")
         
         # Save button
-        ttk.Button(details_frame, text="Save Agent", command=self.save_agent).grid(row=7, column=1, sticky="e", pady=(10, 0))
+        ttk.Button(details_frame, text="Save Agent", command=self.save_agent).grid(row=8, column=1, sticky="e", pady=(10, 0))
     
     def create_conversation_tab(self):
         """Create the conversation setup tab."""
@@ -937,6 +944,7 @@ class AgentConversationSimulatorGUI:
         self.current_editing_agent_id = agent.id  # Track that we're editing this agent
         self.agent_name_var.set(agent.name)
         self.agent_role_var.set(agent.role)
+        self.agent_gender_var.set(getattr(agent, 'gender', 'Unspecified'))  # Load gender with default
         self.agent_traits_var.set(", ".join(agent.personality_traits))
         self.agent_api_key_var.set(agent.api_key or "")  # Load API key
         
@@ -969,6 +977,7 @@ class AgentConversationSimulatorGUI:
         self.current_editing_agent_id = None  # Clear editing state
         self.agent_name_var.set("")
         self.agent_role_var.set("")
+        self.agent_gender_var.set("")  # Clear gender
         self.agent_traits_var.set("")
         self.agent_api_key_var.set("")  # Clear API key
         self.agent_prompt_text.delete(1.0, tk.END)
@@ -1008,7 +1017,8 @@ class AgentConversationSimulatorGUI:
                 personality_traits=original_agent.personality_traits.copy(),
                 color=original_agent.color,
                 api_key=original_agent.api_key,
-                tools=original_agent.tools.copy()
+                tools=original_agent.tools.copy(),
+                gender=getattr(original_agent, 'gender', 'Unspecified')  # Copy gender with default
             )
             
             # Copy knowledge base if it exists
@@ -1180,6 +1190,7 @@ class AgentConversationSimulatorGUI:
         """Save the current agent."""
         name = self.agent_name_var.get().strip()
         role = self.agent_role_var.get().strip()
+        gender = self.agent_gender_var.get().strip()
         traits_str = self.agent_traits_var.get().strip()
         api_key = self.agent_api_key_var.get().strip()  # Get API key
         prompt = self.agent_prompt_text.get(1.0, tk.END).strip()
@@ -1201,6 +1212,7 @@ class AgentConversationSimulatorGUI:
             if agent:
                 agent.name = name
                 agent.role = role
+                agent.gender = gender if gender else "Unspecified"  # Set gender with default
                 agent.base_prompt = prompt  # Fix: Set base_prompt
                 agent.personality_traits = traits
                 agent.api_key = api_key if api_key else None  # Set API key
@@ -1218,7 +1230,7 @@ class AgentConversationSimulatorGUI:
                 return
         else:
             # Create new agent
-            agent = Agent.create_new(name, role, prompt, traits, api_key=api_key if api_key else None, tools=selected_tools)
+            agent = Agent.create_new(name, role, prompt, traits, api_key=api_key if api_key else None, tools=selected_tools, gender=gender if gender else "Unspecified")
             
             # Auto-manage knowledge_base_retriever tool
             self._update_knowledge_base_tool(agent)
@@ -1661,16 +1673,34 @@ class AgentConversationSimulatorGUI:
         # Determine alignment based on agent temp number
         align_right = False
         if msg_type == "ai" and self.current_conversation_id:
-            # Get the current conversation to access agent temp numbers
-            conversation = self.data_manager.get_conversation_by_id(self.current_conversation_id)
-            if conversation and hasattr(conversation, 'agent_temp_numbers'):
+            # First try to get agent temp numbers from the active conversation engine
+            agent_temp_numbers = None
+            if (hasattr(self, 'conversation_engine') and 
+                self.conversation_engine and 
+                self.current_conversation_id in self.conversation_engine.active_conversations):
+                conv_data = self.conversation_engine.active_conversations[self.current_conversation_id]
+                agent_temp_numbers = conv_data.get("agent_temp_numbers")
+                print(f"DEBUG: Using agent_temp_numbers from conversation engine: {agent_temp_numbers}")
+            
+            # Fall back to conversation from database if not found in engine
+            if not agent_temp_numbers:
+                conversation = self.data_manager.get_conversation_by_id(self.current_conversation_id)
+                if conversation and hasattr(conversation, 'agent_temp_numbers'):
+                    agent_temp_numbers = conversation.agent_temp_numbers
+                    print(f"DEBUG: Using agent_temp_numbers from database: {agent_temp_numbers}")
+            
+            # Apply alignment logic if we have agent temp numbers
+            if agent_temp_numbers:
                 # Find agent by sender name
                 all_agents = self.data_manager.load_agents()
                 sender_agent = next((agent for agent in all_agents if agent.name == sender), None)
-                if sender_agent and sender_agent.id in conversation.agent_temp_numbers:
-                    agent_temp_number = conversation.agent_temp_numbers[sender_agent.id]
+                if sender_agent and sender_agent.id in agent_temp_numbers:
+                    agent_temp_number = agent_temp_numbers[sender_agent.id]
                     # Even temp numbers get right alignment
                     align_right = (agent_temp_number % 2 == 0)
+                    print(f"DEBUG: Agent '{sender}' (ID: {sender_agent.id}) has temp number {agent_temp_number}, align_right: {align_right}")
+                else:
+                    print(f"DEBUG: Agent '{sender}' not found in agent_temp_numbers or agents list")
         
         # Determine message color based on type and agent
         if msg_type == "user":
@@ -2082,6 +2112,10 @@ class AgentConversationSimulatorGUI:
         self.restart_conv_btn = ttk.Button(btn_frame, text="Restart with New Condition", command=self.restart_selected_conversation, state="disabled")
         self.restart_conv_btn.pack(side=tk.LEFT, padx=(0, 10))
         
+        # Delete button
+        self.delete_conv_btn = ttk.Button(btn_frame, text="Delete", command=self.delete_selected_conversation, state="disabled")
+        self.delete_conv_btn.pack(side=tk.LEFT, padx=(0, 10))
+        
         # Refresh button
         ttk.Button(btn_frame, text="Refresh", command=self.refresh_past_conversations).pack(side=tk.LEFT, padx=(0, 10))
     
@@ -2243,6 +2277,7 @@ class AgentConversationSimulatorGUI:
         if selection:
             self.edit_conv_btn.config(state="normal")
             self.load_conv_btn.config(state="normal")
+            self.delete_conv_btn.config(state="normal")  # Enable delete button
             self.restart_conv_btn.config(state="disabled")  # Disable by default
             
             conversations = self.data_manager.load_conversations()
@@ -2257,6 +2292,7 @@ class AgentConversationSimulatorGUI:
         else:
             self.edit_conv_btn.config(state="disabled")
             self.load_conv_btn.config(state="disabled")
+            self.delete_conv_btn.config(state="disabled")  # Disable delete button
             self.restart_conv_btn.config(state="disabled")
     
     def edit_selected_conversation(self):
@@ -2398,6 +2434,44 @@ class AgentConversationSimulatorGUI:
         except Exception as e:
             messagebox.showerror("Error", f"Failed to save conversation: {str(e)}")
     
+    def delete_selected_conversation(self):
+        """Delete the selected conversation after confirmation."""
+        selection = self.past_conversations_listbox.curselection()
+        if not selection:
+            messagebox.showwarning("No Selection", "Please select a conversation to delete.")
+            return
+        
+        if not hasattr(self, 'past_conversations_data') or not self.past_conversations_data:
+            messagebox.showerror("Error", "No conversation data available.")
+            return
+        
+        conversation = self.past_conversations_data[selection[0]]
+        
+        # Show confirmation dialog
+        result = messagebox.askyesno(
+            "Confirm Delete", 
+            f"Are you sure you want to permanently delete the conversation '{conversation.title}'?\n\n"
+            f"This action cannot be undone.",
+            icon='warning'
+        )
+        
+        if result:
+            try:
+                # Delete the conversation using data manager
+                self.data_manager.delete_conversation(conversation.id)
+                
+                # Show success message
+                messagebox.showinfo("Success", f"Conversation '{conversation.title}' has been deleted successfully.")
+                
+                # Refresh the conversations list automatically
+                self.refresh_past_conversations()
+                
+                print(f"DEBUG: Successfully deleted conversation '{conversation.title}' (ID: {conversation.id})")
+                
+            except Exception as e:
+                print(f"ERROR: Failed to delete conversation: {e}")
+                messagebox.showerror("Error", f"Failed to delete conversation: {str(e)}")
+    
     def run(self):
         """Start the GUI application main loop."""
         print("Starting Multi-Agent Conversation Simulator...")
@@ -2518,6 +2592,11 @@ class AgentConversationSimulatorGUI:
                     conv_data["messages"] = internal_messages
                     print(f"DEBUG: Restored {len(internal_messages)} messages to engine")
                     
+                    # Restore agent_temp_numbers if they exist
+                    if hasattr(conversation, 'agent_temp_numbers') and conversation.agent_temp_numbers:
+                        conv_data["agent_temp_numbers"] = conversation.agent_temp_numbers
+                        print(f"DEBUG: Restored agent_temp_numbers for {len(conversation.agent_temp_numbers)} agents")
+                    
                     # If no agent_sending_messages exist, initialize them from conversation history
                     if not hasattr(conversation, 'agent_sending_messages') or not conversation.agent_sending_messages:
                         print("DEBUG: Initializing agent_sending_messages from conversation history")
@@ -2600,9 +2679,23 @@ class AgentConversationSimulatorGUI:
                             # Get agent color if available
                             color = self.agent_colors.get(sender, UI_COLORS["agent_colors"][0])
                             
+                            # Determine alignment based on agent temp number
+                            align_right = False
+                            if msg_type == "ai":
+                                # Get agent temp numbers from the conversation
+                                agent_temp_numbers = getattr(conversation, 'agent_temp_numbers', {})
+                                if agent_temp_numbers:
+                                    # Find agent by sender name
+                                    all_agents = self.data_manager.load_agents()
+                                    sender_agent = next((agent for agent in all_agents if agent.name == sender), None)
+                                    if sender_agent and sender_agent.id in agent_temp_numbers:
+                                        agent_temp_number = agent_temp_numbers[sender_agent.id]
+                                        # Even temp numbers get right alignment
+                                        align_right = (agent_temp_number % 2 == 0)
+                            
                             short_content = content[:30] + "..." if len(content) > 30 else content
-                            print(f"DEBUG: Loading message {i+1}/{message_count} from '{sender}': {short_content}")
-                            self.chat_canvas.add_bubble(sender, content, timestamp, msg_type, color)
+                            print(f"DEBUG: Loading message {i+1}/{message_count} from '{sender}': {short_content} (align_right: {align_right})")
+                            self.chat_canvas.add_bubble(sender, content, timestamp, msg_type, color, align_right=align_right)
                         
                         # Update UI after each batch
                         self.root.update()

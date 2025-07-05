@@ -276,6 +276,14 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             else:
                 print("INFO: Agent selector will use the provided specific API key")
         
+        # Assign temporary numbers to agents starting from 1 for chat bubble alignment
+        agent_temp_numbers = {}
+        for i, agent_config in enumerate(agents_config, 1):
+            agent_id = agent_config.get("id")
+            if agent_id:
+                agent_temp_numbers[agent_id] = i
+                print(f"DEBUG: Assigned temp number {i} to agent '{agent_config['name']}' (ID: {agent_id})")
+        
         # Store conversation data (agents will be created individually when invoked)
         self.active_conversations[conversation_id] = {
             "agents_config": agents_config,
@@ -294,7 +302,8 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             "agent_sending_messages": {name: [] for name in agent_names},  # Initialize per-agent message lists
             "round_counter": 0,  # Track rounds for human-like-chat mode
             "last_round_participants": [],  # Track who participated in the last round
-            "current_round_responses": {}  # Track responses in current round for parallel processing
+            "current_round_responses": {},  # Track responses in current round for parallel processing
+            "agent_temp_numbers": agent_temp_numbers  # Store agent temp numbers for chat bubble alignment
         }
             # Start the conversation automatically after a short delay
         threading.Timer(CONVERSATION_TIMING["start_delay"], self._start_conversation_cycle, args=(conversation_id,)).start()
@@ -936,6 +945,11 @@ Do not include any other text or explanation."""
                 conversation.agent_sending_messages = conv_data["agent_sending_messages"]
                 print(f"DEBUG: Saved agent_sending_messages for {len(conv_data['agent_sending_messages'])} agents")
             
+            # Save agent_temp_numbers if they exist
+            if "agent_temp_numbers" in conv_data:
+                conversation.agent_temp_numbers = conv_data["agent_temp_numbers"]
+                print(f"DEBUG: Saved agent_temp_numbers for {len(conv_data['agent_temp_numbers'])} agents")
+            
             # Save to database
             self.data_manager.save_conversation(conversation)
             print(f"DEBUG: Saved conversation state for {conversation_id}")
@@ -1017,6 +1031,18 @@ Do not include any other text or explanation."""
                 if hasattr(conversation, 'agent_sending_messages') and conversation.agent_sending_messages:
                     self.active_conversations[conversation_id]["agent_sending_messages"] = conversation.agent_sending_messages
                     print(f"DEBUG: Restored agent_sending_messages for {len(conversation.agent_sending_messages)} agents")
+                
+                # Restore agent_temp_numbers if they exist, otherwise create them
+                if hasattr(conversation, 'agent_temp_numbers') and conversation.agent_temp_numbers:
+                    self.active_conversations[conversation_id]["agent_temp_numbers"] = conversation.agent_temp_numbers
+                    print(f"DEBUG: Restored agent_temp_numbers for {len(conversation.agent_temp_numbers)} agents")
+                else:
+                    # Create agent temp numbers for backward compatibility
+                    agent_temp_numbers = {}
+                    for i, agent in enumerate(conversation_agents, 1):
+                        agent_temp_numbers[agent.id] = i
+                    self.active_conversations[conversation_id]["agent_temp_numbers"] = agent_temp_numbers
+                    print(f"DEBUG: Created agent_temp_numbers for backward compatibility: {len(agent_temp_numbers)} agents")
                 
                 print(f"DEBUG: Restored conversation from database with {len(conversation.messages)} messages")
                 
