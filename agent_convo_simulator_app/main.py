@@ -559,22 +559,44 @@ class AgentConversationSimulatorGUI:
         method_frame = ttk.Frame(settings_frame)
         method_frame.grid(row=3, column=1, sticky="ew", pady=(10, 2), padx=(10, 0))
         
-        ttk.Radiobutton(
+        rb1 = ttk.Radiobutton(
             method_frame, 
             text="Round Robin", 
             variable=self.invocation_method_var, 
             value="round_robin",
             command=self._toggle_termination_condition
-        ).pack(side=tk.LEFT, padx=(0, 10))
+        )
+        rb1.pack(side=tk.LEFT, padx=(0, 10))
         
-        ttk.Radiobutton(
+        rb2 = ttk.Radiobutton(
             method_frame, 
             text="Agent Selector (LLM)", 
             variable=self.invocation_method_var, 
             value="agent_selector",
-            command=self._toggle_termination_condition        ).pack(side=tk.LEFT)
+            command=self._toggle_termination_condition
+        )
+        rb2.pack(side=tk.LEFT, padx=(0, 10))
         
-        # Termination condition (available for both modes)
+        rb3 = ttk.Radiobutton(
+            method_frame, 
+            text="Human-like Chat", 
+            variable=self.invocation_method_var, 
+            value="human_like_chat",
+            command=self._toggle_termination_condition
+        )
+        rb3.pack(side=tk.LEFT)
+        
+        # Add tooltips to radio buttons
+        rb1.bind("<Enter>", lambda e: self.show_tooltip(e, "Agents take turns speaking in a fixed order"))
+        rb1.bind("<Leave>", self.hide_tooltip)
+        
+        rb2.bind("<Enter>", lambda e: self.show_tooltip(e, "An LLM intelligently chooses which agent should speak next"))
+        rb2.bind("<Leave>", self.hide_tooltip)
+        
+        rb3.bind("<Enter>", lambda e: self.show_tooltip(e, "Natural conversation flow where agents respond in parallel and decide whether to participate"))
+        rb3.bind("<Leave>", self.hide_tooltip)
+        
+        # Termination condition (available for all modes)
         ttk.Label(settings_frame, text="Termination Condition:").grid(row=4, column=0, sticky="nw", pady=2)
         self.termination_condition_text = scrolledtext.ScrolledText(settings_frame, width=40, height=4)
         self.termination_condition_text.grid(row=4, column=1, sticky="ew", pady=2, padx=(10, 0))
@@ -2104,21 +2126,42 @@ class AgentConversationSimulatorGUI:
         method_frame = ttk.Frame(edit_form_frame)
         method_frame.grid(row=2, column=1, sticky="ew", pady=5, padx=(10, 0))
         
-        ttk.Radiobutton(
+        edit_rb1 = ttk.Radiobutton(
             method_frame, 
             text="Round Robin", 
             variable=self.edit_invocation_method_var, 
             value="round_robin",
             command=self._toggle_edit_termination_condition
-        ).pack(side=tk.LEFT, padx=(0, 10))
+        )
+        edit_rb1.pack(side=tk.LEFT, padx=(0, 10))
         
-        ttk.Radiobutton(
+        edit_rb2 = ttk.Radiobutton(
             method_frame, 
             text="Agent Selector (LLM)", 
             variable=self.edit_invocation_method_var, 
             value="agent_selector",
             command=self._toggle_edit_termination_condition
-        ).pack(side=tk.LEFT)
+        )
+        edit_rb2.pack(side=tk.LEFT, padx=(0, 10))
+        
+        edit_rb3 = ttk.Radiobutton(
+            method_frame, 
+            text="Human-like Chat", 
+            variable=self.edit_invocation_method_var, 
+            value="human_like_chat",
+            command=self._toggle_edit_termination_condition
+        )
+        edit_rb3.pack(side=tk.LEFT)
+        
+        # Add tooltips to edit dialog radio buttons
+        edit_rb1.bind("<Enter>", lambda e: self.show_tooltip(e, "Agents take turns speaking in a fixed order"))
+        edit_rb1.bind("<Leave>", self.hide_tooltip)
+        
+        edit_rb2.bind("<Enter>", lambda e: self.show_tooltip(e, "An LLM intelligently chooses which agent should speak next"))
+        edit_rb2.bind("<Leave>", self.hide_tooltip)
+        
+        edit_rb3.bind("<Enter>", lambda e: self.show_tooltip(e, "Natural conversation flow where agents respond in parallel and decide whether to participate"))
+        edit_rb3.bind("<Leave>", self.hide_tooltip)
         
         # Termination condition
         ttk.Label(edit_form_frame, text="Termination Condition:").grid(row=3, column=0, sticky="nw", pady=5)
@@ -2183,7 +2226,7 @@ class AgentConversationSimulatorGUI:
             for conv in conversations:
                 # Format display text
                 status_indicator = "🟢" if conv.status == "active" else "🔴" if conv.status == "completed" else "⏸️"
-                method_indicator = "🤖" if getattr(conv, 'invocation_method', 'round_robin') == "agent_selector" else "🔄"
+                method_indicator = "🤖" if getattr(conv, 'invocation_method', 'round_robin') == "agent_selector" else "�" if getattr(conv, 'invocation_method', 'round_robin') == "human_like_chat" else "�🔄"
                 display_text = f"{status_indicator} {method_indicator} {conv.title} - {conv.environment}"
                 print(f"DEBUG: Adding conversation: {display_text}")
                 self.past_conversations_listbox.insert(tk.END, display_text)
@@ -2670,65 +2713,100 @@ class AgentConversationSimulatorGUI:
         if not selection:
             messagebox.showwarning("No Selection", "Please select a completed conversation to restart.")
             return
-
+        
         if not hasattr(self, 'past_conversations_data') or not self.past_conversations_data:
             messagebox.showerror("Error", "No conversation data available.")
             return
-
+        
         conversation = self.past_conversations_data[selection[0]]
-
+        
+        # Check if conversation is completed
         if not hasattr(conversation, 'status') or conversation.status != "completed":
             messagebox.showwarning("Invalid Status", "Only completed conversations can be restarted.")
             return
-
+        
         # Create dialog to get new termination condition
         dialog = tk.Toplevel(self.root)
         dialog.title("Restart Conversation")
         dialog.geometry("600x400")
         dialog.transient(self.root)
         dialog.grab_set()
-
+        
         # Center the dialog
         dialog.update_idletasks()
         x = (dialog.winfo_screenwidth() // 2) - (dialog.winfo_width() // 2)
         y = (dialog.winfo_screenheight() // 2) - (dialog.winfo_height() // 2)
         dialog.geometry(f"+{x}+{y}")
-
-        dialog.grid_rowconfigure(2, weight=1)
+        
+        # Create main frame
+        main_frame = ttk.Frame(dialog, padding="20")
+        main_frame.grid(row=0, column=0, sticky="nsew", padx=20, pady=20)
+        dialog.grid_rowconfigure(0, weight=1)
         dialog.grid_columnconfigure(0, weight=1)
-
-        title_label = ttk.Label(dialog, text=f"Restart '{conversation.title}'", font=("Arial", 14, "bold"))
-        title_label.grid(row=0, column=0, pady=10)
-
-        info_text = "This conversation has been completed. To restart it, please provide a new termination condition."
-        info_label = ttk.Label(dialog, text=info_text, wraplength=550, justify="left")
+        
+        # Title
+        title_label = ttk.Label(main_frame, text=f"Restart Conversation: {conversation.name}", 
+                               font=("Arial", 14, "bold"))
+        title_label.grid(row=0, column=0, pady=(0, 20), sticky="ew")
+        
+        # Info text
+        info_text = f"This conversation has been completed. To restart it, please provide a new termination condition."
+        info_label = ttk.Label(main_frame, text=info_text, wraplength=550, justify="left")
         info_label.grid(row=1, column=0, padx=20, pady=10, sticky="ew")
-
-        input_frame = ttk.LabelFrame(dialog, text="New Termination Condition", padding="10")
+        
+        # Input frame
+        input_frame = ttk.LabelFrame(main_frame, text="New Termination Condition", padding="10")
         input_frame.grid(row=2, column=0, sticky="nsew", padx=20, pady=10)
+        main_frame.grid_rowconfigure(2, weight=1)
+        main_frame.grid_columnconfigure(0, weight=1)
+        
+        # Text input
+        condition_text = scrolledtext.ScrolledText(input_frame, width=60, height=8)
+        condition_text.grid(row=0, column=0, sticky="nsew")
         input_frame.grid_rowconfigure(0, weight=1)
         input_frame.grid_columnconfigure(0, weight=1)
-
-        termination_text = scrolledtext.ScrolledText(input_frame, width=60, height=8)
-        termination_text.grid(row=0, column=0, sticky="nsew")
-
-        button_frame = ttk.Frame(dialog)
+        
+        # Button frame
+        button_frame = ttk.Frame(main_frame)
         button_frame.grid(row=3, column=0, pady=20)
-
+        
         def on_restart():
-            new_condition = termination_text.get(1.0, tk.END).strip()
+            new_condition = condition_text.get("1.0", tk.END).strip()
             if not new_condition:
                 messagebox.showwarning("Warning", "Please enter a new termination condition to restart the conversation.", parent=dialog)
                 return
-
+            
             dialog.destroy()
             self.restart_conversation_with_new_condition(conversation, new_condition)
-
+        
         def on_cancel():
             dialog.destroy()
-
+        
         ttk.Button(button_frame, text="Restart Conversation", command=on_restart).pack(side=tk.LEFT, padx=5)
         ttk.Button(button_frame, text="Cancel", command=on_cancel).pack(side=tk.LEFT, padx=5)
+
+    def restart_conversation_with_new_condition(self, conversation, new_condition):
+        """Restart a conversation with a new termination condition."""
+        try:
+            # Use the conversation engine to restart the conversation
+            if hasattr(self, 'conversation_engine') and self.conversation_engine:
+                success = self.conversation_engine.restart_conversation_with_new_condition(
+                    conversation.id, new_condition
+                )
+                
+                if success:
+                    messagebox.showinfo("Success", f"Conversation '{conversation.name}' has been restarted with the new termination condition.")
+                    # Refresh the past conversations list
+                    self.load_past_conversations()
+                else:
+                    messagebox.showerror("Error", "Failed to restart the conversation.")
+            else:
+                messagebox.showerror("Error", "Conversation engine not available.")
+                
+        except Exception as e:
+            print(f"Error restarting conversation: {e}")
+            messagebox.showerror("Error", f"Failed to restart conversation: {str(e)}")
+
 
 if __name__ == "__main__":
     """Main entry point for the application."""
