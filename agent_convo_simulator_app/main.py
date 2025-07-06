@@ -229,16 +229,38 @@ class ChatBubble(tk.Frame):
     
     def _lighten_color(self, color):
         """Create a lighter version of the given color."""
-        # Simple approach: just return a generic light color
-        # In a more sophisticated implementation, you'd parse the hex color and adjust brightness
-        if color == "#E8F4FD":  # Light blue
-            return "#F0F8FF"
-        elif color == "#E8F8E8":  # Light green  
-            return "#F0FFF0"
-        elif color == "#FFE8E8":  # Light red
-            return "#FFF0F0"
-        else:
-            return "#F5F5F5"  # Default light gray
+        try:
+            # More sophisticated color lightening
+            # Convert color name to RGB if it's a hex color
+            if color.startswith('#'):
+                # Remove the # and convert to RGB
+                hex_color = color[1:]
+                if len(hex_color) == 6:
+                    r = int(hex_color[0:2], 16)
+                    g = int(hex_color[2:4], 16)
+                    b = int(hex_color[4:6], 16)
+                    
+                    # Lighten by adding 30 to each component (max 255)
+                    r = min(255, r + 30)
+                    g = min(255, g + 30)
+                    b = min(255, b + 30)
+                    
+                    return f"#{r:02x}{g:02x}{b:02x}"
+        except:
+            pass
+        
+        # Fallback for specific known colors
+        color_map = {
+            "#E8F4FD": "#F0F8FF",  # Light blue to lighter blue
+            "#E8F8E8": "#F0FFF0",  # Light green to lighter green
+            "#FFE8E8": "#FFF0F0",  # Light red to lighter red
+            "#FFF8DC": "#FFFACD",  # Light yellow to lighter yellow
+            "#E6E6FA": "#F8F8FF",  # Light purple to lighter purple
+            "#F0E68C": "#F5F5DC",  # Light brown to lighter brown
+            "#F0FFFF": "#F5FFFA"   # Light cyan to lighter cyan
+        }
+        
+        return color_map.get(color, "#F8F8F8")  # Default very light gray
     
     def _update_bg_color(self, color):
         """Update background color for all child widgets."""
@@ -376,6 +398,18 @@ class ChatCanvas(tk.Canvas):
             # Clean up the reference
             del self.message_bubbles[message_id]
     
+    def stop_all_blinking(self):
+        """Stop all blinking animations for safety during pause."""
+        print(f"DEBUG: Stopping all blinking animations ({len(self.message_bubbles)} bubbles)")
+        # Get a copy of the keys to avoid modification during iteration
+        bubble_ids = list(self.message_bubbles.keys())
+        for message_id in bubble_ids:
+            if message_id in self.message_bubbles:
+                bubble = self.message_bubbles[message_id]
+                bubble.stop_blink()
+                del self.message_bubbles[message_id]
+        print(f"DEBUG: All blinking animations stopped")
+    
     def auto_scroll(self):
         """Automatically scroll to the bottom of the chat."""
         try:
@@ -415,6 +449,11 @@ class AgentConversationSimulatorGUI:
         self.pending_audio_messages = {}  # message_id -> message_data for messages waiting for audio
         self.audio_queue = []  # Queue of messages waiting to be sent to TTS
         self.current_playing_message_id = None
+        
+        # Message state tracking for pause cleanup
+        self.displayed_messages = set()  # Set of message IDs that have been displayed
+        self.message_bubbles = {}  # message_id -> bubble_widget mapping for removal
+        self.removed_messages = set()  # Set of message IDs that were removed during pause cleanup
         
         # Initialize knowledge manager
         self.knowledge_files = {} # To store paths of files to be uploaded
@@ -1619,7 +1658,16 @@ class AgentConversationSimulatorGUI:
             self.update_status("Starting conversation...")
             
             # Initialize conversation engine (no default API key - agents will use their own)
-            self.conversation_engine = ConversationSimulatorEngine()            # Initialize agent colors dictionary
+            self.conversation_engine = ConversationSimulatorEngine()
+            
+            # Reset message counter and clear state for new conversation
+            self._message_counter = 0
+            self.removed_messages.clear()  # Clear tracking of removed messages
+            self.pending_audio_messages.clear()  # Clear any pending audio
+            self.displayed_messages.clear()  # Clear displayed message tracking
+            self.message_bubbles.clear()  # Clear bubble tracking
+            
+            # Initialize agent colors dictionary
             self.agent_colors = {}
               # Assign unique colors to agents from the predefined palette
             available_colors = list(UI_COLORS["agent_colors"])
@@ -1710,7 +1758,63 @@ class AgentConversationSimulatorGUI:
             # Register callback for message updates
             self.conversation_engine.register_message_callback(
                 conversation.id, self.on_message_received
-            )            # Update UI
+            )
+            
+            # Set up audio synchronization callbacks if audio is enabled
+            if self.audio_enabled and self.audio_manager:
+                # Create wrapper functions to handle the callbacks
+                def on_audio_generation_requested(conv_id, agent_name):
+                    if conv_id == conversation.id:
+                        self.conversation_engine.on_audio_generation_requested(conv_id, agent_name)
+                
+                def on_audio_ready_callback(conv_id, agent_id, message_id):
+                    if conv_id == conversation.id:
+                        # Get agent name from agent_id
+                        agent_name = None
+                        for agent_config in agents_config:
+                            if agent_config.get("id") == agent_id:
+                                agent_name = agent_config.get("name")
+                                break
+                        if agent_name:
+                            self.conversation_engine.on_audio_ready(conv_id, agent_name)
+                
+                def on_audio_finished_callback(conv_id, agent_id, message_id):
+                    if conv_id == conversation.id:
+                        # Get agent name from agent_id
+                        agent_name = None
+                        for agent_config in agents_config:
+                            if agent_config.get("id") == agent_id:
+                                agent_name = agent_config.get("name")
+                                break
+                        if agent_name:
+                            self.conversation_engine.on_audio_finished(conv_id, agent_name)
+                
+                # Store original callbacks
+                self.original_audio_ready_callback = self.audio_manager.audio_ready_callback
+                self.original_audio_finished_callback = self.audio_manager.audio_finished_callback
+                
+                # Set enhanced callbacks that call both original and conversation engine callbacks
+                def enhanced_audio_ready_callback(conv_id, agent_id, message_id):
+                    # Call original callback first
+                    if self.original_audio_ready_callback:
+                        self.original_audio_ready_callback(conv_id, agent_id, message_id)
+                    # Then call conversation engine callback
+                    on_audio_ready_callback(conv_id, agent_id, message_id)
+                
+                def enhanced_audio_finished_callback(conv_id, agent_id, message_id):
+                    # Call original callback first
+                    if self.original_audio_finished_callback:
+                        self.original_audio_finished_callback(conv_id, agent_id, message_id)
+                    # Then call conversation engine callback
+                    on_audio_finished_callback(conv_id, agent_id, message_id)
+                
+                # Set the enhanced callbacks
+                self.audio_manager.set_audio_ready_callback(enhanced_audio_ready_callback)
+                self.audio_manager.set_audio_finished_callback(enhanced_audio_finished_callback)
+                
+                print("DEBUG: Set up audio synchronization callbacks for conversation engine")
+            
+            # Update UI
             self.conversation_active = True
             self.update_simulation_controls(True)
             self.current_env_label.config(text=environment)
@@ -1808,15 +1912,37 @@ class AgentConversationSimulatorGUI:
         ).start()
     def on_message_received(self, message_data: Dict[str, Any]):
         """Callback for when a new message is received."""
+        # Check if conversation is still active and not paused
+        if not self.conversation_active:
+            print(f"DEBUG: Ignoring message callback - conversation not active")
+            return
+        
+        # Check if conversation engine shows this conversation as active
+        if (hasattr(self, 'conversation_engine') and 
+            self.conversation_engine and 
+            self.current_conversation_id in self.conversation_engine.active_conversations):
+            conv_data = self.conversation_engine.active_conversations[self.current_conversation_id]
+            if conv_data.get("status") != "active":
+                print(f"DEBUG: Ignoring message callback - conversation status is {conv_data.get('status')}")
+                return
+        
         # Check if voices are enabled for this conversation
         conversation = self.data_manager.get_conversation_by_id(self.current_conversation_id)
         voices_enabled = conversation and conversation.voices_enabled
         
-        # Generate a unique message ID
-        import time
-        import random
-        message_id = f"msg_{int(time.time() * 1000)}_{random.randint(1000, 9999)}"
+        # Generate a predictable message ID based on conversation and message count
+        if not hasattr(self, '_message_counter'):
+            self._message_counter = 0
+        self._message_counter += 1
+        message_id = f"{self.current_conversation_id}_msg_{self._message_counter}"
         message_data["message_id"] = message_id
+        
+        # Additional check: ignore if this message was already marked as removed during pause cleanup
+        if hasattr(self, 'removed_messages') and message_id in self.removed_messages:
+            print(f"DEBUG: Ignoring message callback - message {message_id} was removed during pause cleanup")
+            return
+        
+        print(f"DEBUG: Processing message callback for {message_data.get('sender', 'Unknown')} (ID: {message_id})")
         
         if voices_enabled and message_data.get("type") == "ai":
             # Handle voice-enabled message
@@ -1835,6 +1961,7 @@ class AgentConversationSimulatorGUI:
         sender = message_data.get("sender", "Agent")
         content = message_data.get("content", "")
         message_id = message_data["message_id"]
+        is_voice_processing = message_data.get("voice_processing", False)
         
         # Check if audio manager is available
         if not self.audio_enabled or not self.audio_manager:
@@ -1864,25 +1991,60 @@ class AgentConversationSimulatorGUI:
             self.root.after(0, lambda: self.display_message(sender, content, "ai", message_id))
             return
         
-        # Store message data for later display when audio is ready
-        self.pending_audio_messages[message_id] = message_data
-        
-        # Request audio generation
-        self.audio_manager.request_audio(
-            self.current_conversation_id,
-            agent.id,
-            message_id,
-            content,
-            voice
-        )
-        
-        print(f"DEBUG: Requested audio for {sender} with voice {voice}")
+        # For voice processing mode (human-like-chat), send to TTS first without displaying
+        if is_voice_processing:
+            print(f"DEBUG: Voice processing mode - sending to TTS first for {sender}")
+            
+            # Store message data for later display when audio is ready
+            self.pending_audio_messages[message_id] = message_data
+            
+            # Request audio generation (message will be displayed when audio is ready)
+            self.audio_manager.request_audio(
+                self.current_conversation_id,
+                agent.id,
+                message_id,
+                content,
+                voice
+            )
+            
+            print(f"DEBUG: Sent to TTS for {sender} with voice {voice} - will display when ready")
+        else:
+            # Original behavior for regular voice-enabled mode
+            # Store message data for later display when audio is ready
+            self.pending_audio_messages[message_id] = message_data
+            
+            # Request audio generation
+            self.audio_manager.request_audio(
+                self.current_conversation_id,
+                agent.id,
+                message_id,
+                content,
+                voice
+            )
+            
+            print(f"DEBUG: Requested audio for {sender} with voice {voice}")
     
     def on_audio_ready(self, conversation_id: str, agent_id: str, message_id: str):
         """Callback when audio is ready for a message."""
+        # Check if conversation is still active
+        if not self.conversation_active or conversation_id != self.current_conversation_id:
+            print(f"DEBUG: Ignoring audio ready callback - conversation not active or ID mismatch")
+            return
+        
+        # Check if this message was removed during pause cleanup
+        if message_id in self.removed_messages:
+            print(f"DEBUG: Ignoring audio ready callback for removed message {message_id}")
+            return
+        
         if message_id in self.pending_audio_messages:
-            # Display the message now that audio is ready
             message_data = self.pending_audio_messages[message_id]
+            is_voice_processing = message_data.get("voice_processing", False)
+            
+            # For both voice processing and regular voice mode, display and play when ready
+            # The conversation engine manages the queue to ensure only one plays at a time
+            print(f"DEBUG: Audio ready for message {message_id}, displaying and starting playback")
+            
+            # Display the message now
             self.root.after(0, lambda: self.display_message(
                 message_data.get("sender", "Agent"),
                 message_data.get("content", ""),
@@ -1895,26 +2057,52 @@ class AgentConversationSimulatorGUI:
             
             # Start blinking animation for the message bubble
             self.root.after(0, lambda: self._start_bubble_blink(message_id))
-            
-            print(f"DEBUG: Audio ready for message {message_id}, displaying and starting playback")
+        else:
+            print(f"DEBUG: Audio ready for message {message_id} but no pending message data found")
     
     def on_audio_finished(self, conversation_id: str, agent_id: str, message_id: str):
         """Callback when audio finishes playing."""
-        # Stop blinking animation
+        # Check if conversation ID matches (allow cleanup even if paused)
+        if conversation_id != self.current_conversation_id:
+            print(f"DEBUG: Ignoring audio finished callback - conversation ID mismatch")
+            return
+        
+        print(f"DEBUG: Audio finished for message {message_id}")
+        
+        # ALWAYS stop blinking animation and clear current playing state, even for removed messages
+        # This is crucial to stop blinking when audio finishes after pause
         self.root.after(0, lambda: self._stop_bubble_blink(message_id))
         
         # Clear current playing message
         if self.current_playing_message_id == message_id:
             self.current_playing_message_id = None
         
-        # Remove from pending messages
+        # Remove from pending messages if it exists (do this BEFORE checking removed messages)
         if message_id in self.pending_audio_messages:
             del self.pending_audio_messages[message_id]
         
-        # Process next audio in queue if any
-        self._process_next_audio_in_queue()
+        # Check if this message was removed during pause cleanup
+        if message_id in self.removed_messages:
+            print(f"DEBUG: Message {message_id} was removed during pause cleanup - stopped blinking and cleaned up state but skipping engine notification")
+            return
         
-        print(f"DEBUG: Audio finished for message {message_id}")
+        # Only notify conversation engine if conversation is still active (not paused)
+        if (hasattr(self, 'conversation_engine') and 
+            self.conversation_engine and 
+            self.conversation_active):
+            # Get agent name from agent_id
+            all_agents = self.data_manager.load_agents()
+            agent = next((a for a in all_agents if a.id == agent_id), None)
+            if agent:
+                self.conversation_engine.on_voice_audio_finished(conversation_id, agent.name)
+        else:
+            print(f"DEBUG: Conversation not active - skipping engine notification but cleaned up audio state")
+        
+        # Process next audio in queue if any (only if conversation is active)
+        if self.conversation_active:
+            self._process_next_audio_in_queue()
+        
+        print(f"DEBUG: Audio cleanup completed for message {message_id}")
     
     def _start_bubble_blink(self, message_id: str):
         """Start blinking animation for a message bubble."""
@@ -1928,7 +2116,8 @@ class AgentConversationSimulatorGUI:
     
     def _process_next_audio_in_queue(self):
         """Process the next audio request in queue."""
-        # This can be expanded later if we need to queue multiple audio requests
+        # The conversation engine handles the queue via _process_audio_queue
+        # This method is kept for compatibility but queue management is done in conversation_engine
         pass
         
     def display_message(self, sender: str, content: str, msg_type: str, message_id: str = None, color: str = None):
@@ -1996,7 +2185,13 @@ class AgentConversationSimulatorGUI:
             bubble_color = self.agent_colors.get(sender, color)
         
         # Add the bubble to the chat canvas with alignment
-        self.chat_canvas.add_bubble(sender, content, timestamp, msg_type, bubble_color, align_right=align_right, message_id=message_id)
+        bubble_widget = self.chat_canvas.add_bubble(sender, content, timestamp, msg_type, bubble_color, align_right=align_right, message_id=message_id)
+        
+        # Track displayed messages and their bubble widgets
+        if message_id:
+            self.displayed_messages.add(message_id)
+            if bubble_widget:
+                self.message_bubbles[message_id] = bubble_widget
         
         # Save message to conversation
         if self.current_conversation_id:
@@ -2010,9 +2205,13 @@ class AgentConversationSimulatorGUI:
             self.data_manager.add_message_to_conversation(self.current_conversation_id, message_data)
     
     def pause_conversation(self):
-        """Pause the active conversation."""
+        """Pause the active conversation and clean up pending messages and audio."""
         if self.conversation_engine and self.current_conversation_id:
             try:
+                # Set up cleanup callback before pausing
+                self.conversation_engine.set_pause_cleanup_callback(self.handle_pause_cleanup)
+                
+                # Pause the conversation engine
                 self.conversation_engine.pause_conversation(self.current_conversation_id)
                 self.conversation_active = False
                 self.update_simulation_controls(False, paused=True)  # Pass paused=True
@@ -2028,6 +2227,146 @@ class AgentConversationSimulatorGUI:
                 )
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to pause conversation: {str(e)}")
+    
+    def handle_pause_cleanup(self, cleanup_info: dict):
+        """Handle cleanup operations when conversation is paused."""
+        conversation_id = cleanup_info.get('conversation_id')
+        
+        if conversation_id == self.current_conversation_id:
+            print(f"DEBUG: Handling pause cleanup for conversation {conversation_id}")
+            
+            # 0. Stop any currently blinking chat bubbles immediately
+            if hasattr(self, 'current_playing_message_id') and self.current_playing_message_id:
+                print(f"DEBUG: Stopping blinking animation for currently playing message {self.current_playing_message_id}")
+                self.root.after(0, lambda: self._stop_bubble_blink(self.current_playing_message_id))
+                self.current_playing_message_id = None
+            
+            # 1. Clear pending audio messages and get list of cleared messages
+            cleared_audio_requests = []
+            if self.audio_manager:
+                cleared_audio_requests = self.audio_manager.clear_pending_audio(conversation_id)
+                print(f"DEBUG: Cleared {len(cleared_audio_requests)} pending audio requests")
+            
+            # 2. Clear pending audio messages from main app state
+            pending_message_ids = list(self.pending_audio_messages.keys())
+            cleared_pending_messages = []
+            
+            for message_id in pending_message_ids:
+                message_data = self.pending_audio_messages[message_id]
+                cleared_pending_messages.append({
+                    'message_id': message_id,
+                    'sender': message_data.get('sender', 'Unknown'),
+                    'content': message_data.get('content', '')
+                })
+                # Track this message as removed to prevent future processing
+                self.removed_messages.add(message_id)
+                del self.pending_audio_messages[message_id]
+            
+            print(f"DEBUG: Cleared {len(cleared_pending_messages)} pending messages from main app")
+            print(f"DEBUG: Tracking {len(self.removed_messages)} total removed messages")
+            
+            # 3. Get the conversation data and identify which messages to keep
+            conversation = self.data_manager.get_conversation_by_id(conversation_id)
+            if conversation:
+                original_message_count = len(conversation.messages)
+                
+                # Strategy: Only remove messages that were never displayed
+                # Keep all messages that have corresponding visible chat bubbles
+                
+                # Get message IDs that were cleared from pending (these were never displayed)
+                cleared_message_ids = {msg_info['message_id'] for msg_info in cleared_pending_messages}
+                
+                # Count messages: we'll remove the last N messages where N = number of cleared pending messages
+                # This is safer than trying to match content, since the conversation messages are stored
+                # in the order they were added, and pending messages are the most recent ones
+                
+                messages_to_keep_count = original_message_count - len(cleared_pending_messages)
+                messages_to_keep_count = max(0, messages_to_keep_count)  # Ensure non-negative
+                
+                displayed_messages = conversation.messages[:messages_to_keep_count]
+                removed_messages = conversation.messages[messages_to_keep_count:]
+                
+                # Log what we're removing
+                for msg in removed_messages:
+                    sender = msg.get('sender', 'Unknown')
+                    content = msg.get('content', '')
+                    print(f"DEBUG: Removing undisplayed message from {sender}: {content[:50]}...")
+                
+                # Update conversation in database with only displayed messages
+                conversation.messages = displayed_messages
+                conversation.last_updated = datetime.now().isoformat()
+                self.data_manager.save_conversation(conversation)
+                
+                removed_count = len(removed_messages)
+                print(f"DEBUG: Removed {removed_count} undisplayed messages from conversation database")
+                print(f"DEBUG: Kept {len(displayed_messages)} displayed messages in database")
+                
+                # 4. Update the conversation engine's active conversation data
+                if hasattr(self.conversation_engine, 'active_conversations') and conversation_id in self.conversation_engine.active_conversations:
+                    conv_data = self.conversation_engine.active_conversations[conversation_id]
+                    
+                    # Convert displayed messages back to engine format
+                    engine_messages = []
+                    for msg in displayed_messages:
+                        # Skip system messages when converting to engine format
+                        if msg.get('type') != 'system':
+                            engine_messages.append({
+                                "agent_name": msg.get('sender', 'Unknown'),
+                                "message": msg.get('content', '')
+                            })
+                    
+                    # Update engine's message list
+                    original_engine_count = len(conv_data.get("messages", []))
+                    conv_data["messages"] = engine_messages
+                    
+                    engine_removed_count = original_engine_count - len(engine_messages)
+                    print(f"DEBUG: Updated engine conversation data, removed {engine_removed_count} messages")
+                
+                # 5. Also update the agent_sending_messages in the persistent conversation data
+                # Remove the corresponding messages from each agent's sending history
+                if hasattr(conversation, 'agent_sending_messages') and conversation.agent_sending_messages:
+                    print(f"DEBUG: Cleaning up agent_sending_messages - removing {removed_count} messages")
+                    
+                    # For each agent, remove the last N messages where N = number of removed messages
+                    # This works because agent_sending_messages are updated in sync with the main conversation
+                    for agent_name in conversation.agent_sending_messages:
+                        original_agent_messages = conversation.agent_sending_messages[agent_name]
+                        original_agent_count = len(original_agent_messages)
+                        
+                        # Remove the last N messages for this agent (same as removed from main conversation)
+                        messages_to_keep_for_agent = max(0, original_agent_count - removed_count)
+                        conversation.agent_sending_messages[agent_name] = original_agent_messages[:messages_to_keep_for_agent]
+                        
+                        agent_removed_count = original_agent_count - len(conversation.agent_sending_messages[agent_name])
+                        print(f"DEBUG: Agent '{agent_name}': removed {agent_removed_count} messages from sending history")
+                    
+                    # Save the updated conversation with cleaned agent_sending_messages
+                    self.data_manager.save_conversation(conversation)
+                    print(f"DEBUG: Saved conversation with cleaned agent_sending_messages")
+                
+                # 6. Update the conversation engine's agent_sending_messages if they exist
+                if hasattr(self.conversation_engine, 'active_conversations') and conversation_id in self.conversation_engine.active_conversations:
+                    conv_data = self.conversation_engine.active_conversations[conversation_id]
+                    
+                    if "agent_sending_messages" in conv_data and hasattr(conversation, 'agent_sending_messages'):
+                        # Update the engine's agent_sending_messages with the cleaned data
+                        conv_data["agent_sending_messages"] = conversation.agent_sending_messages.copy()
+                        print(f"DEBUG: Updated engine's agent_sending_messages with cleaned data")
+                
+                # 7. Do NOT remove any chat bubbles that are already displayed
+                # Only the pending audio messages were cleared, and those bubbles were never created
+                print(f"DEBUG: Keeping all displayed chat bubbles on screen")
+                print(f"DEBUG: Pause cleanup completed - removed {removed_count} undisplayed messages from data only")
+            else:
+                print(f"WARNING: Could not find conversation {conversation_id} in database for cleanup")
+    
+    def _remove_undisplayed_message_bubbles(self, cleared_messages: list):
+        """
+        This method is kept for compatibility but no longer removes bubbles.
+        Chat bubbles should only be removed if they were never displayed, 
+        but since pending messages never create bubbles, there's nothing to remove.
+        """
+        print(f"DEBUG: Not removing any chat bubbles - only cleared {len(cleared_messages)} pending messages that had no bubbles yet")
 
     def resume_conversation(self):
         """Resume a paused conversation or restart a terminated one."""
@@ -2048,6 +2387,12 @@ class AgentConversationSimulatorGUI:
             else:
                 # Regular resume of paused conversation
                 if self.conversation_engine:
+                    # Reset message counter to match current conversation state
+                    conversation = self.data_manager.get_conversation_by_id(self.current_conversation_id)
+                    if conversation and hasattr(conversation, 'messages'):
+                        self._message_counter = len(conversation.messages)
+                        print(f"DEBUG: Reset message counter to {self._message_counter} based on current conversation state")
+                    
                     self.conversation_engine.resume_conversation(self.current_conversation_id)
                     self.conversation_active = True
                     self.update_simulation_controls(True)
@@ -2145,18 +2490,6 @@ class AgentConversationSimulatorGUI:
             )
             
             if success:
-                # Register callback for real-time updates
-                self.conversation_engine.register_message_callback(conversation.id, self.on_message_received)
-                self.current_conversation_id = conversation.id
-                self.conversation_active = True
-                self.update_simulation_controls(True)
-                
-                # Update current environment in UI
-                self.current_env_label.config(text=conversation.environment)
-                
-                # Switch to simulation tab
-                self.notebook.select(3)  # Simulation tab
-                self.root.update_idletasks()
                 self.root.update()
                 
                 # Verify the chat canvas is initialized
@@ -2783,6 +3116,9 @@ class AgentConversationSimulatorGUI:
                 
             self.conversation_engine = ConversationSimulatorEngine()
             
+            # Reset message counter for loaded conversation
+            self._message_counter = len(conversation.messages) if hasattr(conversation, 'messages') else 0
+            
             # Prepare agent configs with their individual API keys
             agents_config = []
             self.agent_colors = conversation.agent_colors if hasattr(conversation, 'agent_colors') and conversation.agent_colors else {}
@@ -2821,6 +3157,10 @@ class AgentConversationSimulatorGUI:
             if agent_selector_api_key:
                 print(f"DEBUG: Agent selector API key starts with: {agent_selector_api_key[:10]}...")
             
+            # Get voices enabled setting from the conversation
+            voices_enabled = getattr(conversation, 'voices_enabled', False)
+            print(f"DEBUG: Loading conversation with voices enabled: {voices_enabled}")
+            
             # Start the conversation with existing messages
             thread_id = self.conversation_engine.start_conversation(
                 conversation.id, 
@@ -2829,7 +3169,8 @@ class AgentConversationSimulatorGUI:
                 conversation.scene_description,
                 invocation_method=getattr(conversation, 'invocation_method', 'round_robin'),
                 termination_condition=getattr(conversation, 'termination_condition', None),
-                agent_selector_api_key=agent_selector_api_key
+                agent_selector_api_key=agent_selector_api_key,
+                voices_enabled=voices_enabled
             )
             
             # Restore agent_sending_messages and conversation state if they exist
@@ -2875,6 +3216,64 @@ class AgentConversationSimulatorGUI:
             self.conversation_engine.register_message_callback(
                 conversation.id, self.on_message_received
             )
+            
+            # Set up audio synchronization callbacks if audio and voices are enabled for this conversation
+            if self.audio_enabled and self.audio_manager and voices_enabled:
+                print(f"DEBUG: Setting up audio synchronization callbacks for loaded conversation (voices enabled: {voices_enabled})")
+                
+                # Create wrapper functions to handle the callbacks
+                def on_audio_generation_requested(conv_id, agent_name):
+                    if conv_id == conversation.id:
+                        self.conversation_engine.on_audio_generation_requested(conv_id, agent_name)
+                
+                def on_audio_ready_callback(conv_id, agent_id, message_id):
+                    if conv_id == conversation.id:
+                        # Get agent name from agent_id
+                        agent_name = None
+                        for agent_config in agents_config:
+                            if agent_config.get("id") == agent_id:
+                                agent_name = agent_config.get("name")
+                                break
+                        if agent_name:
+                            self.conversation_engine.on_audio_ready(conv_id, agent_name)
+                
+                def on_audio_finished_callback(conv_id, agent_id, message_id):
+                    if conv_id == conversation.id:
+                        # Get agent name from agent_id
+                        agent_name = None
+                        for agent_config in agents_config:
+                            if agent_config.get("id") == agent_id:
+                                agent_name = agent_config.get("name")
+                                break
+                        if agent_name:
+                            self.conversation_engine.on_audio_finished(conv_id, agent_name)
+                
+                # Store original callbacks
+                self.original_audio_ready_callback = self.audio_manager.audio_ready_callback
+                self.original_audio_finished_callback = self.audio_manager.audio_finished_callback
+                
+                # Set enhanced callbacks that call both original and conversation engine callbacks
+                def enhanced_audio_ready_callback(conv_id, agent_id, message_id):
+                    # Call original callback first
+                    if self.original_audio_ready_callback:
+                        self.original_audio_ready_callback(conv_id, agent_id, message_id)
+                    # Then call conversation engine callback
+                    on_audio_ready_callback(conv_id, agent_id, message_id)
+                
+                def enhanced_audio_finished_callback(conv_id, agent_id, message_id):
+                    # Call original callback first
+                    if self.original_audio_finished_callback:
+                        self.original_audio_finished_callback(conv_id, agent_id, message_id)
+                    # Then call conversation engine callback
+                    on_audio_finished_callback(conv_id, agent_id, message_id)
+                
+                # Set the enhanced callbacks
+                self.audio_manager.set_audio_ready_callback(enhanced_audio_ready_callback)
+                self.audio_manager.set_audio_finished_callback(enhanced_audio_finished_callback)
+                
+                print("DEBUG: Set up audio synchronization callbacks for loaded conversation")
+            elif voices_enabled:
+                print("DEBUG: Voices enabled for conversation but audio manager not available - voice synchronization disabled")
             
             # Update UI state
             self.conversation_active = True

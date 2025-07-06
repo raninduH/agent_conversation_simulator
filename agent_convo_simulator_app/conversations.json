@@ -4331,6 +4331,535 @@
         "agent_bob": "am_liam",
         "agent_clara": "af_sky"
       }
+    },
+    {
+      "id": "conv_8637a700",
+      "title": "voice3",
+      "environment": "Gym",
+      "scene_description": "Clara gets the idea of asking Bob on what are these AI agents so much in news.",
+      "agents": [
+        "agent_bob",
+        "agent_clara"
+      ],
+      "messages": [
+        {
+          "sender": "User",
+          "content": "Hello everyone! Let's start our conversation.",
+          "timestamp": "2025-07-06T16:35:19.365891",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Hey Bob! I've been seeing so much about AI agents in the news lately, and I know you're into tech. Could you explain what they are in simple terms? I'm really curious to learn more!",
+          "timestamp": "2025-07-06T16:35:19.365894",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Hey Clara! Sure, I can help with that. Think of AI agents as computer programs designed to act independently to achieve specific goals, kind of like a virtual assistant that can make decisions on its own. They use AI to perceive their environment and figure out the best course of action.",
+          "timestamp": "2025-07-06T16:35:19.365896",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "That makes sense, Bob! So, they're not just following a script, but actually making choices based on what's happening around them? I wonder, what are some of the ways these AI agents are being used in the real world right now?",
+          "timestamp": "2025-07-06T16:35:19.365897",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "That makes sense, Bob! So, they're not just following a script, but actually making choices based on what's happening around them? I wonder, what are some of the ways these AI agents are being used in the real world right now?",
+          "timestamp": "2025-07-06T16:35:19.365898",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Exactly, Clara! One cool application is in customer service, where AI agents handle common questions, freeing up human agents for more complex issues. Also, they're used in things like managing smart home devices or even optimizing supply chains. It's pretty fascinating stuff!",
+          "timestamp": "2025-07-06T16:35:19.365899",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Wow, that's quite a range of uses! It's amazing how adaptable they are. Thinking about these AI agents making decisions, though, I'm curious about the ethical side of things. Are there any potential downsides or concerns we should be aware of?",
+          "timestamp": "2025-07-06T16:35:19.365900",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "That's a really important question, Clara. One concern is bias in the data they're trained on, which can lead to unfair or discriminatory outcomes. Plus, there are worries about job displacement as AI agents become more capable.",
+          "timestamp": "2025-07-06T16:35:19.365901",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "That makes sense. It's almost like they're reflecting the biases already present in society, but in a potentially amplified way. I wonder if there are ways to mitigate those biases during the development process?",
+          "timestamp": "2025-07-06T16:35:19.365903",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Definitely! Techniques like using diverse datasets, employing algorithms that detect and correct bias, and having diverse teams involved in the development can help a lot. It's an ongoing challenge, but crucial for building fair AI.",
+          "timestamp": "2025-07-06T16:35:19.365904",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "It's reassuring to know that there are strategies to address it, even if it's a continuous effort. Thinking about the job displacement aspect, do you think AI agents will eventually lead to a significant shift in the types of skills that are valued in the workforce?",
+          "timestamp": "2025-07-06T16:35:19.365906",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Absolutely, Clara. I think we'll see a greater demand for skills like critical thinking, creativity, and complex problem-solving – things that are harder for AI to replicate. Adaptability and continuous learning will also become even more important for workers.",
+          "timestamp": "2025-07-06T16:35:19.365907",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Yeah, I think so too, Clara. It's not just about learning new tools, but understanding how to work *with* AI, leveraging its strengths while still bringing uniquely human skills to the table. It's a pretty big shift!",
+          "timestamp": "2025-07-06T16:35:19.365908",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "That's so interesting, Bob! It sounds like some companies are already finding ways to blend AI and human skills effectively. I wonder if focusing on how AI can augment our abilities, rather than replace them, could be a key to a smoother transition?",
+          "timestamp": "2025-07-06T16:35:19.365909",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "I totally agree, Clara! Thinking of AI as a tool to amplify our capabilities makes the whole thing a lot less scary and a lot more exciting. It's about finding that sweet spot where humans and AI can collaborate effectively.",
+          "timestamp": "2025-07-06T16:35:19.365910",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Absolutely, Bob! It's like instead of fearing being replaced, we should focus on how AI can free us up to do more of what we're uniquely good at, like connecting with people and thinking creatively. It's all about teamwork, right?",
+          "timestamp": "2025-07-06T16:35:19.365912",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Absolutely, Bob! It's like instead of fearing being replaced, we should focus on how AI can free us up to do more of what we're uniquely good at, like connecting with people and thinking creatively. It's all about teamwork, right?",
+          "timestamp": "2025-07-06T16:35:19.365914",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Exactly, Clara! It's like pairing a super-fast calculator with someone who knows *what* to calculate and *why*. That's a team I'd want on my side!",
+          "timestamp": "2025-07-06T16:35:19.365915",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "That's a perfect analogy, Bob! A super-fast calculator that needs someone to give it purpose and direction. It makes me think a lot about how we define intelligence and value in the future.",
+          "timestamp": "2025-07-06T16:35:19.365916",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "That's a perfect analogy, Bob! A super-fast calculator that needs someone to give it purpose and direction. It makes me think a lot about how we define intelligence and value in the future.",
+          "timestamp": "2025-07-06T16:35:19.365917",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Right? It's not just about processing power, but about understanding the *meaning* behind the information. Maybe that's what will really set us apart in the age of AI.",
+          "timestamp": "2025-07-06T16:35:19.365918",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Absolutely, Clara. I think we'll see a greater demand for skills like critical thinking, creativity, and complex problem-solving – things that are harder for AI to replicate. Adaptability and continuous learning will also become even more important for workers.",
+          "timestamp": "2025-07-06T16:35:19.365919",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Bob: Absolutely, Clara. I think we'll see a greater demand for skills like critical thinking, creativity, and complex problem-solving – things that are harder for AI to replicate. Adaptability and continuous learning will also become even more important for workers.",
+          "timestamp": "2025-07-06T16:35:19.365920",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Right? It's not just about processing power, but about understanding the *meaning* behind the information. Maybe that's what will really set us apart in the age of AI.",
+          "timestamp": "2025-07-06T16:35:19.365921",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Absolutely, Clara. I think we'll see a greater demand for skills like critical thinking, creativity, and complex problem-solving – things that are harder for AI to replicate. Adaptability and continuous learning will also become even more important for workers.",
+          "timestamp": "2025-07-06T16:35:19.365922",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Exactly! It's like instead of fearing the robot uprising, we're teaming up with super-smart assistants. I think the companies that figure out that teamwork aspect will be the ones that really thrive in the coming years. It's all about humans and AI playing to each other's strengths.",
+          "timestamp": "2025-07-06T16:35:19.365923",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Absolutely, Bob! It's like instead of fearing robots taking over, we're learning to dance with them! Do you think there are any companies that are leading the way in this human-AI collaboration? I'm curious to see some real-world examples of how it's working out.",
+          "timestamp": "2025-07-06T16:35:19.365925",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Exactly! It's funny, all this talk about AI agents reminds me of something I've been seeing in the news lately. What do you think about the use of AI in mental health support?",
+          "timestamp": "2025-07-06T16:35:19.365926",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Definitely teamwork, Clara! I've been reading about some companies that are really leaning into that human-AI collaboration thing. I can send you some links later if you're interested!",
+          "timestamp": "2025-07-06T16:35:19.365927",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Right, Clara! It's like having a super-efficient assistant that handles the repetitive stuff so we can focus on the bigger picture and the more creative aspects of our work. I think that's the key to making this whole AI thing work for everyone.",
+          "timestamp": "2025-07-06T16:35:19.365928",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "You're so right, Bob! This conversation is making me think... we keep hearing so much about AI agents in the news, but it's hard to get a clear picture. Hey, would you mind if I picked your brain about them sometime? Maybe grab coffee and chat?",
+          "timestamp": "2025-07-06T16:35:19.365929",
+          "type": "ai"
+        }
+      ],
+      "status": "active",
+      "created_at": "2025-07-06T14:27:53.872700",
+      "last_updated": "2025-07-06T16:35:38.834915",
+      "summary": null,
+      "thread_id": "thread_9579da25",
+      "agent_colors": {
+        "Bob": "#CAE8BD",
+        "Clara": "#FFE8CD"
+      },
+      "agent_temp_numbers": {
+        "agent_bob": 1,
+        "agent_clara": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": null,
+      "agent_selector_api_key": null,
+      "agent_sending_messages": {
+        "Bob": [
+          {
+            "past_convo_summary": "Clara and Bob discuss AI agents, with Bob explaining their function as independent computer programs making decisions based on their environment to achieve goals. They explore applications like customer service and supply chain optimization, then delve into ethical concerns like bias and job displacement. They discuss mitigating bias and augmenting human abilities, emphasizing teamwork between humans and AI. Clara inquires about companies leading in human-AI collaboration and expresses interest in AI's use in mental health support. They agree on the importance of skills like critical thinking and adaptability, and Clara likens AI to a super-fast calculator needing human direction."
+          },
+          {
+            "agent_name": "Bob",
+            "message": "That's a really important question, Clara. One concern is bias in the data they're trained on, which can lead to unfair or discriminatory outcomes. Plus, there are worries about job displacement as AI agents become more capable."
+          },
+          {
+            "agent_name": "Clara",
+            "message": "That makes sense. It's almost like they're reflecting the biases already present in society, but in a potentially amplified way. I wonder if there are ways to mitigate those biases during the development process?"
+          },
+          {
+            "agent_name": "Bob",
+            "message": "Definitely! Techniques like using diverse datasets, employing algorithms that detect and correct bias, and having diverse teams involved in the development can help a lot. It's an ongoing challenge, but crucial for building fair AI."
+          },
+          {
+            "agent_name": "Clara",
+            "message": "It's reassuring to know that there are strategies to address it, even if it's a continuous effort. Thinking about the job displacement aspect, do you think AI agents will eventually lead to a significant shift in the types of skills that are valued in the workforce?"
+          },
+          {
+            "agent_name": "Bob",
+            "message": "Yeah, I think so too, Clara. It's not just about learning new tools, but understanding how to work *with* AI, leveraging its strengths while still bringing uniquely human skills to the table. It's a pretty big shift!"
+          },
+          {
+            "agent_name": "Clara",
+            "message": "That's so interesting, Bob! It sounds like some companies are already finding ways to blend AI and human skills effectively. I wonder if focusing on how AI can augment our abilities, rather than replace them, could be a key to a smoother transition?"
+          },
+          {
+            "agent_name": "Bob",
+            "message": "I totally agree, Clara! Thinking of AI as a tool to amplify our capabilities makes the whole thing a lot less scary and a lot more exciting. It's about finding that sweet spot where humans and AI can collaborate effectively."
+          },
+          {
+            "agent_name": "Clara",
+            "message": "Absolutely, Bob! It's like instead of fearing being replaced, we should focus on how AI can free us up to do more of what we're uniquely good at, like connecting with people and thinking creatively. It's all about teamwork, right?"
+          },
+          {
+            "agent_name": "Clara",
+            "message": "Absolutely, Bob! It's like instead of fearing being replaced, we should focus on how AI can free us up to do more of what we're uniquely good at, like connecting with people and thinking creatively. It's all about teamwork, right?"
+          }
+        ],
+        "Clara": [
+          {
+            "past_convo_summary": "Clara and Bob discuss AI agents, with Bob explaining their function as independent decision-making programs capable of making choices based on their environment. They explore real-world applications like customer service and supply chain optimization. The conversation shifts to the ethical implications of AI agents, including data bias and potential job displacement. They discuss strategies to mitigate bias and the importance of focusing on human-AI collaboration to leverage uniquely human skills like critical thinking, creativity, and adaptability. They agree that AI should be viewed as a tool to augment human capabilities, not replace them, and that this collaborative approach is key to a smoother transition and a more valuable workforce. Clara expresses interest in companies leading the way in human-AI collaboration and the use of AI in mental health support."
+          },
+          {
+            "agent_name": "Bob",
+            "message": "Definitely! Techniques like using diverse datasets, employing algorithms that detect and correct bias, and having diverse teams involved in the development can help a lot. It's an ongoing challenge, but crucial for building fair AI."
+          },
+          {
+            "agent_name": "Clara",
+            "message": "It's reassuring to know that there are strategies to address it, even if it's a continuous effort. Thinking about the job displacement aspect, do you think AI agents will eventually lead to a significant shift in the types of skills that are valued in the workforce?"
+          },
+          {
+            "agent_name": "Bob",
+            "message": "Yeah, I think so too, Clara. It's not just about learning new tools, but understanding how to work *with* AI, leveraging its strengths while still bringing uniquely human skills to the table. It's a pretty big shift!"
+          },
+          {
+            "agent_name": "Clara",
+            "message": "That's so interesting, Bob! It sounds like some companies are already finding ways to blend AI and human skills effectively. I wonder if focusing on how AI can augment our abilities, rather than replace them, could be a key to a smoother transition?"
+          },
+          {
+            "agent_name": "Bob",
+            "message": "I totally agree, Clara! Thinking of AI as a tool to amplify our capabilities makes the whole thing a lot less scary and a lot more exciting. It's about finding that sweet spot where humans and AI can collaborate effectively."
+          },
+          {
+            "agent_name": "Clara",
+            "message": "Absolutely, Bob! It's like instead of fearing being replaced, we should focus on how AI can free us up to do more of what we're uniquely good at, like connecting with people and thinking creatively. It's all about teamwork, right?"
+          },
+          {
+            "agent_name": "Clara",
+            "message": "Absolutely, Bob! It's like instead of fearing being replaced, we should focus on how AI can free us up to do more of what we're uniquely good at, like connecting with people and thinking creatively. It's all about teamwork, right?"
+          },
+          {
+            "agent_name": "Bob",
+            "message": "Exactly, Clara! It's like pairing a super-fast calculator with someone who knows *what* to calculate and *why*. That's a team I'd want on my side!"
+          },
+          {
+            "agent_name": "Clara",
+            "message": "That's a perfect analogy, Bob! A super-fast calculator that needs someone to give it purpose and direction. It makes me think a lot about how we define intelligence and value in the future."
+          }
+        ]
+      },
+      "voices_enabled": true,
+      "agent_voices": {
+        "agent_bob": "am_onyx",
+        "agent_clara": "af_river"
+      }
+    },
+    {
+      "id": "conv_cf2f998b",
+      "title": "voice-human-like-1",
+      "environment": "road",
+      "scene_description": "Bob, clara and David are met in the road. Clara get the idea of asking to create a new traevl app.",
+      "agents": [
+        "agent_bob",
+        "agent_clara",
+        "agent_david"
+      ],
+      "messages": [
+        {
+          "sender": "User",
+          "content": "Hello everyone! Let's start our conversation.",
+          "timestamp": "2025-07-06T18:52:02.163596",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Hey Clara and David, good to see you both! What's on the agenda today? Always up for a good chat, especially if it involves interesting problems or new tech.",
+          "timestamp": "2025-07-06T18:52:02.163598",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Hi Bob and David! It's great to see you both. I was just thinking, with all our different travel experiences, wouldn't it be amazing if we could create a travel app together?",
+          "timestamp": "2025-07-06T18:52:02.163599",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Clara, that's an awesome idea! I'm always looking for ways to make travel more accessible and exciting for everyone. I've got tons of stories and cultural insights from my trips that could be really helpful content for an app!",
+          "timestamp": "2025-07-06T18:52:02.163600",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "David, I'm so glad you're on board! With your cultural insights and Bob's tech enthusiasm, I think we could really create something special. What features do you think are essential for a travel app, David?",
+          "timestamp": "2025-07-06T18:52:02.163601",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "A travel app, you say? That's an interesting idea, Clara! David, your cultural insights would definitely be a valuable asset. From a technical perspective, there's a lot to consider, but it sounds like a fun challenge.",
+          "timestamp": "2025-07-06T18:52:02.163603",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Bob, with your tech background, you could bring so much to the table too! What do you think?",
+          "timestamp": "2025-07-06T18:52:02.163604",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "That's fantastic, David! Your cultural insights would be invaluable. Bob, with your tech background, what aspects do you think we should focus on to make it stand out?",
+          "timestamp": "2025-07-06T18:52:02.163605",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "A travel app, huh? That's an interesting idea, Clara. David, your cultural insights would definitely be a valuable asset. From a technical perspective, we'd need to think about features, platform, and data integration, but I'm definitely intrigued.",
+          "timestamp": "2025-07-06T18:52:02.163606",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Well, Clara, from my experience, having offline access to maps and basic phrase translations would be a game-changer! It's saved me in so many remote places.",
+          "timestamp": "2025-07-06T18:52:02.163607",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Exactly, Bob! Data integration is key, but making sure it's accessible even without internet is crucial for travelers.",
+          "timestamp": "2025-07-06T18:52:02.163608",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Offline maps and phrase translations are great ideas, David. From a development standpoint, we could use a solution like Google Maps API for the maps and a local database for storing translations. We'd also want to consider how to efficiently update that data.",
+          "timestamp": "2025-07-06T18:52:02.163609",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Offline maps and phrase translations are definitely essential, David! And Bob, your ideas on using Google Maps API and a local database sound like a great starting point. What about incorporating user reviews or a community forum? Do you think that would enhance the app's appeal?",
+          "timestamp": "2025-07-06T18:52:02.163610",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "Agreed, David. Efficient data updates are vital; we could explore differential updates or a system that prioritizes essential data for offline use. We'd also need to optimize the data storage to minimize the app's footprint on the user's device.",
+          "timestamp": "2025-07-06T18:52:02.163611",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Clara, a community forum would be amazing! Sharing tips and hidden gems from other travelers would make our app stand out.",
+          "timestamp": "2025-07-06T18:52:02.163612",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "That sounds incredibly efficient, Bob! Perhaps we could also include a feature where users can share their own travel tips and hidden gems, creating a sense of community and shared experience? It could really set our app apart.",
+          "timestamp": "2025-07-06T18:52:02.163613",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "User reviews and a community forum could definitely enhance the app, Clara. We'd need to implement a robust moderation system and consider how to handle user-generated content responsibly. From a technical perspective, we could integrate with existing platforms or build our own system.",
+          "timestamp": "2025-07-06T18:52:02.163614",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Bob, moderation is key, but the value of authentic user experiences is priceless! It's like having a local guide in your pocket.",
+          "timestamp": "2025-07-06T18:52:02.163615",
+          "type": "ai"
+        },
+        {
+          "sender": "Bob",
+          "content": "I agree, Clara, user-generated content is a great way to differentiate the app. To handle that, we could implement a system for flagging inappropriate content and perhaps even use AI to help with initial moderation. We'd also need clear terms of service to protect both us and our users.",
+          "timestamp": "2025-07-06T18:52:02.163616",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Bob, a robust moderation system is super important – we want to keep the community positive and helpful! Maybe we could even reward users who contribute high-quality tips?",
+          "timestamp": "2025-07-06T18:52:02.163617",
+          "type": "ai"
+        },
+        {
+          "sender": "Clara",
+          "content": "Rewarding high-quality tips is a brilliant idea, David! It could motivate users to share valuable insights and foster a supportive community. Bob, your suggestions for moderation and AI integration are excellent for maintaining a positive environment. This is all coming together so well!",
+          "timestamp": "2025-07-06T18:52:02.163618",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "AI for initial moderation sounds fantastic, Bob! It would save us so much time and help maintain a great atmosphere in the community.",
+          "timestamp": "2025-07-06T18:52:02.163619",
+          "type": "ai"
+        },
+        {
+          "sender": "David",
+          "content": "Exactly! And think about it, Clara, we could highlight local businesses and experiences that are often overlooked by mainstream travel guides. It's all about authentic discovery!",
+          "timestamp": "2025-07-06T18:52:02.163620",
+          "type": "ai"
+        }
+      ],
+      "status": "stopped",
+      "created_at": "2025-07-06T16:53:22.289727",
+      "last_updated": "2025-07-06T19:01:24.080187",
+      "summary": null,
+      "thread_id": "thread_d8fb83a7",
+      "agent_colors": {
+        "Bob": "#CAE8BD",
+        "Clara": "#FFE8CD",
+        "David": "#4F8B61"
+      },
+      "agent_temp_numbers": {
+        "agent_bob": 1,
+        "agent_clara": 2,
+        "agent_david": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": null,
+      "agent_selector_api_key": null,
+      "agent_sending_messages": {
+        "Bob": [
+          {
+            "agent_name": "Bob",
+            "message": "Hey Clara and David, good to see you both! What's on the agenda today? Always up for a good chat, especially if it involves interesting problems or new tech."
+          },
+          {
+            "agent_name": "Clara",
+            "message": "Hi Bob and David! It's great to see you both. I was just thinking, with all our different travel experiences, wouldn't it be amazing if we could create a travel app together?"
+          },
+          {
+            "agent_name": "David",
+            "message": "Clara, that's an awesome idea! I'm always looking for ways to make travel more accessible and exciting for everyone. I've got tons of stories and cultural insights from my trips that could be really helpful content for an app!"
+          },
+          {
+            "agent_name": "Clara",
+            "message": "David, I'm so glad you're on board! With your cultural insights and Bob's tech enthusiasm, I think we could really create something special. What features do you think are essential for a travel app, David?"
+          },
+          {
+            "agent_name": "Bob",
+            "message": "A travel app, you say? That's an interesting idea, Clara! David, your cultural insights would definitely be a valuable asset. From a technical perspective, there's a lot to consider, but it sounds like a fun challenge."
+          }
+        ],
+        "Clara": [
+          {
+            "agent_name": "Bob",
+            "message": "Hey Clara and David, good to see you both! What's on the agenda today? Always up for a good chat, especially if it involves interesting problems or new tech."
+          },
+          {
+            "agent_name": "Clara",
+            "message": "Hi Bob and David! It's great to see you both. I was just thinking, with all our different travel experiences, wouldn't it be amazing if we could create a travel app together?"
+          },
+          {
+            "agent_name": "David",
+            "message": "Clara, that's an awesome idea! I'm always looking for ways to make travel more accessible and exciting for everyone. I've got tons of stories and cultural insights from my trips that could be really helpful content for an app!"
+          },
+          {
+            "agent_name": "Clara",
+            "message": "David, I'm so glad you're on board! With your cultural insights and Bob's tech enthusiasm, I think we could really create something special. What features do you think are essential for a travel app, David?"
+          },
+          {
+            "agent_name": "Bob",
+            "message": "A travel app, you say? That's an interesting idea, Clara! David, your cultural insights would definitely be a valuable asset. From a technical perspective, there's a lot to consider, but it sounds like a fun challenge."
+          }
+        ],
+        "David": [
+          {
+            "past_convo_summary": "Clara proposes creating a travel app, which David enthusiastically supports, offering his cultural insights. Bob is intrigued and highlights the technical challenges and considerations. They all agree that each of them brings valuable skills to the project."
+          }
+        ]
+      },
+      "voices_enabled": true,
+      "agent_voices": {
+        "agent_bob": "am_adam",
+        "agent_david": "am_liam",
+        "agent_clara": "af_jessica"
+      }
     }
   ]
 }

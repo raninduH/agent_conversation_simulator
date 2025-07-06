@@ -28,6 +28,9 @@ load_dotenv()
 
 # Import configuration settings
 from config import CONVERSATION_TIMING, MESSAGE_SETTINGS, AGENT_SETTINGS, MODEL_SETTINGS
+
+# Import agent selector for human-like chat
+from agent_selector import AgentSelector
 from agent_selector import AgentSelector
 from utility import extract_json_from_markdown
 
@@ -285,7 +288,7 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
                 print(f"DEBUG: Assigned temp number {i} to agent '{agent_config['name']}' (ID: {agent_id})")
         
         # Store conversation data (agents will be created individually when invoked)
-        self.active_conversations[conversation_id] = {
+        conv_state = {
             "agents_config": agents_config,
             "agent_names": agent_names,
             "thread_id": thread_id,
@@ -300,9 +303,6 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             "agent_invocation_counts": {name: 0 for name in agent_names},  # Track invocations per agent
             "agent_selector_api_key": agent_selector_api_key,  # Store agent selector API key
             "agent_sending_messages": {name: [] for name in agent_names},  # Initialize per-agent message lists
-            "round_counter": 0,  # Track rounds for human-like-chat mode
-            "last_round_participants": [],  # Track who participated in the last round
-            "current_round_responses": {},  # Track responses in current round for parallel processing
             "agent_temp_numbers": agent_temp_numbers,  # Store agent temp numbers for chat bubble alignment
             "voices_enabled": voices_enabled,  # Store voice enablement flag
             # Audio synchronization state
@@ -312,6 +312,30 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
             "next_agent_scheduled": None,           # Track the next agent to be invoked after audio completes
             "audio_callbacks_set": False            # Track if audio callbacks are set
         }
+        
+        # Initialize human-like-chat specific state if needed
+        if invocation_method == "human_like_chat":
+            print(f"DEBUG: [HUMAN-LIKE-CHAT] Initializing human-like-chat specific state")
+            conv_state.update({
+                "round_counter": 0,  # Track rounds for human-like-chat mode
+                "last_round_participants": [],  # Track who participated in the last round
+                "current_round_responses": {},  # Track responses in current round for parallel processing
+                "round_audio_queue": [],  # Audio playback queue for human-like-chat
+                "current_playing_audio": None,  # Currently playing audio info
+                "pending_round_completion": False,  # Flag to track if round is still being processed
+                # Audio generation mode tracking
+                "audio_generation_mode": "parallel",  # "parallel" or "sequential"
+                "parallel_audio_failed": False,  # Track if parallel generation has failed
+                "round_audio_generation_queue": [],  # Queue for sequential fallback generation
+                "round_audio_generation_index": 0,  # Current index for sequential generation
+                # Recursion protection flags for human-like-chat
+                "_processing_audio_queue": False,
+                "_processing_audio_finished": False,
+                "_checking_round_completion": False,
+                "_round_completion_checks": 0
+            })
+        
+        self.active_conversations[conversation_id] = conv_state
             # Start the conversation automatically after a short delay
         threading.Timer(CONVERSATION_TIMING["start_delay"], self._start_conversation_cycle, args=(conversation_id,)).start()
         
@@ -377,7 +401,14 @@ Keep responses to 1-3 sentences to maintain good conversation flow."""
     
     def _invoke_next_agent_regular(self, conversation_id: str):
         """Invoke the next agent using regular (non-human-like-chat) logic."""
+        if conversation_id not in self.active_conversations:
+            print(f"ERROR: Conversation {conversation_id} not found in active conversations")
+            return
+        
         conv_data = self.active_conversations[conversation_id]
+        if conv_data["status"] != "active":
+            print(f"DEBUG: Conversation {conversation_id} status is {conv_data['status']}, not invoking agent")
+            return
         
         # Get current agent
         current_agent_name = conv_data["agent_names"][conv_data["current_agent_index"]]
@@ -606,8 +637,16 @@ IDENTITY REINFORCEMENT: You are {current_agent_name}. Every word you say comes f
                     self.message_callbacks[conversation_id](message_data)
                     
                     # If voices are enabled, track that audio generation is being requested
+                    # Note: For round_robin/agent_selector, we use simple audio tracking
+                    # For human_like_chat, we use the round audio queue system
                     if conv_data.get("voices_enabled", False):
-                        self.on_audio_generation_requested(conversation_id, current_agent_name)
+                        invocation_method = conv_data.get("invocation_method", "round_robin")
+                        if invocation_method in ["round_robin", "agent_selector"]:
+                            # Simple audio tracking for sequential modes
+                            self.on_audio_generation_requested(conversation_id, current_agent_name)
+                        else:
+                            # Human-like-chat uses different audio handling - this shouldn't happen here
+                            print(f"WARNING: Regular agent invocation called for {invocation_method} mode")
             else:
                 print(f"ERROR: No valid response from agent '{current_agent_name}'")
                 print(f"DEBUG: Response structure: {response}")
@@ -718,18 +757,18 @@ IDENTITY REINFORCEMENT: You are {current_agent_name}. Every word you say comes f
                 # Store the next agent to be scheduled
                 conv_data["next_agent_scheduled"] = next_agent_name
                 
-                # Check if we need to wait for audio
+                # For voices enabled, check if we need to wait for audio
                 if self._should_wait_for_audio(conversation_id):
                     print(f"DEBUG: Voices enabled - waiting for audio before invoking next agent '{next_agent_name}'")
                     # Agent will be invoked when audio completes via callbacks
                     return
                 else:
-                    # No audio waiting needed, invoke immediately
+                    # No audio waiting needed, invoke immediately without delay
                     print(f"DEBUG: Voices enabled - no audio waiting needed, invoking next agent '{next_agent_name}' immediately")
                     conv_data["next_agent_scheduled"] = None
                     self._invoke_next_agent(conversation_id)
             else:
-                # Original behavior for non-voice mode
+                # Original behavior for non-voice mode with time delays
                 delay = random.uniform(
                     CONVERSATION_TIMING["agent_turn_delay_min"], 
                     CONVERSATION_TIMING["agent_turn_delay_max"]
@@ -771,24 +810,41 @@ IDENTITY REINFORCEMENT: You are {current_agent_name}. Every word you say comes f
             conv_data = self.active_conversations[conversation_id]
             conv_data["status"] = "paused"
             
-            # Get currently playing audio info to preserve it
-            currently_playing_info = None
-            if conv_data.get("voices_enabled", False):
-                # Check if audio is currently playing
-                currently_playing_info = {
-                    'message_id': conv_data.get("last_agent_audio_sent"),
-                    'waiting_for_audio': conv_data.get("waiting_for_audio_generation", False),
-                    'audio_playing': conv_data.get("waiting_for_audio_playback", False)
-                }
+            invocation_method = conv_data.get("invocation_method", "round_robin")
+            print(f"DEBUG: Pausing conversation {conversation_id} (mode: {invocation_method})")
             
-            # Prepare cleanup information for the UI to handle
+            # Clear any scheduled next agent invocations
+            conv_data["next_agent_scheduled"] = None
+            conv_data["waiting_for_audio_generation"] = False
+            conv_data["waiting_for_audio_playback"] = False
+            conv_data["last_agent_audio_sent"] = None
+            
+            # Clear recursion protection flags (applies to all modes)
+            conv_data["_processing_audio_queue"] = False
+            conv_data["_processing_audio_finished"] = False
+            conv_data["_checking_round_completion"] = False
+            conv_data["_round_completion_checks"] = 0
+            
+            # Clear voice-enabled audio queue and state for ALL modes that use voices
+            if conv_data.get("voices_enabled", False):
+                cleared_queue_size = len(conv_data.get("round_audio_queue", []))
+                conv_data["round_audio_queue"] = []
+                conv_data["current_playing_audio"] = None
+                conv_data["pending_round_completion"] = False
+                
+                if invocation_method == "human_like_chat":
+                    print(f"DEBUG: [HUMAN-LIKE-CHAT] Cleared voice audio queue ({cleared_queue_size} messages) and playback state")
+                else:
+                    print(f"DEBUG: [{invocation_method.upper()}] Cleared voice audio queue ({cleared_queue_size} messages) and playback state")
+            
+            # Return information about what was cleaned up for the UI to handle
             cleanup_info = {
                 'conversation_id': conversation_id,
                 'action': 'paused',
-                'voices_enabled': conv_data.get("voices_enabled", False),
-                'currently_playing': currently_playing_info,
-                'messages_count': len(conv_data.get("messages", []))
+                'invocation_method': invocation_method
             }
+            
+            print(f"DEBUG: Successfully paused conversation {conversation_id} and cleared audio state")
             
             # Call cleanup callback if set (main.py will handle the actual cleanup)
             if hasattr(self, 'pause_cleanup_callback') and self.pause_cleanup_callback:
@@ -808,11 +864,31 @@ IDENTITY REINFORCEMENT: You are {current_agent_name}. Every word you say comes f
             if conv_data.get('agent_names'):
                 current_agent = conv_data['agent_names'][conv_data.get('current_agent_index', 0)]
                 print(f"DEBUG: Next agent to speak: {current_agent}")
+            print(f"DEBUG: Voices enabled: {conv_data.get('voices_enabled', False)}")
             print(f"DEBUG: ===== END RESUMING INFO =====")
             
             self.active_conversations[conversation_id]["status"] = "active"
-            # Resume the conversation cycle
-            threading.Timer(CONVERSATION_TIMING["resume_delay"], self._invoke_next_agent, args=(conversation_id,)).start()
+            
+            # For voice-enabled conversations, use more careful timing when resuming
+            if conv_data.get("voices_enabled", False) and conv_data.get("messages"):
+                # If there are existing messages and voices are enabled, 
+                # check if the last message was from an AI agent
+                last_message = conv_data["messages"][-1]
+                last_sender = last_message.get("agent_name", "")
+                
+                # If last message was from an AI agent, there might be pending audio
+                if last_sender in conv_data.get("agent_names", []):
+                    print(f"DEBUG: Voice-enabled resume - last message from AI agent '{last_sender}', using longer delay for audio sync")
+                    delay = CONVERSATION_TIMING["resume_delay"] + 1.0  # Extra time for audio sync
+                else:
+                    print(f"DEBUG: Voice-enabled resume - last message from '{last_sender}' (not AI), using normal delay")
+                    delay = CONVERSATION_TIMING["resume_delay"]
+            else:
+                delay = CONVERSATION_TIMING["resume_delay"]
+            
+            # Resume the conversation cycle with appropriate delay
+            print(f"DEBUG: Resuming conversation in {delay} seconds")
+            threading.Timer(delay, self._invoke_next_agent, args=(conversation_id,)).start()
         else:
             print(f"DEBUG: Cannot resume conversation {conversation_id} - not found in active conversations")
     
@@ -1082,6 +1158,13 @@ Do not include any other text or explanation."""
                     "termination_condition": new_termination_condition,  # New condition
                     "agent_invocation_counts": {agent.name: 0 for agent in conversation_agents},
                     "agent_selector_api_key": getattr(conversation, 'agent_selector_api_key', None),
+                    "voices_enabled": getattr(conversation, 'voices_enabled', False),  # Restore voices setting
+                    # Audio synchronization state
+                    "waiting_for_audio_generation": False,
+                    "waiting_for_audio_playback": False,
+                    "last_agent_audio_sent": None,
+                    "next_agent_scheduled": None,
+                    "audio_callbacks_set": False
                 }
                 
                 # Restore agent_sending_messages if they exist
@@ -1131,8 +1214,28 @@ Do not include any other text or explanation."""
         # Save the updated state
         self._save_conversation_state(conversation_id)
         
-        # Start the conversation cycle with a short delay
-        threading.Timer(1.0, self._invoke_next_agent, args=(conversation_id,)).start()
+        # For voice-enabled conversations, check if we need to wait before starting next agent
+        conv_data = self.active_conversations[conversation_id]
+        if conv_data.get("voices_enabled", False) and conv_data.get("messages"):
+            # If there are existing messages and voices are enabled, 
+            # check if the last message was from an AI agent
+            last_message = conv_data["messages"][-1]
+            last_sender = last_message.get("agent_name", "")
+            
+            # If last message was from an AI agent, there might be pending audio
+            # We should wait a bit before starting the next agent to ensure proper sequencing
+            if last_sender in conv_data.get("agent_names", []):
+                print(f"DEBUG: Voice-enabled restart - last message from AI agent '{last_sender}', using longer delay for audio sync")
+                delay = 2.0  # Longer delay to ensure any pending audio is handled
+            else:
+                print(f"DEBUG: Voice-enabled restart - last message from '{last_sender}' (not AI), using normal delay")
+                delay = 1.0
+        else:
+            delay = 1.0
+        
+        # Start the conversation cycle with appropriate delay
+        print(f"DEBUG: Starting conversation cycle in {delay} seconds")
+        threading.Timer(delay, self._invoke_next_agent, args=(conversation_id,)).start()
         
         return True
 
@@ -1356,16 +1459,567 @@ Do not include any other text or explanation."""
         self._invoke_next_agent_regular(conversation_id)
     
     def _start_conversation_cycle(self, conversation_id: str):
-        """Start the conversation cycle."""
+        """Start the conversation cycle with the first agent."""
         if conversation_id not in self.active_conversations:
             return
         
         conv_data = self.active_conversations[conversation_id]
+        if conv_data["status"] != "active":
+            return
+        
+        # Mark conversation as started
+        conv_data["conversation_started"] = True
+        
         invocation_method = conv_data.get("invocation_method", "round_robin")
         
-        print(f"DEBUG: Starting conversation cycle with method: {invocation_method}")
-        
         if invocation_method == "human_like_chat":
-            self._start_human_like_chat(conversation_id)
+            print(f"DEBUG: ===== STARTING HUMAN-LIKE-CHAT CONVERSATION =====")
+            # Start human-like-chat mode directly
+            self._start_human_like_chat_round(conversation_id)
         else:
+            print(f"DEBUG: ===== STARTING CONVERSATION CYCLE =====")
+            # Choose random first agent for round_robin and agent_selector methods
+            conv_data["current_agent_index"] = random.randint(0, len(conv_data["agent_names"]) - 1)
+            first_agent = conv_data["agent_names"][conv_data["current_agent_index"]]
+            print(f"DEBUG: First agent selected: {first_agent} (index {conv_data['current_agent_index']})")
+            print(f"DEBUG: ===== STARTING FIRST AGENT INVOCATION =====")
+            
+            # Start the conversation
             self._invoke_next_agent(conversation_id)
+    
+    def on_audio_generation_requested(self, conversation_id: str, agent_name: str):
+        """Called when audio generation is requested for an agent's message."""
+        if conversation_id in self.active_conversations:
+            conv_data = self.active_conversations[conversation_id]
+            conv_data["waiting_for_audio_generation"] = True
+            conv_data["last_agent_audio_sent"] = agent_name
+            print(f"DEBUG: Audio generation requested for agent '{agent_name}' in conversation {conversation_id}")
+    
+    def on_audio_ready(self, conversation_id: str, agent_name: str):
+        """Called when audio is ready to be played."""
+        if conversation_id in self.active_conversations:
+            conv_data = self.active_conversations[conversation_id]
+            conv_data["waiting_for_audio_generation"] = False
+            conv_data["waiting_for_audio_playback"] = True
+            print(f"DEBUG: Audio ready for agent '{agent_name}' in conversation {conversation_id}")
+    
+    def on_audio_finished(self, conversation_id: str, agent_name: str):
+        """Called when audio finishes playing."""
+        if conversation_id in self.active_conversations:
+            conv_data = self.active_conversations[conversation_id]
+            conv_data["waiting_for_audio_playback"] = False
+            conv_data["last_agent_audio_sent"] = None
+            
+            # Only proceed if conversation is still active (not paused)
+            if conv_data.get("status") != "active":
+                print(f"DEBUG: Audio finished for agent '{agent_name}' but conversation is {conv_data.get('status')} - no further action")
+                return
+            
+            # Handle different invocation methods separately
+            invocation_method = conv_data.get("invocation_method", "round_robin")
+            
+            if invocation_method == "human_like_chat" and conv_data.get("voices_enabled", False):
+                # HUMAN-LIKE-CHAT: Use specialized voice completion handling
+                print(f"DEBUG: [HUMAN-LIKE-CHAT] Audio finished for agent '{agent_name}' - delegating to human-like-chat voice handler")
+                self.on_voice_audio_finished(conversation_id, agent_name)
+                return
+                
+            elif invocation_method in ["round_robin", "agent_selector"] and conv_data.get("voices_enabled", False):
+                # ROUND ROBIN / AGENT SELECTOR: Simple next agent invocation
+                next_agent = conv_data.get("next_agent_scheduled")
+                if next_agent:
+                    print(f"DEBUG: [{invocation_method.upper()}] Audio finished for agent '{agent_name}' - invoking next agent")
+                    conv_data["next_agent_scheduled"] = None
+                    # Invoke the next agent immediately
+                    self._invoke_next_agent(conversation_id)
+                else:
+                    print(f"DEBUG: [{invocation_method.upper()}] Audio finished for agent '{agent_name}' - no next agent scheduled")
+                return
+            
+            # NON-VOICE OR FALLBACK: If there's a next agent scheduled, invoke them now
+            next_agent = conv_data.get("next_agent_scheduled")
+            if next_agent:
+                conv_data["next_agent_scheduled"] = None
+                print(f"DEBUG: [{invocation_method.upper()}] Audio finished for agent '{agent_name}', invoking next agent '{next_agent}'")
+                
+                # Continue with next agent based on invocation method
+                if invocation_method == "human_like_chat":
+                    self._start_human_like_chat_round(conversation_id)
+                else:  # round_robin or agent_selector
+                    self._invoke_next_agent_regular(conversation_id)
+            else:
+                print(f"DEBUG: [{invocation_method.upper()}] Audio finished for agent '{agent_name}' - no next agent scheduled")
+                
+                # For voices enabled, don't add delay
+                if conv_data.get("voices_enabled", False):
+                    self._invoke_next_agent(conversation_id)
+                else:
+                    delay = random.uniform(
+                        CONVERSATION_TIMING["agent_turn_delay_min"], 
+                        CONVERSATION_TIMING["agent_turn_delay_max"]
+                    )
+                    threading.Timer(delay, self._invoke_next_agent, args=(conversation_id,)).start()
+    
+    def _should_wait_for_audio(self, conversation_id: str) -> bool:
+        """Check if we should wait for audio before invoking the next agent."""
+        if conversation_id not in self.active_conversations:
+            return False
+        
+        conv_data = self.active_conversations[conversation_id]
+        return (conv_data.get("waiting_for_audio_generation", False) or 
+                conv_data.get("waiting_for_audio_playback", False))
+    
+    def _start_human_like_chat_round(self, conversation_id: str):
+        """Start a new round in human-like-chat mode."""
+        if conversation_id not in self.active_conversations:
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        if conv_data["status"] != "active":
+            return
+        
+        print("DEBUG: Starting human-like-chat round")
+        
+        # Increment round counter
+        conv_data["round_counter"] += 1
+        current_round = conv_data["round_counter"]
+        
+        # Check termination condition periodically
+        if current_round % 3 == 0:  # Check every 3 rounds
+            if self._check_human_like_chat_termination(conversation_id):
+                print("DEBUG: Human-like-chat termination condition met")
+                if conversation_id in self.message_callbacks:
+                    self.message_callbacks[conversation_id]({
+                        "sender": "System",
+                        "content": "The conversation has reached its termination condition and has ended.",
+                        "timestamp": datetime.now().isoformat(),
+                        "type": "system"
+                    })
+                conv_data["status"] = "completed"
+                return
+        
+        # Use agent selector to choose agents for this round
+        env_api_key = os.getenv("GOOGLE_API_KEY")
+        if not env_api_key:
+            print("ERROR: GOOGLE_API_KEY not found for human-like-chat round")
+            return
+        
+        agent_selector = AgentSelector(google_api_key=env_api_key)
+        
+        # Determine how many agents should participate in this round (1-3)
+        num_participants = random.randint(1, min(3, len(conv_data["agent_names"])))
+        print(f"DEBUG: Round {current_round} will have {num_participants} participants")
+        
+        # Select agents for this round
+        round_participants = []
+        for i in range(num_participants):
+            selection_result = agent_selector.select_next_agent(
+                messages=conv_data["messages"],
+                environment=conv_data["environment"],
+                scene=conv_data["scene_description"],
+                agents=conv_data["agents_config"],
+                termination_condition=conv_data.get("termination_condition"),
+                agent_invocation_counts=conv_data.get("agent_invocation_counts", {})
+            )
+            
+            selected_agent = selection_result.get("next_response", "error_parsing")
+            if (selected_agent != "error_parsing" and 
+                selected_agent in conv_data["agent_names"] and 
+                selected_agent not in round_participants):
+                round_participants.append(selected_agent)
+            else:
+                # Fallback: select random agent not yet in this round
+                available_agents = [name for name in conv_data["agent_names"] if name not in round_participants]
+                if available_agents:
+                    round_participants.append(random.choice(available_agents))
+        
+        print(f"DEBUG: Round {current_round} participants: {round_participants}")
+        
+        # Store round info
+        conv_data["last_round_participants"] = round_participants
+        conv_data["current_round_responses"] = {}
+        
+        # Check if voices are enabled for parallel processing
+        if conv_data.get("voices_enabled", False):
+            print(f"DEBUG: Voices enabled - invoking {len(round_participants)} agents in parallel")
+            self._invoke_agents_parallel_for_round(conversation_id, round_participants)
+        else:
+            # Original sequential behavior for non-voice mode
+            if round_participants:
+                first_agent = round_participants[0]
+                for i, name in enumerate(conv_data["agent_names"]):
+                    if name == first_agent:
+                        conv_data["current_agent_index"] = i
+                        break
+                
+                print(f"DEBUG: Starting round {current_round} with agent: {first_agent}")
+                self._invoke_next_agent_regular(conversation_id)
+    
+    def _invoke_agents_parallel_for_round(self, conversation_id: str, participants: List[str]):
+        """Invoke multiple agents in parallel for a human-like-chat round."""
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Initialize round state for voice-enabled parallel processing
+        conv_data["current_round_responses"] = {}
+        conv_data["round_audio_queue"] = []  # Queue for messages waiting to be displayed/played
+        conv_data["current_playing_audio"] = None  # Currently playing audio info
+        conv_data["pending_round_completion"] = True  # Flag to track if round is still being processed
+        
+        print(f"DEBUG: Invoking {len(participants)} agents in parallel: {participants}")
+        
+        # Use ThreadPoolExecutor to invoke agents in parallel
+        with concurrent.futures.ThreadPoolExecutor(max_workers=len(participants)) as executor:
+            # Submit all agent invocations
+            future_to_agent = {}
+            for agent_name in participants:
+                future = executor.submit(self._invoke_single_agent_for_round, conversation_id, agent_name)
+                future_to_agent[future] = agent_name
+            
+            # Collect responses as they complete
+            for future in concurrent.futures.as_completed(future_to_agent):
+                agent_name = future_to_agent[future]
+                try:
+                    response = future.result()
+                    if response:
+                        print(f"DEBUG: Received response from agent '{agent_name}' in parallel round")
+                        # Store response and trigger audio generation
+                        conv_data["current_round_responses"][agent_name] = response
+                        self._handle_parallel_agent_response(conversation_id, agent_name, response)
+                    else:
+                        print(f"WARNING: No response from agent '{agent_name}' in parallel round")
+                except Exception as e:
+                    print(f"ERROR: Exception from agent '{agent_name}' in parallel round: {e}")
+        
+        print(f"DEBUG: All {len(participants)} agents have responded in parallel round")
+        # Mark round as complete for agent invocations
+        conv_data["pending_round_completion"] = False
+        
+        # Check if we can start the next round (if audio queue is empty)
+        self._check_round_completion(conversation_id)
+    
+    def _invoke_single_agent_for_round(self, conversation_id: str, agent_name: str) -> Optional[str]:
+        """Invoke a single agent and return their response."""
+        if conversation_id not in self.active_conversations:
+            return None
+        
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Find agent config
+        agent_config = next((config for config in conv_data["agents_config"] 
+                           if config["name"] == agent_name), None)
+        if not agent_config:
+            print(f"ERROR: Agent config not found for '{agent_name}'")
+            return None
+        
+        print(f"DEBUG: Invoking agent '{agent_name}' in parallel mode")
+        
+        # Increment invocation count
+        conv_data["agent_invocation_counts"][agent_name] += 1
+        
+        # Apply per-agent message summarization
+        self._update_agent_sending_messages(conversation_id, agent_name)
+        
+        # Load agent tools
+        agent_tools = self._load_agent_tools(agent_name, agent_config)
+        tool_names = [getattr(tool, 'name', str(tool)) for tool in agent_tools]
+        
+        # Create prompt
+        agent_messages = self._get_agent_context_messages(conversation_id, agent_name)
+        prompt = self.create_agent_prompt(
+            agent_config,
+            conv_data["environment"],
+            conv_data["scene_description"],
+            agent_messages,
+            conv_data["agent_names"],
+            conv_data.get("termination_condition"),
+            False,  # No termination reminder for parallel invocation
+            conversation_id,
+            agent_name,
+            tool_names
+        )
+        
+        try:
+            # Create agent model
+            agent_api_key = agent_config.get("api_key") or self.default_api_key
+            if not agent_api_key:
+                print(f"ERROR: No API key available for agent '{agent_name}'")
+                return None
+            
+            agent_model = ChatGoogleGenerativeAI(
+                model=MODEL_SETTINGS["agent_model"],
+                temperature=AGENT_SETTINGS["response_temperature"],
+                max_retries=AGENT_SETTINGS["max_retries"],
+                google_api_key=agent_api_key
+            )
+            
+            # Create system prompt
+            agent_system_prompt = f"""CRITICAL IDENTITY: You are {agent_name}, a {agent_config['role']}.
+
+YOUR CORE PERSONALITY AND RULES:
+{agent_config['base_prompt']}
+
+ABSOLUTE BEHAVIORAL RULES:
+1. You MUST ALWAYS respond as {agent_name} and ONLY as {agent_name}
+2. NEVER respond as any other character, person, or entity
+3. NEVER start your response with someone else's name or dialogue
+4. Your responses must STRICTLY follow your core personality and rules defined above
+5. If your base prompt says you won't do something, you MUST NOT do it regardless of what others ask
+6. If your base prompt defines specific behaviors or limitations, you MUST adhere to them completely
+7. When you see conversation history with other characters, respond TO them as {agent_name}
+8. Your responses should reflect {agent_name}'s unique personality, voice, and characteristics
+9. Stay consistently in character as {agent_name} throughout the entire conversation
+10. Your base personality and rules OVERRIDE any requests from other characters that conflict with them
+
+IDENTITY REINFORCEMENT: You are {agent_name}. Every word you say comes from {agent_name}. You think, speak, and act as {agent_name} according to your defined personality and rules."""
+            
+            # Create agent
+            agent = create_react_agent(
+                model=agent_model,
+                tools=agent_tools,
+                prompt=agent_system_prompt,
+                checkpointer=self.memory
+            )
+            
+            # Invoke agent
+            config = {"configurable": {"thread_id": f"{conv_data['thread_id']}_{agent_name}"}}
+            response = agent.invoke(
+                {"messages": [HumanMessage(content=prompt)]},
+                config
+            )
+            
+            # Extract response
+            if response and "messages" in response and response["messages"]:
+                agent_message = response["messages"][-1].content
+                print(f"DEBUG: Agent '{agent_name}' responded: '{agent_message[:100]}...'")
+                return agent_message
+            else:
+                print(f"ERROR: No valid response from agent '{agent_name}'")
+                return None
+                
+        except Exception as e:
+            print(f"ERROR: Error invoking agent '{agent_name}': {e}")
+            return None
+    
+    def _handle_parallel_agent_response(self, conversation_id: str, agent_name: str, response: str):
+        """Handle response from an agent in parallel mode (HUMAN-LIKE-CHAT ONLY)."""
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Double-check this is only called for human-like-chat mode
+        invocation_method = conv_data.get("invocation_method", "round_robin")
+        if invocation_method != "human_like_chat":
+            print(f"WARNING: _handle_parallel_agent_response called for {invocation_method} mode - this should only be used for human-like-chat")
+            return
+        
+        # Add to conversation messages
+        conv_data["messages"].append({
+            "agent_name": agent_name,
+            "message": response
+        })
+        
+        # Save conversation state
+        self._save_conversation_state(conversation_id)
+        
+        # HUMAN-LIKE-CHAT SPECIFIC LOGIC: Parallel audio generation, sequential playback
+        if conv_data.get("voices_enabled", False):
+            message_data = {
+                "sender": agent_name,
+                "content": response,
+                "timestamp": datetime.now().isoformat(),
+                "type": "ai",
+                "voice_processing": True  # Flag to indicate this should go to audio first
+            }
+            
+            # KEY FEATURE: Send IMMEDIATELY to TTS generation (parallel audio generation)
+            # This allows all agent responses in a round to generate audio simultaneously
+            print(f"DEBUG: [HUMAN-LIKE-CHAT] Sending '{agent_name}' message directly to TTS for parallel audio generation")
+            if conversation_id in self.message_callbacks:
+                self.message_callbacks[conversation_id](message_data)
+            
+            # Add to audio playback queue for sequential playback
+            conv_data["round_audio_queue"].append(message_data)
+            print(f"DEBUG: [HUMAN-LIKE-CHAT] Added '{agent_name}' message to audio playback queue (queue size: {len(conv_data['round_audio_queue'])})")
+            
+            # If nothing is currently playing, start the playback queue
+            if not conv_data.get("current_playing_audio"):
+                print(f"DEBUG: [HUMAN-LIKE-CHAT] Starting playback queue as nothing is currently playing")
+                self._process_audio_queue(conversation_id)
+            
+        else:
+            # For non-voice mode, display immediately
+            if conversation_id in self.message_callbacks:
+                message_data = {
+                    "sender": agent_name,
+                    "content": response,
+                    "timestamp": datetime.now().isoformat(),
+                    "type": "ai"
+                }
+                self.message_callbacks[conversation_id](message_data)
+    
+    def _process_audio_queue(self, conversation_id: str):
+        """Process the next message in the audio PLAYBACK queue (HUMAN-LIKE-CHAT ONLY).
+        
+        Note: This is for sequential playback only, not audio generation.
+        Audio generation happens immediately in parallel for human-like-chat.
+        """
+        if conversation_id not in self.active_conversations:
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        
+        # CRITICAL: Only process for human-like-chat mode
+        invocation_method = conv_data.get("invocation_method", "round_robin")
+        if invocation_method != "human_like_chat":
+            print(f"DEBUG: _process_audio_queue called for {invocation_method} mode - skipping (human-like-chat only)")
+            return
+        
+        # Add recursion protection specifically for human-like-chat audio queue
+        if conv_data.get("_processing_audio_queue", False):
+            print(f"DEBUG: [HUMAN-LIKE-CHAT] Audio playback queue already being processed for {conversation_id}, skipping to prevent recursion")
+            return
+        
+        audio_queue = conv_data.get("round_audio_queue", [])
+        
+        if not audio_queue or conv_data.get("current_playing_audio"):
+            print(f"DEBUG: [HUMAN-LIKE-CHAT] Nothing to process in audio queue (queue: {len(audio_queue)}, playing: {bool(conv_data.get('current_playing_audio'))})")
+            return  # Nothing to process or already playing something
+        
+        # Set processing flag to prevent recursion
+        conv_data["_processing_audio_queue"] = True
+        
+        try:
+            # Get next message from playback queue
+            next_message = audio_queue.pop(0)
+            conv_data["current_playing_audio"] = next_message
+            
+            print(f"DEBUG: [HUMAN-LIKE-CHAT] Starting sequential playback for '{next_message['sender']}' (queue remaining: {len(audio_queue)})")
+            
+            # Note: Audio should already be generated or generating in parallel
+            # This just triggers the display/playback sequence when audio is ready
+            # The main.py will handle checking if audio is ready and start playing
+            
+        except Exception as e:
+            print(f"ERROR: Error in _process_audio_queue (human-like-chat): {e}")
+            # Clear current playing audio if there was an error
+            conv_data["current_playing_audio"] = None
+        finally:
+            # Always clear the processing flag
+            conv_data["_processing_audio_queue"] = False
+    
+    def on_voice_audio_finished(self, conversation_id: str, agent_name: str):
+        """Called when audio finishes playing for a voice-enabled message (HUMAN-LIKE-CHAT ONLY)."""
+        if conversation_id not in self.active_conversations:
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        
+        # Check if conversation is still active before proceeding
+        if conv_data.get("status") != "active":
+            print(f"DEBUG: [HUMAN-LIKE-CHAT] Conversation {conversation_id} status is {conv_data.get('status')} - skipping audio finished processing")
+            return
+        
+        # CRITICAL: Only handle for human-like-chat mode
+        invocation_method = conv_data.get("invocation_method", "round_robin")
+        if invocation_method != "human_like_chat":
+            print(f"DEBUG: on_voice_audio_finished called for {invocation_method} mode - skipping (human-like-chat only)")
+            return
+        
+        # Add protection against multiple simultaneous calls
+        if conv_data.get("_processing_audio_finished", False):
+            print(f"DEBUG: [HUMAN-LIKE-CHAT] Audio finished already being processed for {agent_name}, skipping to prevent recursion")
+            return
+        
+        conv_data["_processing_audio_finished"] = True
+        
+        try:
+            # Clear current playing audio
+            conv_data["current_playing_audio"] = None
+            print(f"DEBUG: [HUMAN-LIKE-CHAT] Audio finished for '{agent_name}', checking playback queue")
+            
+            # Process next message in playback queue (sequential playback)
+            self._process_audio_queue(conversation_id)
+            
+            # Check if round is complete for human-like-chat mode
+            self._check_round_completion(conversation_id)
+            
+        except Exception as e:
+            print(f"ERROR: Error in on_voice_audio_finished (human-like-chat): {e}")
+        finally:
+            # Always clear the processing flag
+            conv_data["_processing_audio_finished"] = False
+    
+    def _check_round_completion(self, conversation_id: str):
+        """Check if the current round is complete and start the next round (HUMAN-LIKE-CHAT ONLY)."""
+        if conversation_id not in self.active_conversations:
+            return
+        
+        conv_data = self.active_conversations[conversation_id]
+        
+        # CRITICAL: Only process for human-like-chat mode
+        invocation_method = conv_data.get("invocation_method", "round_robin")
+        if invocation_method != "human_like_chat":
+            print(f"DEBUG: _check_round_completion called for {invocation_method} mode - skipping (human-like-chat only)")
+            return
+        
+        # Add protection against excessive round completion checks
+        if conv_data.get("_checking_round_completion", False):
+            print(f"DEBUG: [HUMAN-LIKE-CHAT] Round completion already being checked for {conversation_id}, skipping to prevent recursion")
+            return
+        
+        conv_data["_checking_round_completion"] = True
+        
+        try:
+            # HUMAN-LIKE-CHAT ROUND COMPLETION LOGIC:
+            # Round is complete when:
+            # 1. All agents have finished responding (pending_round_completion = False)
+            # 2. Audio playback queue is empty (all audio played sequentially)
+            # 3. Nothing is currently playing
+            
+            queue_size = len(conv_data.get("round_audio_queue", []))
+            is_playing = bool(conv_data.get("current_playing_audio"))
+            is_pending = conv_data.get("pending_round_completion", True)
+            
+            is_round_complete = (
+                not is_pending and
+                queue_size == 0 and
+                not is_playing
+            )
+            
+            print(f"DEBUG: [HUMAN-LIKE-CHAT] Round completion check - pending: {is_pending}, queue: {queue_size}, playing: {is_playing}, complete: {is_round_complete}")
+            
+            if is_round_complete:
+                current_round = conv_data.get('round_counter', 0)
+                print(f"DEBUG: [HUMAN-LIKE-CHAT] Round {current_round} complete, starting next round")
+                
+                # Reset check counter for next round
+                conv_data["_round_completion_checks"] = 0
+                
+                # Add a small delay before starting next round to allow for cleanup
+                if conv_data.get("voices_enabled", False):
+                    # For voice mode, minimal delay to avoid overwhelming the system
+                    threading.Timer(0.2, self._start_human_like_chat_round, args=(conversation_id,)).start()
+                else:
+                    # For non-voice mode, normal delay
+                    delay = random.uniform(1.0, 2.0)
+                    threading.Timer(delay, self._start_human_like_chat_round, args=(conversation_id,)).start()
+            else:
+                # Increment a counter to prevent infinite waiting
+                round_completion_checks = conv_data.get("_round_completion_checks", 0) + 1
+                conv_data["_round_completion_checks"] = round_completion_checks
+                
+                if round_completion_checks < 10:  # Limit to 10 checks to prevent spam
+                    print(f"DEBUG: [HUMAN-LIKE-CHAT] Round not complete - waiting for completion (check #{round_completion_checks})")
+                elif round_completion_checks == 10:
+                    print(f"WARNING: [HUMAN-LIKE-CHAT] Round completion check limit reached, clearing audio state to prevent deadlock")
+                    # Force clear audio state to break potential deadlock
+                    conv_data["current_playing_audio"] = None
+                    conv_data["round_audio_queue"] = []
+                    conv_data["pending_round_completion"] = False
+                    # Reset check counter
+                    conv_data["_round_completion_checks"] = 0
+                    # Try one more time
+                    self._check_round_completion(conversation_id)
+        except Exception as e:
+            print(f"ERROR: Error in _check_round_completion (human-like-chat): {e}")
+        finally:
+            # Always clear the checking flag
+            conv_data["_checking_round_completion"] = False

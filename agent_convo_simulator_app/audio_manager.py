@@ -198,33 +198,43 @@ class AudioManager:
     def get_current_playing_agent(self) -> Optional[str]:
         """Get the agent ID of currently playing audio."""
         if self.current_audio_info:
-            return self.current_audio_info.get('agent_id')
+            return self.current_audio_info['agent_id']
         return None
-
-    def clear_pending_audio(self):
-        """Clear all pending audio requests from the queue and stop current playback."""
-        cleared_message_ids = []
+    
+    def clear_pending_audio(self, conversation_id: str) -> list:
+        """
+        Clear all pending audio requests for a conversation.
+        Returns a list of cleared requests with their message IDs.
+        """
+        cleared_requests = []
+        temp_queue = queue.Queue()
         
-        # Stop any currently playing sound
-        if self.pygame_available:
-            pygame.mixer.stop()
-            print("DEBUG: Stopped any currently playing audio.")
-
-        # Clear the queue
-        with self.audio_queue.mutex:
-            while not self.audio_queue.empty():
-                try:
-                    request = self.audio_queue.get_nowait()
-                    cleared_message_ids.append(request['message_id'])
-                except queue.Empty:
-                    break
+        # Extract all items from the queue
+        while not self.audio_queue.empty():
+            try:
+                request = self.audio_queue.get_nowait()
+                if request['conversation_id'] == conversation_id:
+                    # This request should be cleared
+                    cleared_requests.append({
+                        'agent_id': request['agent_id'],
+                        'message_id': request['message_id']
+                    })
+                else:
+                    # Keep requests from other conversations
+                    temp_queue.put(request)
+            except queue.Empty:
+                break
         
-        # Clear any message that was in the process of having its audio generated
-        # but not yet played.
-        self.current_audio_info = None
-
-        print(f"DEBUG: Cleared {len(cleared_message_ids)} pending audio requests from the queue.")
-        return cleared_message_ids
+        # Put back the requests we want to keep
+        while not temp_queue.empty():
+            try:
+                request = temp_queue.get_nowait()
+                self.audio_queue.put(request)
+            except queue.Empty:
+                break
+        
+        print(f"DEBUG: Cleared {len(cleared_requests)} pending audio requests for conversation {conversation_id}")
+        return cleared_requests
     
     def get_current_playing_info(self) -> Optional[Dict]:
         """Get information about currently playing audio."""
