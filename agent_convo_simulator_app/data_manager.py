@@ -61,11 +61,13 @@ class Conversation:
     termination_condition: Optional[str] = None  # Condition for agent-selector to determine when to end conversation
     agent_selector_api_key: Optional[str] = None  # API key for the agent selector
     agent_sending_messages: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)  # Maps agent names to their context messages (summary + recent)
+    voices_enabled: bool = False  # Whether voice synthesis is enabled for this conversation
+    agent_voices: Dict[str, str] = field(default_factory=dict)  # Maps agent IDs to their assigned voice names
     
     @classmethod
     def create_new(cls, title: str, environment: str, scene_description: str, agent_ids: List[str],
                   invocation_method: str = "round_robin", termination_condition: Optional[str] = None,
-                  agent_selector_api_key: Optional[str] = None) -> 'Conversation':
+                  agent_selector_api_key: Optional[str] = None, voices_enabled: bool = False) -> 'Conversation':
         """Create a new conversation with auto-generated ID and timestamps."""
         now = datetime.now().isoformat()
         
@@ -90,7 +92,9 @@ class Conversation:
             invocation_method=invocation_method,
             termination_condition=termination_condition,
             agent_selector_api_key=agent_selector_api_key,
-            agent_sending_messages={}  # Initialize empty agent context messages
+            agent_sending_messages={},  # Initialize empty agent context messages
+            voices_enabled=voices_enabled,
+            agent_voices={}  # Initialize empty agent voices mapping
         )
 
 
@@ -234,7 +238,9 @@ class DataManager:
                     'invocation_method': conv_data.get('invocation_method', 'round_robin'),
                     'termination_condition': conv_data.get('termination_condition'),
                     'agent_selector_api_key': conv_data.get('agent_selector_api_key'),
-                    'agent_sending_messages': conv_data.get('agent_sending_messages', {})
+                    'agent_sending_messages': conv_data.get('agent_sending_messages', {}),
+                    'voices_enabled': conv_data.get('voices_enabled', False),
+                    'agent_voices': conv_data.get('agent_voices', {})
                 }
                 conversations.append(Conversation(**conversation_fields))
             except Exception as e:
@@ -345,3 +351,35 @@ class DataManager:
         
         data["conversations"] = conversations
         self._save_json(self.conversations_file, data)
+    
+    def reassign_voices_for_conversation(self, conversation_id: str, agent_ids: List[str]):
+        """Reassign voices when agents in a conversation are modified."""
+        conversation = self.get_conversation_by_id(conversation_id)
+        if not conversation or not conversation.voices_enabled:
+            return
+        
+        # Get current agent objects
+        agents = [self.get_agent_by_id(agent_id) for agent_id in agent_ids]
+        agents = [agent for agent in agents if agent]  # Filter out None values
+        
+        if not agents:
+            return
+        
+        # Import voice manager
+        from voice_assignment import VoiceAssignmentManager
+        voice_manager = VoiceAssignmentManager()
+        
+        # Keep existing voice assignments for agents that are still in the conversation
+        existing_assignments = {}
+        for agent_id in agent_ids:
+            if agent_id in conversation.agent_voices:
+                existing_assignments[agent_id] = conversation.agent_voices[agent_id]
+        
+        # Reassign voices for all agents
+        new_assignments = voice_manager.assign_voices_to_agents(agents, existing_assignments)
+        conversation.agent_voices = new_assignments
+        
+        # Save the updated conversation
+        self.save_conversation(conversation)
+        
+        print(f"DEBUG: Reassigned voices for conversation {conversation_id}: {new_assignments}")

@@ -22,6 +22,7 @@ try:
     from conversation_engine import ConversationSimulatorEngine
     from config import UI_COLORS, AGENT_SETTINGS
     import knowledge_manager # Import the new module
+    from audio_manager import AudioManager
     LANGGRAPH_AVAILABLE = True
 except ImportError as e:
     print(f"LangGraph dependencies not available: {e}")
@@ -184,6 +185,82 @@ class ChatBubble(tk.Frame):
             )
             message_label.pack(fill="x", pady=(5, 0))
         
+        # Store original color for blinking animation
+        self.original_color = color
+        self.blink_active = False
+        self.blink_job = None
+        
+    def start_blink(self):
+        """Start blinking animation."""
+        if not self.blink_active:
+            self.blink_active = True
+            self._blink_animate()
+    
+    def stop_blink(self):
+        """Stop blinking animation and restore original color."""
+        self.blink_active = False
+        if self.blink_job:
+            self.after_cancel(self.blink_job)
+            self.blink_job = None
+        # Restore original color
+        self.bubble_frame.config(bg=self.original_color)
+        # Update all child widgets' background
+        self._update_bg_color(self.original_color)
+    
+    def _blink_animate(self):
+        """Animate the blinking effect."""
+        if not self.blink_active:
+            return
+        
+        # Alternate between original color and a slightly lighter version
+        current_bg = self.bubble_frame.cget('bg')
+        if current_bg == self.original_color:
+            # Make lighter (simple approach - you could use more sophisticated color manipulation)
+            lighter_color = self._lighten_color(self.original_color)
+            new_color = lighter_color
+        else:
+            new_color = self.original_color
+        
+        self.bubble_frame.config(bg=new_color)
+        self._update_bg_color(new_color)
+        
+        # Schedule next blink
+        self.blink_job = self.after(500, self._blink_animate)  # Blink every 500ms
+    
+    def _lighten_color(self, color):
+        """Create a lighter version of the given color."""
+        # Simple approach: just return a generic light color
+        # In a more sophisticated implementation, you'd parse the hex color and adjust brightness
+        if color == "#E8F4FD":  # Light blue
+            return "#F0F8FF"
+        elif color == "#E8F8E8":  # Light green  
+            return "#F0FFF0"
+        elif color == "#FFE8E8":  # Light red
+            return "#FFF0F0"
+        else:
+            return "#F5F5F5"  # Default light gray
+    
+    def _update_bg_color(self, color):
+        """Update background color for all child widgets."""
+        for child in self.bubble_frame.winfo_children():
+            if hasattr(child, 'config'):
+                try:
+                    child.config(bg=color)
+                except tk.TclError:
+                    pass  # Some widgets might not support bg config
+            # Recursively update nested widgets
+            self._update_child_bg(child, color)
+    
+    def _update_child_bg(self, widget, color):
+        """Recursively update background color for nested widgets."""
+        for child in widget.winfo_children():
+            if hasattr(child, 'config'):
+                try:
+                    child.config(bg=color)
+                except tk.TclError:
+                    pass
+            self._update_child_bg(child, color)
+        
     @staticmethod
     def get_message_height(message, width=400):
         """Estimate the height needed for a message (for canvas sizing)."""
@@ -218,6 +295,9 @@ class ChatCanvas(tk.Canvas):
         # Track the previous sender to add spacing between different agents
         self.previous_sender = None
         
+        # Track message bubbles by message_id for blinking animations
+        self.message_bubbles = {}  # message_id -> ChatBubble
+        
         # Create window for the frame
         self.bubble_window = self.create_window((0, 0), window=self.bubble_frame, anchor="nw", width=self.winfo_width())
         
@@ -234,7 +314,7 @@ class ChatCanvas(tk.Canvas):
         """Update scroll region when the inner frame changes size."""
         self.configure(scrollregion=self.bbox("all"))
         
-    def add_bubble(self, sender, message, timestamp, msg_type="ai", color=None, align_right=False):
+    def add_bubble(self, sender, message, timestamp, msg_type="ai", color=None, align_right=False, message_id=None):
         """Add a new chat bubble to the canvas."""
         
         # Add extra spacing between messages from different senders
@@ -257,6 +337,10 @@ class ChatCanvas(tk.Canvas):
         # Pack with fill="x" but the bubble frame inside handles the width limitation
         bubble.pack(fill="x", expand=True)
         
+        # Store bubble reference if message_id is provided
+        if message_id:
+            self.message_bubbles[message_id] = bubble
+        
         # Force update to ensure proper sizing and positioning
         self.bubble_frame.update_idletasks()
         self.update_idletasks()
@@ -275,6 +359,22 @@ class ChatCanvas(tk.Canvas):
             widget.destroy()
         # Reset previous sender tracking
         self.previous_sender = None
+        # Clear message bubble references
+        self.message_bubbles.clear()
+    
+    def start_bubble_blink(self, message_id: str):
+        """Start blinking animation for a message bubble."""
+        if message_id in self.message_bubbles:
+            bubble = self.message_bubbles[message_id]
+            bubble.start_blink()
+    
+    def stop_bubble_blink(self, message_id: str):
+        """Stop blinking animation for a message bubble."""
+        if message_id in self.message_bubbles:
+            bubble = self.message_bubbles[message_id]
+            bubble.stop_blink()
+            # Clean up the reference
+            del self.message_bubbles[message_id]
     
     def auto_scroll(self):
         """Automatically scroll to the bottom of the chat."""
@@ -299,6 +399,22 @@ class AgentConversationSimulatorGUI:
         
         # Initialize data manager
         self.data_manager = DataManager(os.path.dirname(__file__))
+        
+        # Initialize audio manager
+        try:
+            self.audio_manager = AudioManager()
+            self.audio_manager.set_audio_ready_callback(self.on_audio_ready)
+            self.audio_manager.set_audio_finished_callback(self.on_audio_finished)
+            self.audio_enabled = True
+        except Exception as e:
+            print(f"Warning: Could not initialize audio manager: {e}")
+            self.audio_manager = None
+            self.audio_enabled = False
+        
+        # Audio-related state
+        self.pending_audio_messages = {}  # message_id -> message_data for messages waiting for audio
+        self.audio_queue = []  # Queue of messages waiting to be sent to TTS
+        self.current_playing_message_id = None
         
         # Initialize knowledge manager
         self.knowledge_files = {} # To store paths of files to be uploaded
@@ -346,6 +462,14 @@ class AgentConversationSimulatorGUI:
                     print("DEBUG: Conversation stopped successfully")
                 except Exception as e:
                     print(f"WARNING: Error stopping conversation: {e}")
+            
+            # Stop audio manager
+            if hasattr(self, 'audio_manager'):
+                try:
+                    self.audio_manager.stop()
+                    print("DEBUG: Audio manager stopped successfully")
+                except Exception as e:
+                    print(f"WARNING: Error stopping audio manager: {e}")
                     
                 # Update conversation status in database to reflect it was stopped
                 try:
@@ -616,6 +740,19 @@ class AgentConversationSimulatorGUI:
         self.agent_selector_api_key_entry = ttk.Entry(settings_frame, textvariable=self.agent_selector_api_key_var, width=40, show="*")
         self.agent_selector_api_key_entry.grid(row=5, column=1, sticky="ew", pady=2, padx=(10, 0))
         self.agent_selector_api_key_entry.config(state=tk.DISABLED)  # Disabled by default for round-robin
+        
+        # Voice Settings
+        ttk.Label(settings_frame, text="Voice Synthesis:").grid(row=6, column=0, sticky="w", pady=2)
+        self.voices_enabled_var = tk.BooleanVar()
+        voices_frame = ttk.Frame(settings_frame)
+        voices_frame.grid(row=6, column=1, sticky="ew", pady=2, padx=(10, 0))
+        
+        voices_checkbox = ttk.Checkbutton(
+            voices_frame,
+            text="Enable voice synthesis for agents",
+            variable=self.voices_enabled_var
+        )
+        voices_checkbox.pack(side=tk.LEFT)
         
         settings_frame.grid_rowconfigure(2, weight=1)
         
@@ -1505,13 +1642,25 @@ class AgentConversationSimulatorGUI:
                 if not agent_selector_api_key:
                     agent_selector_api_key = None  # Will use default in engine
             
-            # Create conversation record with agent colors
+            # Get voice settings
+            voices_enabled = self.voices_enabled_var.get()
+            
+            # Create conversation record with agent colors and voice settings
             conversation = Conversation.create_new(
                 title, environment, scene, [agent.id for agent in selected_agents],
                 invocation_method=invocation_method, 
                 termination_condition=termination_condition,
-                agent_selector_api_key=agent_selector_api_key
+                agent_selector_api_key=agent_selector_api_key,
+                voices_enabled=voices_enabled
             )
+            
+            # Assign voices if enabled
+            if voices_enabled:
+                from voice_assignment import VoiceAssignmentManager
+                voice_manager = VoiceAssignmentManager()
+                voice_assignments = voice_manager.assign_voices_to_agents(selected_agents)
+                conversation.agent_voices = voice_assignments
+                print(f"DEBUG: Voice assignments: {voice_assignments}")
             
             # Prepare agent configs
             agents_config = []
@@ -1554,7 +1703,8 @@ class AgentConversationSimulatorGUI:
                 conversation.id, agents_config, environment, scene,
                 invocation_method=invocation_method,
                 termination_condition=termination_condition,
-                agent_selector_api_key=agent_selector_api_key
+                agent_selector_api_key=agent_selector_api_key,
+                voices_enabled=voices_enabled
             )
             
             # Register callback for message updates
@@ -1658,14 +1808,130 @@ class AgentConversationSimulatorGUI:
         ).start()
     def on_message_received(self, message_data: Dict[str, Any]):
         """Callback for when a new message is received."""
-        # Update UI in main thread
-        self.root.after(0, lambda: self.display_message(
-            message_data.get("sender", "Agent"),
-            message_data.get("content", ""),
-            message_data.get("type", "ai")
-        ))
+        # Check if voices are enabled for this conversation
+        conversation = self.data_manager.get_conversation_by_id(self.current_conversation_id)
+        voices_enabled = conversation and conversation.voices_enabled
         
-    def display_message(self, sender: str, content: str, msg_type: str, color: str = None):
+        # Generate a unique message ID
+        import time
+        import random
+        message_id = f"msg_{int(time.time() * 1000)}_{random.randint(1000, 9999)}"
+        message_data["message_id"] = message_id
+        
+        if voices_enabled and message_data.get("type") == "ai":
+            # Handle voice-enabled message
+            self._handle_voice_enabled_message(message_data)
+        else:
+            # Display message immediately for non-voice or non-AI messages
+            self.root.after(0, lambda: self.display_message(
+                message_data.get("sender", "Agent"),
+                message_data.get("content", ""),
+                message_data.get("type", "ai"),
+                message_data.get("message_id")
+            ))
+    
+    def _handle_voice_enabled_message(self, message_data: Dict[str, Any]):
+        """Handle message when voices are enabled."""
+        sender = message_data.get("sender", "Agent")
+        content = message_data.get("content", "")
+        message_id = message_data["message_id"]
+        
+        # Check if audio manager is available
+        if not self.audio_enabled or not self.audio_manager:
+            print("Warning: Audio not available, falling back to text-only display")
+            self.root.after(0, lambda: self.display_message(sender, content, "ai", message_id))
+            return
+        
+        # Find agent and get voice assignment
+        conversation = self.data_manager.get_conversation_by_id(self.current_conversation_id)
+        if not conversation:
+            # Fallback to immediate display if conversation not found
+            self.root.after(0, lambda: self.display_message(sender, content, "ai", message_id))
+            return
+        
+        # Find the agent by name
+        all_agents = self.data_manager.load_agents()
+        agent = next((a for a in all_agents if a.name == sender), None)
+        if not agent:
+            # Fallback if agent not found
+            self.root.after(0, lambda: self.display_message(sender, content, "ai", message_id))
+            return
+        
+        # Get voice assignment
+        voice = conversation.agent_voices.get(agent.id)
+        if not voice:
+            # Fallback if no voice assigned
+            self.root.after(0, lambda: self.display_message(sender, content, "ai", message_id))
+            return
+        
+        # Store message data for later display when audio is ready
+        self.pending_audio_messages[message_id] = message_data
+        
+        # Request audio generation
+        self.audio_manager.request_audio(
+            self.current_conversation_id,
+            agent.id,
+            message_id,
+            content,
+            voice
+        )
+        
+        print(f"DEBUG: Requested audio for {sender} with voice {voice}")
+    
+    def on_audio_ready(self, conversation_id: str, agent_id: str, message_id: str):
+        """Callback when audio is ready for a message."""
+        if message_id in self.pending_audio_messages:
+            # Display the message now that audio is ready
+            message_data = self.pending_audio_messages[message_id]
+            self.root.after(0, lambda: self.display_message(
+                message_data.get("sender", "Agent"),
+                message_data.get("content", ""),
+                message_data.get("type", "ai"),
+                message_id
+            ))
+            
+            # Start playing the audio and track current playing message
+            self.current_playing_message_id = message_id
+            
+            # Start blinking animation for the message bubble
+            self.root.after(0, lambda: self._start_bubble_blink(message_id))
+            
+            print(f"DEBUG: Audio ready for message {message_id}, displaying and starting playback")
+    
+    def on_audio_finished(self, conversation_id: str, agent_id: str, message_id: str):
+        """Callback when audio finishes playing."""
+        # Stop blinking animation
+        self.root.after(0, lambda: self._stop_bubble_blink(message_id))
+        
+        # Clear current playing message
+        if self.current_playing_message_id == message_id:
+            self.current_playing_message_id = None
+        
+        # Remove from pending messages
+        if message_id in self.pending_audio_messages:
+            del self.pending_audio_messages[message_id]
+        
+        # Process next audio in queue if any
+        self._process_next_audio_in_queue()
+        
+        print(f"DEBUG: Audio finished for message {message_id}")
+    
+    def _start_bubble_blink(self, message_id: str):
+        """Start blinking animation for a message bubble."""
+        if hasattr(self, 'chat_canvas') and self.chat_canvas:
+            self.chat_canvas.start_bubble_blink(message_id)
+    
+    def _stop_bubble_blink(self, message_id: str):
+        """Stop blinking animation for a message bubble.""" 
+        if hasattr(self, 'chat_canvas') and self.chat_canvas:
+            self.chat_canvas.stop_bubble_blink(message_id)
+    
+    def _process_next_audio_in_queue(self):
+        """Process the next audio request in queue."""
+        # This can be expanded later if we need to queue multiple audio requests
+        pass
+        
+    def display_message(self, sender: str, content: str, msg_type: str, message_id: str = None, color: str = None):
         """Display a message in the chat window using chat bubbles."""
         # Format timestamp
         timestamp = datetime.now().strftime("%H:%M:%S")
@@ -1730,7 +1996,7 @@ class AgentConversationSimulatorGUI:
             bubble_color = self.agent_colors.get(sender, color)
         
         # Add the bubble to the chat canvas with alignment
-        self.chat_canvas.add_bubble(sender, content, timestamp, msg_type, bubble_color, align_right=align_right)
+        self.chat_canvas.add_bubble(sender, content, timestamp, msg_type, bubble_color, align_right=align_right, message_id=message_id)
         
         # Save message to conversation
         if self.current_conversation_id:

@@ -8,6 +8,10 @@ langchain-google-genai
 # Additional dependencies
 python-dotenv
 
+# Audio dependencies for voice synthesis
+aiohttp
+pygame
+
 # Knowledge Base Dependencies
 pinecone-client
 sentence-transformers
