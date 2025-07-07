@@ -8,44 +8,49 @@ import PyPDF2
 import json
 import uuid
 import io
+import shutil
 
 # Load environment variables from .env file
 load_dotenv()
 
-def setup_embedding_model():
+# Global variable to store the embedding model (lazy loading)
+_embedding_model = None
+
+def get_embedding_model():
     """
-    Loads the embedding model and sets it globally.
-    This function should be called once when the application starts.
+    Lazily loads and returns the embedding model.
+    This ensures the model is only loaded when needed, not at startup.
     """
-    # Use a pre-trained model from HuggingFace
-    model_name = "sentence-transformers/all-MiniLM-L6-v2"
+    global _embedding_model
+    if _embedding_model is None:
+        print(f"🔧 EMBEDDING MODEL SETUP: Starting lazy loading...")
+        model_name = "sentence-transformers/all-MiniLM-L6-v2"
+        
+        print(f"📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        
+        try:
+            start_time = time.time()
+            print(f"⏳ Loading SentenceTransformer model '{model_name}'...")
+            
+            # Load the model directly with SentenceTransformers
+            _embedding_model = SentenceTransformer(model_name)
+            
+            load_time = time.time() - start_time
+            print(f"✅ EMBEDDING MODEL SETUP COMPLETE!")
+            print(f"   📊 Model: {model_name}")
+            print(f"   ⏱️  Load time: {load_time:.2f} seconds")
+            print(f"   🎯 Ready for document embedding tasks")
+            print("-" * 60)
+            
+        except Exception as e:
+            print(f"❌ EMBEDDING MODEL SETUP FAILED!")
+            print(f"   🚨 Error: {e}")
+            print(f"   💡 Please ensure 'sentence-transformers' and 'torch' are installed")
+            print(f"   💻 Run: pip install sentence-transformers torch")
+            print("-" * 60)
+            raise
     
-    print(f"🔧 EMBEDDING MODEL SETUP: Starting setup for embedding model '{model_name}'...")
-    print(f"📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    try:
-        start_time = time.time()
-        print(f"⏳ Loading SentenceTransformer model '{model_name}'...")
-        
-        # Load the model directly with SentenceTransformers
-        model = SentenceTransformer(model_name)
-        
-        load_time = time.time() - start_time
-        print(f"✅ EMBEDDING MODEL SETUP COMPLETE!")
-        print(f"   📊 Model: {model_name}")
-        print(f"   ⏱️  Load time: {load_time:.2f} seconds")
-        print(f"   🎯 Ready for document embedding tasks")
-        print("-" * 60)
-        
-        return model
-        
-    except Exception as e:
-        print(f"❌ EMBEDDING MODEL SETUP FAILED!")
-        print(f"   🚨 Error: {e}")
-        print(f"   💡 Please ensure 'sentence-transformers' and 'torch' are installed")
-        print(f"   💻 Run: pip install sentence-transformers torch")
-        print("-" * 60)
-        raise
+    return _embedding_model
 
 def load_document(file_path):
     """Load document content from various file types."""
@@ -85,16 +90,18 @@ def chunk_text(text, chunk_size=1000, overlap=200):
             break
     return chunks
 
-def ingest_agent_documents(agent_id: str):
+def ingest_agent_documents(agent_id: str, only_new: bool = True):
     """
     Chunks, embeds, and stores documents for a given agent in a unique Pinecone index.
     
     Args:
         agent_id: The unique identifier for the agent.
+        only_new: If True, only process documents that aren't in knowledge_sources.json
     """
     print("=" * 80)
     print(f"🚀 STARTING DOCUMENT INGESTION FOR AGENT: {agent_id}")
     print(f"📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"🔄 Mode: {'Only new documents' if only_new else 'All documents'}")
     print("=" * 80)
     
     agent_docs_path = os.path.join("knowledge_base", agent_id)
@@ -109,18 +116,51 @@ def ingest_agent_documents(agent_id: str):
         print("=" * 80)
         return
     
-    files_in_directory = os.listdir(agent_docs_path)
+    files_in_directory = [f for f in os.listdir(agent_docs_path) if f.endswith(('.pdf', '.txt')) and not f.endswith('.metadata.json')]
     if not files_in_directory:
-        print(f"   ❌ Directory is empty!")
+        print(f"   ❌ No document files found!")
         print(f"   ℹ️  No documents found for agent {agent_id}. Skipping ingestion.")
         print("=" * 80)
         return
     
-    print(f"   ✅ Found {len(files_in_directory)} file(s):")
-    for i, file in enumerate(files_in_directory, 1):
-        file_path = os.path.join(agent_docs_path, file)
-        file_size = os.path.getsize(file_path)
-        print(f"      {i}. {file} ({file_size:,} bytes)")
+    # Load existing knowledge sources
+    sources_file = os.path.join(agent_docs_path, "knowledge_sources.json")
+    existing_sources = {}
+    if os.path.exists(sources_file):
+        try:
+            with open(sources_file, 'r', encoding='utf-8') as f:
+                existing_sources = json.load(f)
+        except Exception as e:
+            print(f"   ⚠️  Error reading sources file: {e}")
+    
+    # Filter files if only_new is True
+    if only_new:
+        existing_files = set()
+        for source_info in existing_sources.values():
+            existing_files.add(source_info.get('file_path', ''))
+        
+        files_to_process = [f for f in files_in_directory if f not in existing_files]
+        
+        if not files_to_process:
+            print(f"   ℹ️  All documents already processed. No new files to ingest.")
+            print("=" * 80)
+            return
+            
+        print(f"   ✅ Found {len(files_to_process)} new file(s) to process:")
+        for i, file in enumerate(files_to_process, 1):
+            file_path = os.path.join(agent_docs_path, file)
+            file_size = os.path.getsize(file_path)
+            print(f"      {i}. {file} ({file_size:,} bytes)")
+    else:
+        files_to_process = files_in_directory
+        print(f"   ✅ Found {len(files_to_process)} file(s) to process:")
+        for i, file in enumerate(files_to_process, 1):
+            file_path = os.path.join(agent_docs_path, file)
+            file_size = os.path.getsize(file_path)
+            print(f"      {i}. {file} ({file_size:,} bytes)")
+
+    # Rest of the function remains the same for processing files...
+    # [Previous Pinecone setup and processing code continues here]
 
     # Check environment variables
     print(f"\n🔐 ENVIRONMENT VALIDATION:")
@@ -213,7 +253,7 @@ def ingest_agent_documents(agent_id: str):
 
         # Setup embedding model
         print(f"\n🤖 EMBEDDING MODEL SETUP:")
-        model = setup_embedding_model()
+        model = get_embedding_model()
 
         # Load and process documents
         print(f"\n📚 DOCUMENT PROCESSING:")
@@ -381,7 +421,7 @@ def query_pinecone(index_name: str, query: str, top_k: int = 3):
         
         # Setup embedding model and encode query
         print(f"   ⏳ Encoding query...")
-        model = setup_embedding_model()
+        model = get_embedding_model()
         query_embedding = model.encode([query])[0].tolist()
         
         # Perform query
@@ -434,10 +474,7 @@ class KnowledgeManager:
     def __init__(self):
         print(f"🧠 KNOWLEDGE MANAGER INITIALIZED")
         print(f"   📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        try:
-            setup_embedding_model()
-        except Exception as e:
-            print(f"   ⚠️  Warning: Embedding model setup failed: {e}")
+        print(f"   📝 Note: Embedding model will load when first needed")
     
     def ingest_agent_documents(self, agent_id: str):
         """Wrapper method for document ingestion."""
@@ -446,4 +483,336 @@ class KnowledgeManager:
     def query_pinecone(self, index_name: str, query: str, top_k: int = 3):
         """Wrapper method for querying Pinecone."""
         return query_pinecone(index_name, query, top_k)
+    
+    def ingest_document_for_agent(self, agent_id: str, file_path: str, description: str = None):
+        """
+        Ingest a single document for an agent by copying it to the agent's knowledge base directory,
+        chunking it, vectorizing it, and storing it in Pinecone with proper metadata.
+        
+        Args:
+            agent_id: The unique identifier for the agent
+            file_path: Path to the document file to ingest
+            description: Optional description of the document
+            
+        Returns:
+            bool: True if successful, False otherwise
+        """
+        print(f"\n🚀 INGESTING SINGLE DOCUMENT FOR AGENT: {agent_id}")
+        print(f"📄 File: {os.path.basename(file_path)}")
+        print(f"💬 Description: {description}")
+        print(f"📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("=" * 60)
+        
+        try:
+            # Generate unique document ID
+            doc_id = str(uuid.uuid4())
+            file_name = os.path.basename(file_path)
+            current_time = datetime.now().isoformat()
+            
+            # Create the agent's knowledge base directory if it doesn't exist
+            agent_docs_path = os.path.join("knowledge_base", agent_id)
+            os.makedirs(agent_docs_path, exist_ok=True)
+            
+            # Copy the file to the agent's directory with doc_id prefix
+            destination_path = os.path.join(agent_docs_path, f"{doc_id}_{file_name}")
+            
+            print(f"📁 Copying file to: {destination_path}")
+            shutil.copy2(file_path, destination_path)
+            
+            # Update knowledge_sources.json
+            sources_file = os.path.join(agent_docs_path, "knowledge_sources.json")
+            sources_data = {}
+            
+            if os.path.exists(sources_file):
+                try:
+                    with open(sources_file, 'r', encoding='utf-8') as f:
+                        sources_data = json.load(f)
+                except Exception as e:
+                    print(f"⚠️  Error reading existing sources file: {e}")
+                    sources_data = {}
+            
+            # Add new document info
+            sources_data[doc_id] = {
+                "doc_id": doc_id,
+                "doc_name": file_name,
+                "doc_description": description or f"Document: {file_name}",
+                "doc_uploaded_datetime": current_time,
+                "file_path": f"{doc_id}_{file_name}"
+            }
+            
+            # Save updated sources
+            with open(sources_file, 'w', encoding='utf-8') as f:
+                json.dump(sources_data, f, indent=2, ensure_ascii=False)
+            print(f"📝 Updated knowledge_sources.json")
+            
+            # Now process the document: chunk, vectorize, and upload to Pinecone
+            print(f"🔄 Processing document for vectorization...")
+            
+            # Load document content
+            content = load_document(destination_path)
+            if not content:
+                print(f"❌ Failed to load document content")
+                return False
+            
+            char_count = len(content)
+            print(f"📊 Content: {char_count:,} characters")
+            
+            # Chunk the document
+            print(f"✂️ Chunking document...")
+            chunks = chunk_text(content, chunk_size=1000, overlap=200)
+            print(f"📦 Created {len(chunks)} chunks")
+            
+            # Prepare chunks with metadata
+            chunk_data = []
+            for j, chunk in enumerate(chunks):
+                chunk_data.append({
+                    'id': f"{agent_id}_{doc_id}_{j}",
+                    'text': chunk,
+                    'doc_id': doc_id,
+                    'doc_name': file_name,
+                    'chunk_index': j,
+                    'agent_id': agent_id
+                })
+            
+            # Initialize Pinecone and setup embedding
+            pinecone_api_key = os.getenv("PINECONE_API_KEY")
+            pinecone_env = os.getenv("PINECONE_ENV")
+            
+            if not pinecone_api_key or not pinecone_env:
+                print(f"❌ Missing Pinecone credentials!")
+                return False
+            
+            print(f"🌲 Connecting to Pinecone...")
+            pc = Pinecone(api_key=pinecone_api_key)
+            
+            # Create/connect to index
+            index_name = f"agent-kb-{agent_id.lower().replace('_', '-')}"
+            dimension = 384  # for all-MiniLM-L6-v2
+            
+            existing_indexes = pc.list_indexes().names()
+            if index_name not in existing_indexes:
+                print(f"🆕 Creating new index '{index_name}'...")
+                pc.create_index(
+                    name=index_name, 
+                    dimension=dimension, 
+                    metric="cosine",
+                    spec=ServerlessSpec(
+                        cloud='aws',
+                        region='us-east-1'
+                    )
+                )
+                time.sleep(10)  # Wait for index to be ready
+            
+            pinecone_index = pc.Index(index_name)
+            print(f"✅ Connected to index '{index_name}'")
+            
+            # Setup embedding model
+            model = get_embedding_model()
+            
+            # Generate embeddings and upload
+            print(f"🔄 Generating embeddings for {len(chunk_data)} chunks...")
+            
+            texts = [chunk['text'] for chunk in chunk_data]
+            embeddings = model.encode(texts)
+            
+            # Prepare vectors for upsert
+            vectors = []
+            for chunk, embedding in zip(chunk_data, embeddings):
+                vectors.append({
+                    'id': chunk['id'],
+                    'values': embedding.tolist(),
+                    'metadata': {
+                        'text': chunk['text'],
+                        'doc_id': chunk['doc_id'],
+                        'doc_name': chunk['doc_name'],
+                        'chunk_index': chunk['chunk_index'],
+                        'agent_id': chunk['agent_id']
+                    }
+                })
+            
+            # Upload to Pinecone
+            pinecone_index.upsert(vectors)
+            print(f"✅ Uploaded {len(vectors)} vectors to Pinecone")
+            
+            print(f"✅ DOCUMENT INGESTION COMPLETED SUCCESSFULLY!")
+            print(f"   🆔 Document ID: {doc_id}")
+            print(f"   📄 File: {file_name}")
+            print(f"   📦 Chunks: {len(chunk_data)}")
+            print(f"   🔢 Vectors: {len(vectors)}")
+            print("=" * 60)
+            
+            return True
+            
+        except Exception as e:
+            print(f"❌ DOCUMENT INGESTION FAILED: {e}")
+            import traceback
+            traceback.print_exc()
+            print("=" * 60)
+            return False
+
+def ingest_document_for_agent(agent_id: str, file_path: str, description: str = None):
+    """
+    Ingest a single document for an agent by copying it to the agent's knowledge base directory,
+    chunking it, vectorizing it, and storing it in Pinecone with proper metadata.
+    
+    Args:
+        agent_id: The unique identifier for the agent
+        file_path: Path to the document file to ingest
+        description: Optional description of the document
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    print(f"\n🚀 INGESTING SINGLE DOCUMENT FOR AGENT: {agent_id}")
+    print(f"📄 File: {os.path.basename(file_path)}")
+    print(f"💬 Description: {description}")
+    print(f"📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("=" * 60)
+    
+    try:
+        # Generate unique document ID
+        doc_id = str(uuid.uuid4())
+        file_name = os.path.basename(file_path)
+        current_time = datetime.now().isoformat()
+        
+        # Create the agent's knowledge base directory if it doesn't exist
+        agent_docs_path = os.path.join("knowledge_base", agent_id)
+        os.makedirs(agent_docs_path, exist_ok=True)
+        
+        # Copy the file to the agent's directory with doc_id prefix
+        destination_path = os.path.join(agent_docs_path, f"{doc_id}_{file_name}")
+        
+        print(f"📁 Copying file to: {destination_path}")
+        shutil.copy2(file_path, destination_path)
+        
+        # Update knowledge_sources.json
+        sources_file = os.path.join(agent_docs_path, "knowledge_sources.json")
+        sources_data = {}
+        
+        if os.path.exists(sources_file):
+            try:
+                with open(sources_file, 'r', encoding='utf-8') as f:
+                    sources_data = json.load(f)
+            except Exception as e:
+                print(f"⚠️  Error reading existing sources file: {e}")
+                sources_data = {}
+        
+        # Add new document info
+        sources_data[doc_id] = {
+            "doc_id": doc_id,
+            "doc_name": file_name,
+            "doc_description": description or f"Document: {file_name}",
+            "doc_uploaded_datetime": current_time,
+            "file_path": f"{doc_id}_{file_name}"
+        }
+        
+        # Save updated sources
+        with open(sources_file, 'w', encoding='utf-8') as f:
+            json.dump(sources_data, f, indent=2, ensure_ascii=False)
+        print(f"📝 Updated knowledge_sources.json")
+        
+        # Now process the document: chunk, vectorize, and upload to Pinecone
+        print(f"🔄 Processing document for vectorization...")
+        
+        # Load document content
+        content = load_document(destination_path)
+        if not content:
+            print(f"❌ Failed to load document content")
+            return False
+        
+        char_count = len(content)
+        print(f"📊 Content: {char_count:,} characters")
+        
+        # Chunk the document
+        print(f"✂️ Chunking document...")
+        chunks = chunk_text(content, chunk_size=1000, overlap=200)
+        print(f"📦 Created {len(chunks)} chunks")
+        
+        # Prepare chunks with metadata
+        chunk_data = []
+        for j, chunk in enumerate(chunks):
+            chunk_data.append({
+                'id': f"{agent_id}_{doc_id}_{j}",
+                'text': chunk,
+                'doc_id': doc_id,
+                'doc_name': file_name,
+                'chunk_index': j,
+                'agent_id': agent_id
+            })
+        
+        # Initialize Pinecone and setup embedding
+        pinecone_api_key = os.getenv("PINECONE_API_KEY")
+        pinecone_env = os.getenv("PINECONE_ENV")
+        
+        if not pinecone_api_key or not pinecone_env:
+            print(f"❌ Missing Pinecone credentials!")
+            return False
+        
+        print(f"🌲 Connecting to Pinecone...")
+        pc = Pinecone(api_key=pinecone_api_key)
+        
+        # Create/connect to index
+        index_name = f"agent-kb-{agent_id.lower().replace('_', '-')}"
+        dimension = 384  # for all-MiniLM-L6-v2
+        
+        existing_indexes = pc.list_indexes().names()
+        if index_name not in existing_indexes:
+            print(f"🆕 Creating new index '{index_name}'...")
+            pc.create_index(
+                name=index_name, 
+                dimension=dimension, 
+                metric="cosine",
+                spec=ServerlessSpec(
+                    cloud='aws',
+                    region='us-east-1'
+                )
+            )
+            time.sleep(10)  # Wait for index to be ready
+        
+        pinecone_index = pc.Index(index_name)
+        print(f"✅ Connected to index '{index_name}'")
+        
+        # Setup embedding model
+        model = get_embedding_model()
+        
+        # Generate embeddings and upload
+        print(f"🔄 Generating embeddings for {len(chunk_data)} chunks...")
+        
+        texts = [chunk['text'] for chunk in chunk_data]
+        embeddings = model.encode(texts)
+        
+        # Prepare vectors for upsert
+        vectors = []
+        for chunk, embedding in zip(chunk_data, embeddings):
+            vectors.append({
+                'id': chunk['id'],
+                'values': embedding.tolist(),
+                'metadata': {
+                    'text': chunk['text'],
+                    'doc_id': chunk['doc_id'],
+                    'doc_name': chunk['doc_name'],
+                    'chunk_index': chunk['chunk_index'],
+                    'agent_id': chunk['agent_id']
+                }
+            })
+        
+        # Upload to Pinecone
+        pinecone_index.upsert(vectors)
+        print(f"✅ Uploaded {len(vectors)} vectors to Pinecone")
+        
+        print(f"✅ DOCUMENT INGESTION COMPLETED SUCCESSFULLY!")
+        print(f"   🆔 Document ID: {doc_id}")
+        print(f"   📄 File: {file_name}")
+        print(f"   📦 Chunks: {len(chunk_data)}")
+        print(f"   🔢 Vectors: {len(vectors)}")
+        print("=" * 60)
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ DOCUMENT INGESTION FAILED: {e}")
+        import traceback
+        traceback.print_exc()
+        print("=" * 60)
+        return False
 

@@ -10,7 +10,7 @@ from langchain_community.tools.playwright.utils import (
     create_async_playwright_browser,  # A synchronous browser is available, though it isn't compatible with jupyter.\n",	  },
 )
 from typing import List, Dict, Any
-from knowledge_manager import KnowledgeManager
+from .knowledge_manager import KnowledgeManager
 
 load_dotenv()
 
@@ -74,8 +74,15 @@ def search_places_from_internet(query: str) -> dict:
 
 
 
-# Initialize KnowledgeManager
-knowledge_manager = KnowledgeManager()
+# Global variable to store the knowledge manager (lazy loading)
+knowledge_manager = None
+
+def get_knowledge_manager():
+    """Lazily loads and returns the knowledge manager."""
+    global knowledge_manager
+    if knowledge_manager is None:
+        knowledge_manager = KnowledgeManager()
+    return knowledge_manager
 
 @tool("knowledge_base_retriever")
 def knowledge_base_retriever(query: str, agent_id: str) -> List[Dict[str, Any]]:
@@ -113,7 +120,8 @@ def knowledge_base_retriever(query: str, agent_id: str) -> List[Dict[str, Any]]:
         print(f"   ⏳ Searching knowledge base...")
         search_start = time.time()
         
-        results = knowledge_manager.query_pinecone(index_name, query, top_k=3)
+        km = get_knowledge_manager()
+        results = km.query_pinecone(index_name, query, top_k=3)
         
         search_time = time.time() - search_start
         print(f"   ⏱️  Search completed in {search_time:.2f} seconds")

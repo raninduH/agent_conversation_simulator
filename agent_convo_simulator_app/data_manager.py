@@ -50,11 +50,11 @@ class Conversation:
     scene_description: str
     agents: List[str]  # Agent IDs
     messages: List[Dict[str, Any]]
-    status: str  # 'active', 'paused', 'completed'
-    created_at: str  # <-- Added this field
+    created_at: str
     last_updated: str
     summary: Optional[str]
     thread_id: str
+    status: str = "active"  # 'active', 'paused', 'completed'
     agent_colors: Dict[str, str] = field(default_factory=dict)  # Maps agent names to color codes
     agent_temp_numbers: Dict[str, int] = field(default_factory=dict)  # Maps agent IDs to temporary numbers for bubble alignment
     invocation_method: str = "round_robin"  # "round_robin" or "agent_selector"
@@ -228,11 +228,11 @@ class DataManager:
                     'scene_description': conv_data.get('scene_description', ''),
                     'agents': conv_data.get('agents', []),
                     'messages': conv_data.get('messages', []),
-                    'status': conv_data.get('status', 'active'),
                     'created_at': conv_data.get('created_at', datetime.now().isoformat()),
                     'last_updated': conv_data.get('last_updated', datetime.now().isoformat()),
                     'summary': conv_data.get('summary'),
                     'thread_id': conv_data.get('thread_id', ''),
+                    'status': conv_data.get('status', 'active'),  # Default to 'active' if missing
                     'agent_colors': conv_data.get('agent_colors', {}),
                     'agent_temp_numbers': conv_data.get('agent_temp_numbers', {}),
                     'invocation_method': conv_data.get('invocation_method', 'round_robin'),
@@ -242,6 +242,9 @@ class DataManager:
                     'voices_enabled': conv_data.get('voices_enabled', False),
                     'agent_voices': conv_data.get('agent_voices', {})
                 }
+                # Ensure status is not None
+                if conversation_fields['status'] is None:
+                    conversation_fields['status'] = 'active'
                 conversations.append(Conversation(**conversation_fields))
             except Exception as e:
                 print(f"Error loading conversation {conv_data.get('id', 'unknown')}: {e}")
