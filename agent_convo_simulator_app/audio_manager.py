@@ -112,10 +112,8 @@ class AudioManager:
         request = {
             'conversation_id': conversation_id,
             'agent_id': agent_id,
-            'message_id': message_id,
             'text': text,
-            'voice': voice,
-            'timestamp': time.time()
+            'voice': voice
         }
         
         self.audio_queue.put(request)
@@ -137,7 +135,7 @@ class AudioManager:
                         self.audio_ready_callback(
                             request['conversation_id'],
                             request['agent_id'],
-                            request['message_id']
+                            None
                         )
                     
                     # Play audio if pygame is available
@@ -149,7 +147,7 @@ class AudioManager:
                             self.audio_finished_callback(
                                 request['conversation_id'],
                                 request['agent_id'],
-                                request['message_id']
+                                None
                             )
                 else:
                     print(f"Failed to generate audio for agent {request['agent_id']}")
@@ -182,7 +180,7 @@ class AudioManager:
                 self.audio_finished_callback(
                     request['conversation_id'],
                     request['agent_id'],
-                    request['message_id']
+                    None
                 )
             
             self.current_audio_info = None

@@ -17,7 +17,8 @@ from tkinter import filedialog
 
 # Import our custom modules
 from agent_convo_simulator_app.data_manager import DataManager, Agent, Conversation
-from agent_convo_simulator_app.conversation_engine import ConversationSimulatorEngine
+
+from agent_convo_simulator_app.conversation_engine import ConversationEngine
 from agent_convo_simulator_app.config import UI_COLORS, AGENT_SETTINGS
 from agent_convo_simulator_app import knowledge_manager # Import the new module
 from agent_convo_simulator_app.audio_manager import AudioManager
@@ -86,6 +87,7 @@ class AgentConversationSimulatorGUI:
           # Configure grid weights for responsive design
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
+
 
     def on_closing(self):
         """Handle application closing - stop any active conversations and clean up resources."""
@@ -209,17 +211,29 @@ class AgentConversationSimulatorGUI:
 
     def pause_conversation(self):
         """Pauses the current conversation from the UI."""
+        print("[MainApp] pause_conversation called")
         if self.conversation_active and self.conversation_engine and self.current_conversation_id:
+            print("[MainApp] Calling engine.pause_conversation...")
             self.conversation_engine.pause_conversation(self.current_conversation_id)
-            self.simulation_tab.update_simulation_controls(True, paused=True)
+            print("[MainApp] Calling simulation_tab.pause_conversation...")
+            self.simulation_tab.pause_conversation()
+            print("[MainApp] Called simulation_tab.pause_conversation")
             self.update_status("Conversation paused.")
+        else:
+            print("[MainApp] pause_conversation called but not active or engine missing")
 
     def resume_conversation(self):
         """Resumes the current conversation from the UI."""
+        print("[MainApp] resume_conversation called")
         if self.conversation_active and self.conversation_engine and self.current_conversation_id:
+            print("[MainApp] Calling engine.resume_conversation...")
             self.conversation_engine.resume_conversation(self.current_conversation_id)
-            self.simulation_tab.update_simulation_controls(True, paused=False)
+            print("[MainApp] Calling simulation_tab.resume_conversation...")
+            self.simulation_tab.resume_conversation()
+            print("[MainApp] Called simulation_tab.resume_conversation")
             self.update_status("Conversation resumed.")
+        else:
+            print("[MainApp] resume_conversation called but not active or engine missing")
 
     def stop_conversation_ui(self):
         """Stops the current conversation from the UI."""
@@ -372,115 +386,47 @@ class AgentConversationSimulatorGUI:
 
     def start_conversation(self):
         """Start a new conversation."""
-        title = self.conversation_setup_tab.conv_title_var.get().strip()
-        environment = self.conversation_setup_tab.conv_env_var.get().strip()
-        scene = self.conversation_setup_tab.conv_scene_text.get(1.0, tk.END).strip()
-        
+        title = self.conv_title_var.get().strip()
+        environment = self.conv_env_var.get().strip()
+        scene = self.conv_scene_text.get(1.0, tk.END).strip()
         if not all([title, environment, scene]):
-            messagebox.showerror("Missing Information", "Please fill in title, environment and scene description.")
+            messagebox.showwarning("Missing Info", "Please fill in all conversation details.")
             return
-        
-        # Get selected agents
         selected_agents = self.conversation_setup_tab.update_selected_agents()
-        
         if len(selected_agents) < 2 or len(selected_agents) > 4:
-            messagebox.showerror("Invalid Selection", "Please select 2-4 agents for the conversation.")
+            messagebox.showwarning("Agent Selection", "Please select 2-4 agents.")
             return
-        
+        # Assign unique colors to agents
+        from agent_convo_simulator_app.config import UI_COLORS
+        available_colors = UI_COLORS["agent_colors"][:]
+        random.shuffle(available_colors)
+        agent_colors = {}
+        for i, agent_id in enumerate(selected_agents):
+            agent_colors[agent_id] = available_colors[i % len(available_colors)]
         try:
-            # Show loading message
-            self.update_status("Starting conversation...")
-            
-            # Initialize conversation engine (no default API key - agents will use their own)
-            self.conversation_engine = ConversationSimulatorEngine()
-            
-            # Reset message counter and clear state for new conversation
-            self.simulation_tab.reset_conversation_state()
-            
-            # Get invocation method and termination condition
-            invocation_method = self.conversation_setup_tab.invocation_method_var.get()
-            termination_condition = self.conversation_setup_tab.termination_condition_text.get(1.0, tk.END).strip()
-            if "Agents will be reminded every" in termination_condition or "The agent selector will check this condition" in termination_condition:
-                termination_condition = None
-            elif not termination_condition:
-                termination_condition = None  # Use None instead of empty string
-            
-            agent_selector_api_key = None
-            if invocation_method == "agent_selector":
-                agent_selector_api_key = self.conversation_setup_tab.agent_selector_api_key_var.get().strip()
-                if not agent_selector_api_key:
-                    agent_selector_api_key = None
-            
-            voices_enabled = self.conversation_setup_tab.voices_enabled_var.get()
-            
             conversation = Conversation.create_new(
-                title, environment, scene, [agent.id for agent in selected_agents],
-                invocation_method=invocation_method, 
-                termination_condition=termination_condition,
-                agent_selector_api_key=agent_selector_api_key,
-                voices_enabled=voices_enabled
+                title=title,
+                environment=environment,
+                scene_description=scene,
+                agent_ids=selected_agents,
+                invocation_method=self.invocation_method_var.get(),
+                termination_condition=self.termination_condition_text.get(1.0, tk.END).strip(),
+                agent_selector_api_key=self.agent_selector_api_key_var.get().strip(),
+                voices_enabled=self.voices_enabled_var.get()
             )
-            
-            if voices_enabled:
-                from .voice_assignment import VoiceAssignmentManager
-                voice_manager = VoiceAssignmentManager()
-                voice_assignments = voice_manager.assign_voices_to_agents(selected_agents)
-                conversation.agent_voices = voice_assignments
-            
-            agents_config = []
-            available_colors = list(UI_COLORS["agent_colors"])
-            for i, agent in enumerate(selected_agents):
-                color = available_colors[i % len(available_colors)]
-                self.simulation_tab.agent_colors[agent.name] = color
-                
-                agents_config.append({
-                    "id": agent.id,
-                    "name": agent.name,
-                    "role": agent.role,
-                    "base_prompt": agent.base_prompt,
-                    "color": color,
-                    "api_key": agent.api_key,
-                    "tools": agent.tools
-                })
-            
-            conversation.agent_colors = self.simulation_tab.agent_colors
+            conversation.agent_colors = agent_colors
+            # Ensure agent_numbers is present and correct
+            conversation.agent_numbers = {agent_id: i+1 for i, agent_id in enumerate(selected_agents)}
             self.data_manager.save_conversation(conversation)
             self.current_conversation_id = conversation.id
-            
-            thread_id = self.conversation_engine.start_conversation(
-                conversation.id, agents_config, environment, scene,
-                invocation_method=invocation_method,
-                termination_condition=termination_condition,
-                agent_selector_api_key=agent_selector_api_key,
-                voices_enabled=voices_enabled
-            )
-            
-            self.conversation_engine.register_message_callback(
-                conversation.id, self.on_message_received
-            )
-            
-            if self.audio_enabled and self.audio_manager:
-                self.audio_manager.set_audio_ready_callback(self.on_audio_ready)
-                self.audio_manager.set_audio_finished_callback(self.on_audio_finished)
-
             self.conversation_active = True
-            self.simulation_tab.update_simulation_controls(True)
-            self.simulation_tab.current_env_label.config(text=environment)
-            
+            # Register message callback for the correct engine
+            if hasattr(self.conversation_engine, 'register_message_callback'):
+                self.conversation_engine.register_message_callback(conversation.id, self.simulation_tab.handle_message_callback)
+            self.simulation_tab.load_conversation(conversation)
+            # After starting, switch to Simulation tab
             self.notebook.select(self.simulation_tab)
-            self.root.update_idletasks()
-            self.root.update()
-            
-            self.simulation_tab.chat_canvas.focus_set()
-            self.simulation_tab.chat_canvas.clear()
-            
-            header_text = f"""🎬 Starting conversation: {title}\n📍 Environment: {environment}\n🎭 Scene: {scene}\n👥 Participants: {', '.join([a.name for a in selected_agents])}"""
-            self.simulation_tab.chat_canvas.add_bubble("System", header_text, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
-            
-            self.update_status(f"Conversation '{title}' started successfully!")
-            
-            self.send_initial_message()
-            
+            self.update_status("Conversation started. Switched to Simulation tab.")
         except Exception as e:
             messagebox.showerror("Error", f"Failed to start conversation: {str(e)}")
             self.update_status("Failed to start conversation.")
@@ -508,25 +454,37 @@ class AgentConversationSimulatorGUI:
             self.root.after(0, lambda: self.update_status(f"Error sending message: {str(e)}"))
 
     def load_selected_conversation(self, conversation):
-        """Loads a selected conversation into the simulation tab."""
+        """Loads a selected conversation into the simulation tab and resumes it."""
         try:
-            # Switch to simulation tab and ensure it's visible
-            self.notebook.select(self.simulation_tab)
-            self.root.update_idletasks()
-            self.root.update()
-
+            # Resume the conversation using the new ConversationEngine logic
+            if not self.conversation_engine:
+                self.conversation_engine = ConversationEngine()
+            # Register message callback for the correct engine
+            if hasattr(self.conversation_engine, 'register_message_callback'):
+                self.conversation_engine.register_message_callback(conversation.id, self.simulation_tab.handle_message_callback)
+            self.conversation_engine.resume_conversation(conversation.id)
+            self.current_conversation_id = conversation.id
+            self.conversation_active = True
+            # Update the simulation tab UI
             self.simulation_tab.load_conversation(conversation)
-
+            # Switch to Simulation tab after loading a conversation
+            self.notebook.select(self.simulation_tab)
+            self.update_status(f"Loaded conversation: {conversation.title}. Switched to Simulation tab.")
         except Exception as e:
-            print(f"Error in load_selected_conversation: {e}")
             messagebox.showerror("Error", f"Failed to load conversation: {str(e)}")
+            self.update_status(f"Failed to load conversation: {str(e)}")
 
     def on_message_received(self, message_data: Dict[str, Any]):
         """Callback for when a new message is received."""
         if not self.conversation_active:
+            print("[ERROR] Conversation not active. Message not displayed.")
             return
-        
-        self.simulation_tab.display_message(message_data)
+        try:
+            self.simulation_tab.display_message(message_data)
+        except Exception as e:
+            print(f"[ERROR] Failed to display chat bubble: {e}")
+            import traceback
+            traceback.print_exc()
 
     def on_audio_ready(self, conv_id, agent_id, message_id):
         """Callback for when audio is ready."""

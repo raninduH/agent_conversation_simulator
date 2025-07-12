@@ -4,15 +4,18 @@ from datetime import datetime
 
 from .chat_widgets import ChatCanvas
 from ..config import UI_COLORS
-from ..conversation_engine import ConversationSimulatorEngine
+from ..conversation_engine import ConversationEngine
+from ..data_manager import Conversation, Agent
 
 class SimulationTab(ttk.Frame):
     def __init__(self, parent, app, data_manager):
         super().__init__(parent)
         self.app = app
         self.data_manager = data_manager
-
+        # Use new ConversationEngine
+        self.app.conversation_engine = ConversationEngine()
         self.create_widgets()
+        self.blinking_messages = {}
 
     def create_widgets(self):
         """Create the conversation simulation tab."""
@@ -127,18 +130,19 @@ class SimulationTab(ttk.Frame):
         self.chat_canvas.clear()
         self.reset_conversation_state()
 
-        # Store agent colors
+        print(f"[SimulationTab] Loading conversation: {getattr(conversation, 'agent_numbers', None)} ")
+        # Store agent colors and sync with app
         self.agent_colors = conversation.agent_colors if hasattr(conversation, 'agent_colors') else {}
+        self.app.agent_colors = self.agent_colors
         
-        # Store agent temp numbers for proper bubble alignment
+        # Store agent numbers for proper bubble alignment
         # Convert from agent ID mapping to agent name mapping for display
-        self._loaded_conversation_agent_temp_numbers = {}
-        if hasattr(conversation, 'agent_temp_numbers') and conversation.agent_temp_numbers:
-            # Get agents to map IDs to names
-            for agent_id, temp_num in conversation.agent_temp_numbers.items():
+        self._loaded_conversation_agent_numbers = {}
+        if hasattr(conversation, 'agent_numbers') and conversation.agent_numbers:
+            for agent_id, num in conversation.agent_numbers.items():
                 agent = self.app.data_manager.get_agent_by_id(agent_id)
                 if agent:
-                    self._loaded_conversation_agent_temp_numbers[agent.name] = temp_num
+                    self._loaded_conversation_agent_numbers[agent_id] = num
 
         # Display header
         header_text = f"""Conversation: {conversation.title}\nEnvironment: {conversation.environment}\nScene: {conversation.scene_description}"""
@@ -181,24 +185,45 @@ class SimulationTab(ttk.Frame):
 
     def pause_conversation(self):
         """Pause the current conversation."""
+        print("[SimulationTab] pause_conversation called")
         if self.app.conversation_active and self.app.conversation_engine:
             try:
+                print("[SimulationTab] Calling engine.pause_conversation...")
                 self.app.conversation_engine.pause_conversation(self.app.current_conversation_id)
+                print("[SimulationTab] Updating simulation controls for pause...")
                 self.update_simulation_controls(False, paused=True)
+                print("[SimulationTab] Updating status for pause...")
                 self.app.update_status("Conversation paused.")
+                print("[SimulationTab] Stopping all blinking...")
                 self.chat_canvas.stop_all_blinking()
+                # Show system message in chat canvas
+                pause_message = "⏸️ System: Conversation is paused."
+                print(f"[SimulationTab] Adding system pause message: {pause_message}")
+                self.chat_canvas.add_bubble("System", pause_message, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
             except Exception as e:
+                print(f"[SimulationTab] Error in pause_conversation: {e}")
                 messagebox.showerror("Error", f"Failed to pause conversation: {str(e)}")
+        else:
+            print("[SimulationTab] pause_conversation called but not active or engine missing")
 
     def resume_conversation(self):
-        """Resume the current conversation."""
-        if self.app.conversation_active and self.app.conversation_engine:
+        """Resume the current conversation (UI only, backend resume is handled by main_app)."""
+        print("[SimulationTab] resume_conversation called (UI only)")
+        if self.app.conversation_active:
             try:
-                self.app.conversation_engine.resume_conversation(self.app.current_conversation_id)
+                print("[SimulationTab] Updating simulation controls for resume...")
                 self.update_simulation_controls(True)
+                print("[SimulationTab] Updating status for resume...")
                 self.app.update_status("Conversation resumed.")
+                # Show system message in chat canvas
+                resume_message = "▶️ System: Conversation has been resumed."
+                print(f"[SimulationTab] Adding system resume message: {resume_message}")
+                self.chat_canvas.add_bubble("System", resume_message, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
             except Exception as e:
+                print(f"[SimulationTab] Error in resume_conversation: {e}")
                 messagebox.showerror("Error", f"Failed to resume conversation: {str(e)}")
+        else:
+            print("[SimulationTab] resume_conversation called but not active")
 
     def stop_conversation(self):
         """Stop the current conversation."""
@@ -269,130 +294,107 @@ class SimulationTab(ttk.Frame):
         self.display_message({"sender": "You", "content": message, "type": "user"})
         self.app.send_user_message(message)
 
-    def display_message(self, message_data):
+    def display_message(self, message_data, blinking=False):
         """Display a message in the chat canvas."""
-        # Handle both old and new message formats
-        sender = message_data.get("sender") or message_data.get("agent_name", "Agent")
+        # Debug print to check incoming message_data
+        print(f"[SimulationTab] display_message called with: {message_data}")
+        agent_id = message_data.get("agent_id")
+        sender = message_data.get("sender")
+        agent_name = message_data.get("agent_name")
+        
+        # Get agent_no from agent_numbers dict of current conversation
+        agent_no = None
+        if hasattr(self.app, 'current_conversation_id') and self.app.current_conversation_id:
+            conversation = self.app.data_manager.get_conversation_by_id(self.app.current_conversation_id)
+            if conversation and hasattr(conversation, 'agent_numbers'):
+                agent_no = conversation.agent_numbers.get(agent_id)
+
+        
+        # Prefer agent_id, then agent_name, then sender
+        color = None
+        if agent_id and agent_id in self.agent_colors:
+            color = self.agent_colors[agent_id]
+        elif agent_name and agent_name in self.agent_colors:
+            color = self.agent_colors[agent_name]
+        elif sender and sender in self.agent_colors:
+            color = self.agent_colors[sender]
+        elif sender == "You":
+            color = UI_COLORS["user_bubble"]
+        else:
+            color = UI_COLORS["agent_colors"][0]
+        print(f"[SimulationTab] Resolved color: {color} for agent_id={agent_id}, agent_name={agent_name}, sender={sender}")
         message = message_data.get("content") or message_data.get("message", "")
         msg_type = message_data.get("type", "ai")
         timestamp = message_data.get("timestamp", datetime.now().strftime("%H:%M:%S"))
         message_id = message_data.get("message_id")
-        
         # Skip summary messages
         if "past_convo_summary" in message_data:
             return
+        # Alignment logic: odd agent_no = right, even agent_no = left
+        print(f"[SimulationTab] agent_no={agent_no}, color={color}")
+        if agent_no is not None:
+            align_right = (agent_no % 2 == 1)
+        else:
+            align_right = (msg_type == "user") or (sender == "You")
+        print(f"[SimulationTab] align_right={align_right}")
+        bubble = self.chat_canvas.add_bubble(sender or agent_name or agent_id, message, timestamp, msg_type, color, align_right, message_id)
+        blinking_flag = message_data.get("blinking", blinking)
+        print(f"[SimulationTab] blinking_flag={blinking_flag}, bubble={bubble}")
+        if blinking_flag and bubble:
+            print(f"[SimulationTab] Triggering blinking for bubble={bubble}")
+            bubble.start_blink()
+            self.blinking_messages[bubble] = True
+        elif blinking_flag:
+            print(f"[SimulationTab] Blinking requested but bubble missing: bubble={bubble}")
 
-        color = self.agent_colors.get(sender) if sender != "You" else UI_COLORS["user_bubble"]
-        
-        # Determine alignment based on agent temp number (even numbers align right)
-        align_right = (msg_type == "user") or (sender == "You")
-        if msg_type == "ai" and sender not in ["You", "System", "Human"]:
-            if hasattr(self.app, 'conversation_engine') and self.app.conversation_engine and self.app.current_conversation_id:
-                # Get agent temp numbers from active conversation
-                convo = self.app.conversation_engine.active_conversations.get(self.app.current_conversation_id)
-                if convo and "agent_temp_numbers" in convo:
-                    agent_temp_num = convo["agent_temp_numbers"].get(sender, 1)
-                    align_right = (agent_temp_num % 2 == 0)
-            elif hasattr(self, '_loaded_conversation_agent_temp_numbers'):
-                # For loaded conversations, use stored temp numbers
-                agent_temp_num = self._loaded_conversation_agent_temp_numbers.get(sender, 1)
-                align_right = (agent_temp_num % 2 == 0)
-
-        bubble = self.chat_canvas.add_bubble(sender, message, timestamp, msg_type, color, align_right, message_id)
-        if message_id:
-            self.app.message_bubbles[message_id] = bubble
+    def handle_message_callback(self, message_data):
+        """Handle messages from round robin engine, including stop_blinking action."""
+        if isinstance(message_data, dict) and message_data.get("action") == "stop_blinking":
+            print(f"[SimulationTab] Received stop_blinking callback from backend. Stopping all blinking bubbles.")
+            for bubble in list(self.blinking_messages.keys()):
+                print(f"[SimulationTab] Stopping blinking for bubble={bubble}")
+                bubble.stop_blink()
+            self.blinking_messages.clear()
+        else:
+            self.display_message(message_data)
 
     def on_audio_ready(self, conv_id, agent_id, message_id):
-        pass
+        """Start blinking the chat bubble when audio starts playing."""
+        self.chat_canvas.start_bubble_blink(message_id)
 
     def on_audio_finished(self, conv_id, agent_id, message_id):
-        pass
+        """Stop blinking and display the chat bubble for the agent after audio finishes."""
+        self.chat_canvas.stop_bubble_blink(message_id)
+        # Find the last message for this agent in the active conversation
+        convo = self.app.conversation_engine.active_conversations.get(conv_id)
+        if not convo or not convo.get("messages"):
+            return
+        # Find the last message from this agent
+        for msg in reversed(convo["messages"]):
+            if msg.get("agent_name") == agent_id or msg.get("sender") == agent_id:
+                self.display_message(msg)
+                break
 
     def resume_loaded_conversation(self, conversation):
-        """Resume a loaded conversation by recreating the conversation engine."""
+        """Resume a loaded conversation by using ConversationEngine's resume logic."""
         try:
-            # Initialize conversation engine
-            self.app.conversation_engine = ConversationSimulatorEngine()
-            
-            # Get agents for this conversation
-            agent_ids = conversation.agents
-            agents = [self.app.data_manager.get_agent_by_id(agent_id) for agent_id in agent_ids]
-            agents = [agent for agent in agents if agent is not None]  # Filter out None values
-            
-            if not agents:
-                self.app.update_status("Error: No valid agents found for this conversation.")
-                return
-            
-            # Create agents config
-            agents_config = []
-            for agent in agents:
-                agents_config.append({
-                    "id": agent.id,
-                    "name": agent.name,
-                    "role": agent.role,
-                    "base_prompt": agent.base_prompt,
-                    "color": conversation.agent_colors.get(agent.name, "#000000"),
-                    "api_key": agent.api_key,
-                    "tools": agent.tools
-                })
-            
-            # Update conversation status to active
-            if not hasattr(conversation, 'status') or conversation.status is None:
-                conversation.status = "active"
-            else:
-                conversation.status = "active"
-            self.app.data_manager.save_conversation(conversation)
-            
-            # Set current conversation
+            # Use the main app's conversation engine to resume
+            if not self.app.conversation_engine:
+                from ..conversation_engine import ConversationEngine
+                self.app.conversation_engine = ConversationEngine()
+            self.app.conversation_engine.resume_conversation(conversation.id)
             self.app.current_conversation_id = conversation.id
-            
-            # Start the conversation engine with existing data
-            thread_id = self.app.conversation_engine.start_conversation(
-                conversation.id, 
-                agents_config, 
-                conversation.environment, 
-                conversation.scene_description,
-                invocation_method=conversation.invocation_method,
-                termination_condition=conversation.termination_condition,
-                agent_selector_api_key=conversation.agent_selector_api_key,
-                voices_enabled=conversation.voices_enabled
-            )
-            
-            # Load existing messages into the conversation engine
-            if conversation.messages:
-                for message in conversation.messages:
-                    # Skip summary messages
-                    if "past_convo_summary" in message:
-                        self.app.conversation_engine.active_conversations[conversation.id]["messages"].append(message)
-                    else:
-                        # Handle both old and new message formats
-                        sender = message.get("sender") or message.get("agent_name", "Unknown")
-                        content = message.get("content") or message.get("message", "")
-                        timestamp = message.get("timestamp", datetime.now().isoformat())
-                        
-                        self.app.conversation_engine.active_conversations[conversation.id]["messages"].append({
-                            "agent_name": sender,
-                            "message": content,
-                            "timestamp": timestamp
-                        })
-            
-            # Register message callback
-            self.app.conversation_engine.register_message_callback(
-                conversation.id, self.app.on_message_received
-            )
-            
-            # Set conversation as active
             self.app.conversation_active = True
             self.update_simulation_controls(True)
-            
-            # Add system message about resuming
-            resume_message = f"📍 Conversation '{conversation.title}' has been resumed."
-            self.chat_canvas.add_bubble("System", resume_message, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
-            
-            self.app.update_status(f"Conversation '{conversation.title}' resumed successfully!")
-            
+            if len(conversation.messages) > 0:
+                resume_message = f"📍 Conversation '{conversation.title}' has been resumed."
+                self.chat_canvas.add_bubble("System", resume_message, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
+                self.app.update_status(f"Conversation '{conversation.title}' resumed successfully!")
+            else:
+                resume_message = f"📍 Conversation '{conversation.title}' has Started."
+                self.chat_canvas.add_bubble("System", resume_message, datetime.now().strftime("%H:%M:%S"), "system", UI_COLORS["system_bubble"])
+                self.app.update_status(f"Conversation '{conversation.title}' started successfully!")
         except Exception as e:
             self.app.update_status(f"Error resuming conversation: {str(e)}")
-            print(f"Error in resume_loaded_conversation: {e}")
             import traceback
             traceback.print_exc()

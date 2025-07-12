@@ -16,15 +16,15 @@ class Agent:
     base_prompt: str
     personality_traits: List[str]
     created_at: str
-    color: Optional[str] = None  # Color for the agent's messages
-    api_key: Optional[str] = None  # API key for the agent's model
-    tools: List[str] = field(default_factory=list)  # List of tool names assigned to this agent
-    knowledge_base: List[Dict[str, str]] = field(default_factory=list)  # List of documents with doc_name and description
-    gender: Optional[str] = "Unspecified"  # Gender of the agent
-    
+    api_key: Optional[str] = None
+    tools: List[str] = field(default_factory=list)
+    gender: Optional[str] = "Unspecified"
+    voice: Optional[str] = None
+    knowledge_base: List[Dict[str, str]] = field(default_factory=list)
+
     @classmethod
     def create_new(cls, name: str, role: str, base_prompt: str, personality_traits: List[str], 
-                   color: str = None, api_key: str = None, tools: List[str] = None, gender: str = "Unspecified") -> 'Agent':
+                   api_key: str = None, tools: List[str] = None, gender: str = "Unspecified", voice: str = None) -> 'Agent':
         """Create a new agent with auto-generated ID and timestamp."""
         return cls(
             id=f"agent_{uuid.uuid4().hex[:8]}",
@@ -33,12 +33,22 @@ class Agent:
             base_prompt=base_prompt,
             personality_traits=personality_traits,
             created_at=datetime.now().isoformat(),
-            color=color,
             api_key=api_key,
             tools=tools or [],
-            knowledge_base=[],  # Initialize empty knowledge base
-            gender=gender
+            gender=gender,
+            voice=voice,
+            knowledge_base=[]
         )
+
+    @staticmethod
+    def get_agent_details_by_id(agent_id: str, agents_file: str) -> dict:
+        """Get agent details from agents.json by agent id."""
+        with open(agents_file, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        for agent in data.get("agents", []):
+            if agent.get("id") == agent_id:
+                return agent
+        return None
 
 
 @dataclass
@@ -48,21 +58,19 @@ class Conversation:
     title: str
     environment: str
     scene_description: str
-    agents: List[str]  # Agent IDs
+    agents: List[str]  # Agent IDs only
     messages: List[Dict[str, Any]]
     created_at: str
     last_updated: str
-    summary: Optional[str]
     thread_id: str
-    status: str = "active"  # 'active', 'paused', 'completed'
-    agent_colors: Dict[str, str] = field(default_factory=dict)  # Maps agent names to color codes
-    agent_temp_numbers: Dict[str, int] = field(default_factory=dict)  # Maps agent IDs to temporary numbers for bubble alignment
-    invocation_method: str = "round_robin"  # "round_robin" or "agent_selector"
-    termination_condition: Optional[str] = None  # Condition for agent-selector to determine when to end conversation
-    agent_selector_api_key: Optional[str] = None  # API key for the agent selector
-    agent_sending_messages: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)  # Maps agent names to their context messages (summary + recent)
-    voices_enabled: bool = False  # Whether voice synthesis is enabled for this conversation
-    agent_voices: Dict[str, str] = field(default_factory=dict)  # Maps agent IDs to their assigned voice names
+    status: str = "active"
+    agent_colors: Dict[str, str] = field(default_factory=dict)
+    agent_numbers: Dict[str, int] = field(default_factory=dict)
+    invocation_method: str = "round_robin"
+    termination_condition: Optional[str] = None
+    agent_selector_api_key: Optional[str] = None
+    LLM_sending_messages: List[Dict[str, Any]] = field(default_factory=list)
+    voices_enabled: bool = False
     
     @classmethod
     def create_new(cls, title: str, environment: str, scene_description: str, agent_ids: List[str],
@@ -70,12 +78,9 @@ class Conversation:
                   agent_selector_api_key: Optional[str] = None, voices_enabled: bool = False) -> 'Conversation':
         """Create a new conversation with auto-generated ID and timestamps."""
         now = datetime.now().isoformat()
-        
-        # Assign temporary numbers to agents starting from 1
-        agent_temp_numbers = {}
+        agent_numbers = {}
         for i, agent_id in enumerate(agent_ids, 1):
-            agent_temp_numbers[agent_id] = i
-        
+            agent_numbers[agent_id] = i
         return cls(
             id=f"conv_{uuid.uuid4().hex[:8]}",
             title=title,
@@ -83,21 +88,19 @@ class Conversation:
             scene_description=scene_description,
             agents=agent_ids,
             messages=[],
-            status='active',
             created_at=now,
             last_updated=now,
-            summary=None,
             thread_id=f"thread_{uuid.uuid4().hex[:8]}",
-            agent_temp_numbers=agent_temp_numbers,
+            status='active',
+            agent_colors={},
+            agent_numbers=agent_numbers,
             invocation_method=invocation_method,
             termination_condition=termination_condition,
             agent_selector_api_key=agent_selector_api_key,
-            agent_sending_messages={},  # Initialize empty agent context messages
-            voices_enabled=voices_enabled,
-            agent_voices={}  # Initialize empty agent voices mapping
+            LLM_sending_messages=[],
+            voices_enabled=voices_enabled
         )
-
-
+    
 class DataManager:
     """Manages JSON file operations for agents and conversations."""
     
@@ -156,15 +159,13 @@ class DataManager:
         data = self._load_json(self.agents_file)
         agents = []
         for agent_data in data.get("agents", []):
-            # Remove debug output to reduce console spam
-            # print(f"DEBUG: Loading agent '{agent_data.get('name')}' with API key: {agent_data.get('api_key')}")
-            
+            # Remove any extra keys not in Agent dataclass
+            allowed_keys = {f.name for f in Agent.__dataclass_fields__.values()}
+            filtered_agent_data = {k: v for k, v in agent_data.items() if k in allowed_keys}
             # Ensure knowledge_base field exists, default to empty list if not present
-            if 'knowledge_base' not in agent_data:
-                agent_data['knowledge_base'] = []
-            
-            agent = Agent(**agent_data)
-            # print(f"DEBUG: Loaded agent '{agent.name}' with API key: {agent.api_key}")
+            if 'knowledge_base' not in filtered_agent_data:
+                filtered_agent_data['knowledge_base'] = []
+            agent = Agent(**filtered_agent_data)
             agents.append(agent)
         
         # Update cache
@@ -180,7 +181,13 @@ class DataManager:
         
         # Update existing agent or add new one
         agent_dict = asdict(agent)
+        # Remove 'color' key if present
+        if 'color' in agent_dict:
+            del agent_dict['color']
         for i, existing_agent in enumerate(agents):
+            # Remove 'color' key from existing agent dicts
+            if 'color' in existing_agent:
+                del existing_agent['color']
             if existing_agent["id"] == agent.id:
                 agents[i] = agent_dict
                 break
@@ -213,6 +220,11 @@ class DataManager:
                 return agent
         return None
     
+    def get_all_agent_ids(self) -> list:
+        """Return a list of all agent IDs from agents.json."""
+        agents = self.load_agents()
+        return [agent.id for agent in agents]
+    
     # Conversation management methods
     def load_conversations(self) -> List[Conversation]:
         """Load all conversations from JSON file."""
@@ -220,32 +232,20 @@ class DataManager:
         conversations = []
         for conv_data in data.get("conversations", []):
             try:
-                # Filter out any extra fields that aren't in the dataclass
-                conversation_fields = {
-                    'id': conv_data.get('id', ''),
-                    'title': conv_data.get('title', ''),
-                    'environment': conv_data.get('environment', ''),
-                    'scene_description': conv_data.get('scene_description', ''),
-                    'agents': conv_data.get('agents', []),
-                    'messages': conv_data.get('messages', []),
-                    'created_at': conv_data.get('created_at', datetime.now().isoformat()),
-                    'last_updated': conv_data.get('last_updated', datetime.now().isoformat()),
-                    'summary': conv_data.get('summary'),
-                    'thread_id': conv_data.get('thread_id', ''),
-                    'status': conv_data.get('status', 'active'),  # Default to 'active' if missing
-                    'agent_colors': conv_data.get('agent_colors', {}),
-                    'agent_temp_numbers': conv_data.get('agent_temp_numbers', {}),
-                    'invocation_method': conv_data.get('invocation_method', 'round_robin'),
-                    'termination_condition': conv_data.get('termination_condition'),
-                    'agent_selector_api_key': conv_data.get('agent_selector_api_key'),
-                    'agent_sending_messages': conv_data.get('agent_sending_messages', {}),
-                    'voices_enabled': conv_data.get('voices_enabled', False),
-                    'agent_voices': conv_data.get('agent_voices', {})
-                }
-                # Ensure status is not None
-                if conversation_fields['status'] is None:
-                    conversation_fields['status'] = 'active'
-                conversations.append(Conversation(**conversation_fields))
+                # Remove any keys not in Conversation dataclass
+                allowed_keys = {f.name for f in Conversation.__dataclass_fields__.values()}
+                filtered_conv_data = {k: v for k, v in conv_data.items() if k in allowed_keys}
+                # Fix legacy field name
+                if 'agent_sending_messages' in filtered_conv_data:
+                    filtered_conv_data['LLM_sending_messages'] = filtered_conv_data.pop('agent_sending_messages')
+                # Ensure required fields
+                for key in allowed_keys:
+                    if key not in filtered_conv_data:
+                        if Conversation.__dataclass_fields__[key].default_factory is not None:
+                            filtered_conv_data[key] = Conversation.__dataclass_fields__[key].default_factory()
+                        else:
+                            filtered_conv_data[key] = Conversation.__dataclass_fields__[key].default if Conversation.__dataclass_fields__[key].default is not None else None
+                conversations.append(Conversation(**filtered_conv_data))
             except Exception as e:
                 print(f"Error loading conversation {conv_data.get('id', 'unknown')}: {e}")
         return conversations
@@ -259,13 +259,19 @@ class DataManager:
         
         # Update existing conversation or add new one
         conv_dict = asdict(conversation)
+        # Remove agent_temp_numbers if present
+        if "agent_temp_numbers" in conv_dict:
+            del conv_dict["agent_temp_numbers"]
+        data_key = "agent_numbers"
+        # Ensure agent_numbers is present
+        if "agent_numbers" not in conv_dict and hasattr(conversation, "agent_numbers"):
+            conv_dict["agent_numbers"] = getattr(conversation, "agent_numbers", {})
         for i, existing_conv in enumerate(conversations):
             if existing_conv["id"] == conversation.id:
                 conversations[i] = conv_dict
                 break
         else:
             conversations.append(conv_dict)
-        
         data["conversations"] = conversations
         self._save_json(self.conversations_file, data)
     
@@ -284,8 +290,12 @@ class DataManager:
                 return conversation
         return None
     
-    def add_message_to_conversation(self, conversation_id: str, message: Dict[str, Any]):
-        """Add a message to a specific conversation."""
+    def add_message_to_conversation(self, conversation_id, message):
+        """Add a message to a conversation and save to disk."""
+        # Remove timestamp and message_id if present
+        message.pop('timestamp', None)
+        message.pop('message_id', None)
+        
         conversation = self.get_conversation_by_id(conversation_id)
         if conversation:
             conversation.messages.append(message)

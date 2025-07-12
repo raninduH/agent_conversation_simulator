@@ -85,31 +85,46 @@ class AgentManagementTab(ttk.Frame):
         ttk.Label(details_frame, text="Gender:").grid(row=2, column=0, sticky="w", pady=2)
         self.app.agent_gender_var = tk.StringVar()
         self.app.agent_gender_combo = ttk.Combobox(details_frame, textvariable=self.app.agent_gender_var, width=27, state="readonly")
-        self.app.agent_gender_combo['values'] = ("Male", "Female", "Non-binary", "Other", "Unspecified")
+        self.app.agent_gender_combo['values'] = ("male", "female")
         self.app.agent_gender_combo.grid(row=2, column=1, sticky="ew", pady=2, padx=(10, 0))
         
-        ttk.Label(details_frame, text="Personality Traits:").grid(row=3, column=0, sticky="nw", pady=2)
+        # Voice selection (move to row 3)
+        ttk.Label(details_frame, text="Voice:").grid(row=3, column=0, sticky="w", pady=2)
+        self.app.agent_voice_var = tk.StringVar()
+        self.app.agent_voice_combo = ttk.Combobox(details_frame, textvariable=self.app.agent_voice_var, width=27, state="readonly")
+        self.app.agent_voice_combo.grid(row=3, column=1, sticky="ew", pady=2, padx=(10, 0))
+        self.app.agent_voice_combo['values'] = ()  # Will be set based on gender
+        self.app.agent_voice_combo.set('')
+        self.app.play_voice_btn = ttk.Button(details_frame, text="Play Sample", command=self.play_selected_voice_sample)
+        self.app.play_voice_btn.grid(row=3, column=2, padx=(5, 0))
+        self.app.play_voice_btn['state'] = 'disabled'
+        self.app.agent_gender_var.trace_add('write', lambda *args: self.update_voice_options())
+        self.app.agent_voice_var.trace_add('write', lambda *args: self.update_play_button_state())
+        
+        # Personality Traits (move to row 4)
+        ttk.Label(details_frame, text="Personality Traits:").grid(row=4, column=0, sticky="nw", pady=2)
         self.app.agent_traits_var = tk.StringVar()
         self.app.agent_traits_entry = ttk.Entry(details_frame, textvariable=self.app.agent_traits_var, width=30)
-        self.app.agent_traits_entry.grid(row=3, column=1, sticky="ew", pady=2, padx=(10, 0))
+        self.app.agent_traits_entry.grid(row=4, column=1, sticky="ew", pady=2, padx=(10, 0))
         
-        ttk.Label(details_frame, text="Base Prompt:").grid(row=4, column=0, sticky="nw", pady=2)
+        # Base Prompt (move to row 5)
+        ttk.Label(details_frame, text="Base Prompt:").grid(row=5, column=0, sticky="nw", pady=2)
         self.app.agent_prompt_text = scrolledtext.ScrolledText(details_frame, width=40, height=10)
-        self.app.agent_prompt_text.grid(row=4, column=1, sticky="nsew", pady=2, padx=(10, 0))
-        details_frame.grid_rowconfigure(4, weight=1)
+        self.app.agent_prompt_text.grid(row=5, column=1, sticky="nsew", pady=2, padx=(10, 0))
+        details_frame.grid_rowconfigure(5, weight=1)
         
-        ttk.Label(details_frame, text="API Key:").grid(row=5, column=0, sticky="w", pady=2)
+        ttk.Label(details_frame, text="API Key:").grid(row=6, column=0, sticky="w", pady=2)
         self.app.agent_api_key_var = tk.StringVar()
         self.app.agent_api_key_entry = ttk.Entry(details_frame, textvariable=self.app.agent_api_key_var, width=30, show="*")
-        self.app.agent_api_key_entry.grid(row=5, column=1, sticky="ew", pady=2, padx=(10, 0))
+        self.app.agent_api_key_entry.grid(row=6, column=1, sticky="ew", pady=2, padx=(10, 0))
         
         # Tools selection
-        ttk.Label(details_frame, text="Tools:").grid(row=6, column=0, sticky="nw", pady=2)
+        ttk.Label(details_frame, text="Tools:").grid(row=7, column=0, sticky="nw", pady=2)
         
         # Create a frame for tools with a scrollbar
         tools_frame = ttk.Frame(details_frame)
-        tools_frame.grid(row=6, column=1, sticky="nsew", pady=2, padx=(10, 0))
-        details_frame.grid_rowconfigure(6, weight=1)
+        tools_frame.grid(row=7, column=1, sticky="nsew", pady=2, padx=(10, 0))
+        details_frame.grid_rowconfigure(7, weight=1)
         
         # Create a canvas for scrolling
         tools_canvas = tk.Canvas(tools_frame, height=100)
@@ -136,7 +151,7 @@ class AgentManagementTab(ttk.Frame):
 
         # Knowledge Base Section
         kb_frame = ttk.LabelFrame(details_frame, text="Knowledge Base", padding="5")
-        kb_frame.grid(row=7, column=0, columnspan=2, sticky="ew", pady=(10, 0), padx=(0,0))
+        kb_frame.grid(row=8, column=0, columnspan=2, sticky="ew", pady=(10, 0), padx=(0,0))
         kb_frame.grid_columnconfigure(1, weight=1)
 
         self.app.upload_kb_btn = ttk.Button(kb_frame, text="Upload Files (.pdf, .txt)", command=self.upload_knowledge_files, state=tk.NORMAL)
@@ -146,7 +161,7 @@ class AgentManagementTab(ttk.Frame):
         self.app.knowledge_files_label.grid(row=0, column=1, padx=5, pady=5, sticky="w")
         
         # Save button
-        ttk.Button(details_frame, text="Save Agent", command=self.save_agent).grid(row=8, column=1, sticky="e", pady=(10, 0))
+        ttk.Button(details_frame, text="Save Agent", command=self.save_agent).grid(row=9, column=1, sticky="e", pady=(10, 0))
 
     def on_agent_select(self, event):
         """Handle agent selection in the listbox."""
@@ -181,6 +196,11 @@ class AgentManagementTab(ttk.Frame):
         self.app.knowledge_files_label.config(text="No files selected.")
         self.knowledge_files = {}
 
+        # Set voice selection
+        self.app.agent_voice_var.set(getattr(agent, 'voice', ''))
+        self.update_voice_options()  # Update options based on gender
+        self.app.play_voice_btn.config(state=tk.NORMAL if agent.voice else tk.DISABLED)
+
     def new_agent(self):
         """Create a new agent."""
         self.clear_agent_form()
@@ -210,6 +230,10 @@ class AgentManagementTab(ttk.Frame):
         temp_keys = [k for k in self.knowledge_files.keys() if k.startswith("NEW_AGENT_")]
         for temp_key in temp_keys:
             del self.knowledge_files[temp_key]
+
+        # Clear voice selection
+        self.app.agent_voice_var.set('')
+        self.app.play_voice_btn.config(state=tk.DISABLED)
 
     def clone_agent(self):
         """Clone the selected agent with a unique name."""
@@ -379,75 +403,42 @@ class AgentManagementTab(ttk.Frame):
         traits_str = self.app.agent_traits_var.get().strip()
         api_key = self.app.agent_api_key_var.get().strip()  # Get API key
         prompt = self.app.agent_prompt_text.get(1.0, tk.END).strip()
-        
+        voice = self.app.agent_voice_var.get().strip()  # Get voice
         if not all([name, role, prompt]):
-            messagebox.showerror("Missing Information", "Please fill in all required fields (Name, Role, and Base Prompt).")
+            messagebox.showwarning("Missing Info", "Please fill in all required agent details.")
             return
-        
         # Parse personality traits
         traits = [t.strip() for t in traits_str.split(",") if t.strip()] if traits_str else []
-        
         # Get selected tools (excluding knowledge_base_retriever as it's auto-managed)
         selected_tools = [name for name, var in self.tool_vars.items() if var.get()]
-        
         # Check if editing existing agent using the tracking variable
         if self.current_editing_agent_id:
-            # Edit existing agent
+            # Update existing agent
             agent = self.data_manager.get_agent_by_id(self.current_editing_agent_id)
             if agent:
                 agent.name = name
                 agent.role = role
-                agent.gender = gender if gender else "Unspecified"  # Set gender with default
-                agent.base_prompt = prompt
+                agent.gender = gender
                 agent.personality_traits = traits
-                agent.api_key = api_key if api_key else None  # Set API key
-                agent.tools = selected_tools  # Save selected tools
-                
-                # Auto-manage knowledge_base_retriever tool
-                self._update_knowledge_base_tool(agent)
-                
+                agent.api_key = api_key
+                agent.base_prompt = prompt
+                agent.voice = voice
+                agent.tools = selected_tools
                 self.data_manager.save_agent(agent)
-                self.app.update_status(f"Agent '{name}' updated.")
-                # Ingest documents after saving (use existing agent ID)
-                self.handle_knowledge_ingestion(agent.id)
-            else:
-                messagebox.showerror("Error", f"Could not find agent with ID {self.current_editing_agent_id}")
-                return
         else:
             # Create new agent
-            agent = Agent.create_new(name, role, prompt, traits, api_key=api_key if api_key else None, tools=selected_tools, gender=gender if gender else "Unspecified")
-            
-            # Auto-manage knowledge_base_retriever tool
-            self._update_knowledge_base_tool(agent)
-            
-            self.data_manager.save_agent(agent)
-            self.app.update_status(f"Agent '{name}' created.")
-            
-            # Handle knowledge ingestion for new agent
-            staged_agent_id = None
-            temp_agent_id = f"NEW_AGENT_{name.replace(' ', '_')}"
-            
-            if temp_agent_id in self.knowledge_files:
-                staged_agent_id = temp_agent_id
-                print(f"🔄 Found staged files under temporary ID '{temp_agent_id}'")
-            else:
-                for existing_id in list(self.knowledge_files.keys()):
-                    if existing_id.startswith('agent_'):
-                        print(f"🔍 Found staged files under existing agent ID '{existing_id}', transferring to new agent '{agent.id}'")
-                        staged_agent_id = existing_id
-                        break
-            
-            if staged_agent_id:
-                print(f"🔄 Transferring staged files from '{staged_agent_id}' to real agent ID '{agent.id}'")
-                self.knowledge_files[agent.id] = self.knowledge_files[staged_agent_id]
-                del self.knowledge_files[staged_agent_id]
-            else:
-                print(f"ℹ️  No staged files found for new agent '{agent.name}'")
-            
-            self.handle_knowledge_ingestion(agent.id)
-        
+            new_agent = Agent.create_new(
+                name=name,
+                role=role,
+                base_prompt=prompt,
+                personality_traits=traits,
+                api_key=api_key,
+                tools=selected_tools,
+                gender=gender,
+                voice=voice
+            )
+            self.data_manager.save_agent(new_agent)
         self.current_editing_agent_id = None
-        
         self.refresh_agents_list()
         self.app.conversation_setup_tab.refresh_agent_checkboxes()
 
@@ -635,3 +626,50 @@ class AgentManagementTab(ttk.Frame):
         if self.tooltip:
             self.tooltip.destroy()
             self.tooltip = None
+
+    def update_voice_options(self):
+        """Update the voice dropdown based on selected gender."""
+        import json
+        voices_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "kokoro_voices.json")
+        gender = self.app.agent_gender_var.get().lower()
+        if gender not in ("male", "female"):
+            self.app.agent_voice_combo['values'] = ()
+            self.app.agent_voice_combo.set('')
+            self.app.play_voice_btn['state'] = 'disabled'
+            return
+        with open(voices_path, "r", encoding="utf-8") as f:
+            voices = json.load(f)
+        voice_list = voices.get(gender, [])
+        self.app.agent_voice_combo['values'] = tuple(voice_list)
+        self.app.agent_voice_combo.set('')
+        self.app.play_voice_btn['state'] = 'disabled'
+
+    def update_play_button_state(self):
+        """Enable play button if a voice is selected."""
+        if self.app.agent_voice_var.get():
+            self.app.play_voice_btn['state'] = 'normal'
+        else:
+            self.app.play_voice_btn['state'] = 'disabled'
+
+    def play_selected_voice_sample(self):
+        """Play the selected voice sample from the samples directory."""
+        import threading
+        import platform
+        import subprocess
+        voice = self.app.agent_voice_var.get()
+        gender = self.app.agent_gender_var.get().lower()
+        if not voice or gender not in ("male", "female"):
+            return
+        # Use the correct directory for voice samples
+        sample_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "kokor_voice_samples", "kokor_voice_sample_audios")
+        sample_file = os.path.join(sample_dir, f"{voice}_{gender}.wav")
+        if not os.path.exists(sample_file):
+            messagebox.showerror("Sample Not Found", f"Sample file not found: {sample_file}")
+            return
+        def play():
+            if platform.system() == "Windows":
+                import winsound
+                winsound.PlaySound(sample_file, winsound.SND_FILENAME)
+            else:
+                subprocess.run(["aplay", sample_file])
+        threading.Thread(target=play, daemon=True).start()

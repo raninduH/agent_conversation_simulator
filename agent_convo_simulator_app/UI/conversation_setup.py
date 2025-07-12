@@ -3,8 +3,8 @@ from tkinter import ttk, messagebox, scrolledtext
 from datetime import datetime
 import threading
 
-from ..data_manager import Conversation
-from ..conversation_engine import ConversationSimulatorEngine
+from ..data_manager import Conversation, Agent
+from ..conversation_engine_old import ConversationSimulatorEngine
 from ..config import UI_COLORS
 from .main_utils import _toggle_termination_condition
 
@@ -13,7 +13,13 @@ class ConversationSetupTab(ttk.Frame):
         super().__init__(parent)
         self.app = app
         self.data_manager = data_manager
-
+        # Ensure all required variables are set on the main app for cross-tab access
+        for var in [
+            'conv_title_var', 'conv_title_entry', 'conv_env_var', 'conv_env_entry', 'conv_scene_text',
+            'invocation_method_var', 'termination_condition_text', 'agent_selector_api_key_var',
+            'agent_selector_api_key_entry', 'voices_enabled_var', 'selected_agents', 'agent_checkboxes', 'agents_checkbox_frame']:
+            if not hasattr(self.app, var):
+                setattr(self.app, var, None)
         self.create_widgets()
 
     def create_widgets(self):
@@ -86,13 +92,13 @@ class ConversationSetupTab(ttk.Frame):
         rb3.pack(side=tk.LEFT)
         
         # Add tooltips to radio buttons
-        rb1.bind("<Enter>", lambda e: self.app.show_tooltip(e, "Agents take turns speaking in a fixed order"))
+        rb1.bind("<Enter>", lambda e: self.app.show_tooltip(e.widget, "Agents take turns speaking in a fixed order"))
         rb1.bind("<Leave>", self.app.hide_tooltip)
         
-        rb2.bind("<Enter>", lambda e: self.app.show_tooltip(e, "An LLM intelligently chooses which agent should speak next"))
+        rb2.bind("<Enter>", lambda e: self.app.show_tooltip(e.widget, "An LLM intelligently chooses which agent should speak next"))
         rb2.bind("<Leave>", self.app.hide_tooltip)
         
-        rb3.bind("<Enter>", lambda e: self.app.show_tooltip(e, "Natural conversation flow where agents respond in parallel and decide whether to participate"))
+        rb3.bind("<Enter>", lambda e: self.app.show_tooltip(e.widget, "Natural conversation flow where agents respond in parallel and decide whether to participate"))
         rb3.bind("<Leave>", self.app.hide_tooltip)
         
         # Termination condition (available for all modes)
@@ -140,19 +146,14 @@ class ConversationSetupTab(ttk.Frame):
         btn_frame = ttk.Frame(content_frame)
         btn_frame.grid(row=1, column=0, columnspan=2, pady=(20, 0))
         
-        ttk.Button(btn_frame, text="Start Conversation", command=self.app.start_conversation).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(btn_frame, text="Start Conversation", command=self.on_start_conversation).pack(side=tk.LEFT, padx=(0, 10))
 
     def refresh_agent_checkboxes(self):
         """Refresh the agent checkboxes in the conversation setup."""
-        # Clear existing checkboxes
         for widget in self.app.agents_checkbox_frame.winfo_children():
             widget.destroy()
         self.app.agent_checkboxes.clear()
-        
-        # Get agents from data manager
         agents = self.data_manager.load_agents()
-        
-        # Create new checkboxes
         for agent in agents:
             var = tk.BooleanVar()
             checkbox = ttk.Checkbutton(
@@ -164,9 +165,18 @@ class ConversationSetupTab(ttk.Frame):
             self.app.agent_checkboxes.append((agent, var, checkbox))
 
     def update_selected_agents(self):
-        """Update and return the list of selected agents."""
+        """Update and return the list of selected agents (by ID, verified from agents.json)."""
         self.app.selected_agents = []
+        all_agent_ids = self.data_manager.get_all_agent_ids()
         for agent, var, checkbox in self.app.agent_checkboxes:
             if var.get():
-                self.app.selected_agents.append(agent)
+                # Only add agent if its ID is in agents.json
+                if hasattr(agent, 'id') and agent.id in all_agent_ids:
+                    self.app.selected_agents.append(agent.id)
         return self.app.selected_agents
+
+    def on_start_conversation(self):
+        """Start the conversation and switch to the Simulation tab."""
+        self.app.start_conversation()
+        # Switch to Simulation tab after starting
+        self.app.notebook.select(self.app.simulation_tab)

@@ -70,11 +70,13 @@ class PastConversationsTab(ttk.Frame):
         if not selection:
             messagebox.showwarning("No Selection", "Please select a conversation to load.")
             return
-        
         conversations = self.data_manager.load_conversations()
         if selection[0] < len(conversations):
             conversation = conversations[selection[0]]
+            # Use the main app's method, which now uses resume_conversation
             self.app.load_selected_conversation(conversation)
+            # Switch to Simulation tab after loading
+            self.app.notebook.select(self.app.simulation_tab)
 
     def delete_selected_conversation(self):
         """Delete the selected conversation."""

@@ -1,475 +1,437 @@
 """
 Round Robin Conversation Engine
-Handles sequential agent invocation in round-robin fashion.
+Handles agent invocation in a round-robin fashion, with or without voice.
 """
-
-import os
 import threading
+import time
 import random
 import traceback
-import time
-from datetime import datetime
-from typing import List, Dict, Any, Callable
-from functools import partial
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
-from langchain_core.tools import Tool
 from langgraph.prebuilt import create_react_agent
-from .config import MODEL_SETTINGS, AGENT_SETTINGS, CONVERSATION_TIMING
+from .config import CONVERSATION_TIMING, AGENT_SETTINGS, MODEL_SETTINGS
+from .audio_manager import AudioManager
+from .data_manager import DataManager
+from .backend_utils import _load_agent_tools, create_agent_base_prompt, create_agent_prompt, message_list_summarization
+from langgraph.checkpoint.memory import InMemorySaver
+import os
+
 
 
 class RoundRobinEngine:
-    """Handles round-robin conversation logic."""
-    
-    def __init__(self, conversation_engine):
-        """Initialize with reference to main conversation engine."""
-        self.conversation_engine = conversation_engine
-    
-    def start_conversation_cycle(self, conversation_id: str):
-        """Start the round-robin conversation cycle with the first agent."""
-        if conversation_id not in self.conversation_engine.active_conversations:
-            return
-        
-        conv_data = self.conversation_engine.active_conversations[conversation_id]
-        if conv_data["status"] != "active":
-            return
-        
-        # Mark conversation as started
-        conv_data["conversation_started"] = True
-        
-        print(f"🚀 [ROUND-ROBIN] Starting conversation cycle for ID: {conversation_id}")
-        
-        # Choose random first agent
-        conv_data["current_agent_index"] = random.randint(0, len(conv_data["agent_names"])) - 1
-        first_agent = conv_data["agent_names"][conv_data["current_agent_index"]]
-        print(f"DEBUG: First agent selected: {first_agent} (index {conv_data['current_agent_index']})")
-        print(f"DEBUG: ===== STARTING FIRST AGENT INVOCATION =====")
-        
-        # Start the conversation
-        self.invoke_next_agent(conversation_id)
-    
-    def start_cycle(self, conversation_id: str):
-        """Alias for start_conversation_cycle to unify engine interface."""
-        self.start_conversation_cycle(conversation_id)
-    
-    def invoke_next_agent(self, conversation_id: str):
-        """Invoke the next agent in the round-robin cycle."""
-        print(f"\n🟢 [ROUND-ROBIN] invoke_next_agent called for conversation {conversation_id}")
-        if conversation_id not in self.conversation_engine.active_conversations:
-            print(f"❌ ERROR: Conversation {conversation_id} not found in active conversations")
-            return
-        conv_data = self.conversation_engine.active_conversations[conversation_id]
-        if conv_data["status"] != "active":
-            print(f"⚠️ Conversation {conversation_id} status is {conv_data['status']}, not invoking agent")
-            return
-        agent_names = conv_data["agent_names"]
-        current_agent_index = conv_data["current_agent_index"]
-        current_agent_name = agent_names[current_agent_index]
-        current_agent_config = conv_data["agents_config"][current_agent_name]
-        print(f"\n🤖 [ROUND-ROBIN] Invoking agent: {current_agent_name} (Index: {conv_data['current_agent_index']})")
-        conv_data["agent_invocation_counts"][current_agent_name] += 1
-        termination_condition = conv_data.get("termination_condition")
-        should_remind_termination = False
-        if termination_condition:
-            reminder_frequency = AGENT_SETTINGS["termination_reminder_frequency"]
-            current_count = conv_data["agent_invocation_counts"][current_agent_name]
-            should_remind_termination = (current_count % reminder_frequency == 0)
-            if should_remind_termination:
-                print(f"🔔 [ROUND-ROBIN] Agent '{current_agent_name}' will be reminded about termination condition (invocation #{current_count})")
-        # --- CONTEXT: Use all previous messages as context for the agent ---
-        all_messages = conv_data.get("messages", [])
-        print(f"📚 [ROUND-ROBIN] Passing {len(all_messages)} previous messages as context to agent '{current_agent_name}'")
-        print(f"DEBUG: voices_enabled={conv_data.get('voices_enabled', None)}")
-        print(f"DEBUG: on_audio_generation_requested exists: {hasattr(self.conversation_engine, 'on_audio_generation_requested')}")
-        # Use all previous messages as context
-        agent_messages = all_messages.copy()
-        # Apply per-agent message summarization before creating prompt
-        self.conversation_engine._update_agent_sending_messages(conversation_id, current_agent_name)
-        agent_tools = self.conversation_engine._load_agent_tools(conversation_id, current_agent_name)
-        tool_names = [tool.name for tool in agent_tools]
-        agent_obj = None
-        prompt = self.conversation_engine.create_agent_prompt(
-            current_agent_config,
-            conv_data["environment"],
-            conv_data["scene_description"],
-            agent_messages,
-            conv_data["agent_names"],
-            termination_condition,
-            should_remind_termination,
-            conversation_id,
-            current_agent_name,
-            tool_names,
-            agent_obj
-        )
-        print(f"📝 [ROUND-ROBIN] Generated prompt for agent '{current_agent_name}' - Length: {len(prompt)} chars")
-        try:
-            print(f"🛠️ [ROUND-ROBIN] Creating agent model for '{current_agent_name}'")
-            agent_api_key = current_agent_config.get("api_key")
-            print(f"🔑 [ROUND-ROBIN] Agent '{current_agent_name}' has API key: {'Yes' if agent_api_key else 'No'}")
-            if not agent_api_key:
-                agent_api_key = self.conversation_engine.default_api_key
-                if not agent_api_key:
-                    print(f"❌ [ROUND-ROBIN] No default API key available for agent '{current_agent_name}'")
-                    raise ValueError(f"No API key available for agent {current_agent_name}")
+    def __init__(self, parent_engine):
+        self.parent_engine = parent_engine
+        self.audio_manager = AudioManager()
+        self.lock = threading.Lock()
+        self.data_manager = DataManager(os.path.dirname(__file__))        
+        self.active = True
+        self.paused = False
+        self.convo_id = None
+        self.convo = None
+        self.agents = []
+        self.agent_numbers = {}
+        self.agent_order = []
+        self.voices_enabled = False
+        self.termination_condition = None
+        self.termination_reminder_frequency = AGENT_SETTINGS["termination_reminder_frequency"]
+        self.round_count = 0
+        self.agent_selector_api_key = None
+        self.current_agent_index = 0
+        self.audio_manager.set_audio_ready_callback(self._on_audio_ready)
+        self.audio_manager.set_audio_finished_callback(self._on_audio_finished)
+        self.waiting_for_audio = threading.Event()
+        self.waiting_for_audio.clear()
+        self.last_message = None
+        self.ui_callback = None
+
+    def start_cycle(self, conversation_id, agents, voices_enabled, termination_condition, agent_selector_api_key):
+        print(f"🚦 [RoundRobin] Starting round robin cycle for conversation: {conversation_id}")
+        self.convo_id = conversation_id
+        self.convo = self.parent_engine.active_conversations[conversation_id]
+        # agents is now a list of agent IDs, so fetch full agent dicts
+        self.agents = []
+        missing_agents = []
+        for agent_id in agents:
+            agent_obj = self.data_manager.get_agent_by_id(agent_id)
+            if agent_obj:
+                self.agents.append(agent_obj if isinstance(agent_obj, dict) else agent_obj.__dict__)
+            else:
+                missing_agents.append(agent_id)
+        if missing_agents:
+            print(f"❌ [RoundRobin] Missing agent(s) in DataManager: {missing_agents}")
+            raise ValueError(f"Missing agent(s) in DataManager: {missing_agents}")
+        self.agent_numbers = self.convo.get("agent_numbers", {})
+        self.agent_order = sorted(self.agent_numbers, key=lambda k: self.agent_numbers[k])
+        self.voices_enabled = voices_enabled
+        self.termination_condition = termination_condition
+        self.agent_selector_api_key = agent_selector_api_key
+        self.round_count = 0
+        self.active = True
+        self.paused = False
+        self.current_agent_index = 0
+        self.last_message = None
+        self.ui_callback = self.parent_engine.message_callbacks.get(conversation_id)
+        # Ensure LLM_sending_messages exists and is a list
+        if "LLM_sending_messages" not in self.convo or not isinstance(self.convo["LLM_sending_messages"], list):
+            self.convo["LLM_sending_messages"] = []
+        # --- Create all LangGraph agents at the start ---
+        self.agent_instances = []
+        for agent_id in self.agent_order:
+            agent_config = next(a for a in self.agents if a["id"] == agent_id)
+            agent_name = agent_config["name"]
+            print(f"🤖 [RoundRobin] Initializing agent: {agent_name}")
+            agent_tools = _load_agent_tools(agent_name)
+            base_prompt = create_agent_base_prompt(agent_config)
+            agent_api_key = agent_config.get("api_key") or getattr(self.parent_engine, "default_api_key", None)
+            from langchain_google_genai import ChatGoogleGenerativeAI
             agent_model = ChatGoogleGenerativeAI(
                 model=MODEL_SETTINGS["agent_model"],
                 temperature=AGENT_SETTINGS["response_temperature"],
                 max_retries=AGENT_SETTINGS["max_retries"],
                 google_api_key=agent_api_key
             )
-            agent_system_prompt = self.conversation_engine.create_agent_prompt(
-                current_agent_config,
-                conv_data["environment"],
-                conv_data["scene_description"],
-                agent_messages,
-                conv_data["agent_names"],
-                termination_condition,
-                should_remind_termination,
-                conversation_id,
-                current_agent_name,
-                tool_names,
-                agent_obj
-            )
-            agent = create_react_agent(
+            agent_variable = create_react_agent(
                 model=agent_model,
                 tools=agent_tools,
-                prompt=agent_system_prompt,
-                checkpointer=self.conversation_engine.memory
+                prompt=base_prompt,
+                checkpointer=InMemorySaver()
             )
-            print(f"🚀 [ROUND-ROBIN] Invoking agent '{current_agent_name}' with their specific model")
-            config = {"configurable": {"thread_id": f"{conv_data['thread_id']}_{current_agent_name}"}}
-            response = agent.invoke(
-                {"messages": [HumanMessage(content=prompt)]},
-                config
+            self.agent_instances.append({
+                "agent_name": agent_name,
+                "agent_no": self.agent_numbers[agent_id],
+                "agent_variable": agent_variable,
+                "config": agent_config
+            })
+        print(f"✅ [RoundRobin] All agents initialized. Starting round robin thread.")
+        threading.Thread(target=self._run_round_robin, daemon=True).start()
+
+    def _run_round_robin(self):
+        while self.active:
+            if self.paused:
+                print("⏸️ [RoundRobin] Paused. Waiting...")
+                time.sleep(0.2)
+                continue
+            agent_id = self.agent_order[self.current_agent_index]
+            agent_config = next(a for a in self.agents if a["id"] == agent_id)
+            agent_name = agent_config["name"]
+            print(f"➡️ [RoundRobin] Invoking agent: {agent_name}")
+            should_remind = self._should_remind_termination()
+            message = self._invoke_agent(agent_config, should_remind)
+            if not message:
+                print(f"⚠️ [RoundRobin] No message from agent: {agent_name}. Skipping to next agent.")
+                self._next_agent()
+                continue
+            print(f"📩 [RoundRobin] Message received from {agent_name}: {message['message'][:60]}...")
+            if self.voices_enabled and agent_config.get("voice"):
+                print(f"🔊 [RoundRobin] Requesting audio for {agent_name}...")
+                self.last_message = message
+                self.waiting_for_audio.clear()
+                # Request audio and wait for it to be ready
+                audio_data = self.audio_manager._generate_audio_sync(message["message"], agent_config["voice"])
+                print(f"[AUDIO READY] Audio received for agent: {agent_name}")
+                # Display chat bubble before playing audio
+                self._display_message(agent_config, message, blinking=True)
+                # Play audio
+                if audio_data:
+                    self.audio_manager._play_audio(audio_data, {
+                        'conversation_id': self.convo_id,
+                        'agent_id': agent_name,
+                        'message_id': len(self.convo["messages"])+1,
+                        'text': message["message"],
+                        'voice': agent_config["voice"]
+                    })
+                print(f"✅ [RoundRobin] Audio finished for {agent_name}.")
+            else:
+                self._add_message_to_conversation(message)
+                self._display_message(agent_config, message)
+                delay = self._get_turn_delay()
+                print(f"⏲️ [RoundRobin] Waiting {delay:.2f} seconds before next agent.")
+                time.sleep(delay)
+            self._next_agent()
+            if self.current_agent_index == 0:
+                self.round_count += 1
+                print(f"🔄 [RoundRobin] Completed a round. Total rounds: {self.round_count}")
+            self._maybe_remind_termination()
+
+
+    def _invoke_agent(self, agent_config, should_remind=None):
+        try:
+            agent_name = agent_config["name"]
+            print(f"🧠 [RoundRobin] Preparing to invoke agent: {agent_name}")
+            agent_entry = next(a for a in self.agent_instances if a["agent_name"] == agent_name)
+            agent_variable = agent_entry["agent_variable"]
+            # Use LLM_sending_messages for summarization
+            llm_messages = self.convo.get("LLM_sending_messages", [])
+            self.convo["LLM_sending_messages"] = message_list_summarization(llm_messages)
+            # Update LLM_sending_messages with the summarized result
+             
+            tool_names = agent_config["tools"]
+            thread_id = self.convo.get("thread_id")
+            if not thread_id:
+                import uuid
+                thread_id = f"thread_{uuid.uuid4().hex[:8]}"
+                self.convo["thread_id"] = thread_id
+            prompt = create_agent_prompt(
+                agent_config,
+                self.convo["environment"],
+                self.convo["scene_description"],
+                self.convo["LLM_sending_messages"],
+                self.agent_order,
+                self.termination_condition,
+                should_remind_termination=should_remind,
+                conversation_id=self.convo_id,
+                agent_name=agent_name,
+                available_tools=tool_names,
+                agent_obj=agent_config
             )
-            print(f"✅ [ROUND-ROBIN] Agent '{current_agent_name}' responded successfully")
+            print(f"📝 [RoundRobin] Sending prompt to {agent_name} (length: {len(prompt)} chars)")
+            config = {"configurable": {"thread_id": f"{thread_id}_{agent_name}"}}
+            response = agent_variable.invoke({"messages": [HumanMessage(content=prompt)]}, config)
             if response and "messages" in response and response["messages"]:
-                agent_message = response["messages"][-1].content
-                print(f"💬 [ROUND-ROBIN] Agent '{current_agent_name}' response: '{agent_message[:100]}...'")
-                conv_data["messages"].append({
-                    "agent_name": current_agent_name,
-                    "message": agent_message
-                })
-                if "agent_sending_messages" not in conv_data:
-                    conv_data["agent_sending_messages"] = {}
-                if current_agent_name not in conv_data["agent_sending_messages"]:
-                    conv_data["agent_sending_messages"][current_agent_name] = []
-                conv_data["agent_sending_messages"][current_agent_name].append(agent_message)
-                self.conversation_engine._save_conversation_state(conversation_id)
-                print(f"💾 [ROUND-ROBIN] Message saved to conversation and agent_sending_messages.")
-                if conversation_id in self.conversation_engine.message_callbacks:
-                    message_data = {
-                        "sender": current_agent_name,
-                        "content": agent_message,
-                        "timestamp": datetime.now().isoformat(),
-                        "type": "ai"
-                    }
-                    self.conversation_engine.message_callbacks[conversation_id](message_data)
-                    print(f"📤 [ROUND-ROBIN] Message sent to UI callback.")
-                    if conv_data.get("voices_enabled", False):
-                        print(f"🔊 [ROUND-ROBIN] Sending message for audio generation...")
-                        if hasattr(self.conversation_engine, 'on_audio_generation_requested'):
-                            self.conversation_engine.on_audio_generation_requested(conversation_id, current_agent_name)
-                        else:
-                            print(f"❌ [ROUND-ROBIN] No on_audio_generation_requested callback set!")
-                    else:
-                        print(f"⏳ [ROUND-ROBIN] No audio, will schedule next agent after delay.")
+                agent_response = response["messages"][-1].content
             else:
-                print(f"❌ [ROUND-ROBIN] No valid response from agent '{current_agent_name}'")
-                print(f"DEBUG: [ROUND-ROBIN] Response structure: {response}")
-            conv_data["current_agent_index"] = (conv_data["current_agent_index"] + 1) % len(conv_data["agent_names"])
-            if (conv_data["current_agent_index"] == 0 and \
-                termination_condition and \
-                len(conv_data["messages"]) >= len(conv_data["agent_names"])):
-                print("🔚 [ROUND-ROBIN] Checking termination condition")
-                if self.conversation_engine._check_round_robin_termination(conversation_id):
-                    print("🛑 [ROUND-ROBIN] Termination condition met. Ending conversation.")
-                    if conversation_id in self.conversation_engine.message_callbacks:
-                        self.conversation_engine.message_callbacks[conversation_id]({
-                            "sender": "System",
-                            "content": "Termination condition reached.",
-                            "timestamp": datetime.now().isoformat(),
-                            "type": "system"
-                        })
-                    self.conversation_engine.stop_conversation(conversation_id)
-                    return
-            # --- SCHEDULING NEXT AGENT ---
-            if conv_data.get("voices_enabled", False):
-                print(f"🟡 [ROUND-ROBIN] Waiting for audio to finish before next agent.")
-                # Next agent will be invoked by audio_finished callback
-            else:
-                delay = random.uniform(CONVERSATION_TIMING["min_delay"], CONVERSATION_TIMING["max_delay"])
-                print(f"⏳ [ROUND-ROBIN] Scheduling next agent in {delay:.2f} seconds (voices disabled)")
-                threading.Timer(delay, self.invoke_next_agent, args=[conversation_id]).start()
+                agent_response = f"(No response from {agent_name})"
+            print(f"💬 [RoundRobin] {agent_name} responded: {agent_response[:60]}...")
+            message = {
+                "agent_name": agent_name,
+                "message": agent_response,
+            }
+          
+            return message
         except Exception as e:
-            print(f"❌ [ROUND-ROBIN] Error invoking agent '{current_agent_name}': {e}")
-            print(f"ERROR: Exception type: {type(e).__name__}")
-            print(f"ERROR: Traceback: {traceback.format_exc()}")
-            if conv_data["status"] == "active":
-                print(f"🔁 [ROUND-ROBIN] Retrying after {CONVERSATION_TIMING['error_retry_delay']} seconds")
-                threading.Timer(CONVERSATION_TIMING["error_retry_delay"], self.invoke_next_agent, args=(conversation_id,)).start()
-    
-    def handle_agent_response(self, conversation_id: str, agent_name: str, response: str):
-        """Handles the response from an agent, sending it to the UI and invoking the next agent."""
-        print(f"DEBUG: [ROUND-ROBIN] Handling response from agent '{agent_name}' for conversation {conversation_id}")
-        
-        if conversation_id not in self.conversation_engine.active_conversations:
-            print(f"ERROR: Conversation {conversation_id} not found in active conversations")
+            print(f"❌ [RoundRobin] Error invoking agent {agent_config['name']}: {e}")
+            import traceback
+            print(traceback.format_exc())
+            return None
+
+
+    def _add_message_to_conversation(self, message):
+        # Remove 'blinking' key before storing
+        msg_to_store = dict(message)
+        msg_to_store.pop('blinking', None)
+        with self.lock:
+            if msg_to_store not in self.convo["messages"]:
+                self.convo["messages"].append(msg_to_store)
+            if msg_to_store not in self.convo["LLM_sending_messages"]:
+                self.convo["LLM_sending_messages"].append(msg_to_store)
+        self.parent_engine._save_conversation_state(self.convo_id)
+
+    def _handle_voice_for_message(self, agent_config, message):
+        voice = agent_config.get("voice")
+        if not voice:
+            self._add_message_to_conversation(message)
+            self._display_message(agent_config, message)
             return
-        
-        conv_data = self.conversation_engine.active_conversations[conversation_id]
-        if conv_data["status"] != "active":
-            print(f"DEBUG: Conversation {conversation_id} status is {conv_data['status']}, not processing response")
-            return
-        
-        # Add the agent's response to the conversation history
-        conv_data["messages"].append({
-            "agent_name": agent_name,
-            "message": response
-        })
-        
-        # Save conversation state
-        self.conversation_engine._save_conversation_state(conversation_id)
-        
-        # Prepare message data for UI
-        ui_message = {
-            "sender": agent_name,
-            "content": response,
-            "timestamp": datetime.now().isoformat(),
-            "type": "ai"
-        }
-        
-        # Send the message to the UI
-        if conversation_id in self.conversation_engine.message_callbacks:
-            self.conversation_engine.message_callbacks[conversation_id](ui_message)
-        
-        # Immediately invoke the next agent for a more responsive feel
-        if not conv_data["stop_conversation"]:
-            threading.Timer(0.1, self.invoke_next_agent, args=[conversation_id]).start()
-    
-    def on_voice_audio_finished(self, conversation_id: str):
-        """Callback for when voice audio finishes playing. No longer triggers the next agent."""
-        convo = self.conversation_engine.active_conversations.get(conversation_id)
-        if not convo or not convo.get("voices_enabled"):
-            return
-        
-        print("✅ [ROUND-ROBIN] Audio finished playing. Next agent was already invoked.")
-        # The logic to invoke the next agent has been moved to handle_agent_response
-        # to make the conversation flow faster. This callback now does nothing.
+        # Request audio
+        self.last_message = message
+        if not hasattr(self, 'waiting_for_audio'):
+            self.waiting_for_audio = threading.Event()
+        self.waiting_for_audio.clear()
+        messages = self.convo.get("messages", [])
+        message_id = len(messages) + 1  # Use next message ID
+        self.audio_manager.request_audio(
+            self.convo_id,
+            agent_config["id"],
+            message_id,
+            message["message"],
+            voice
+        )
+        self._display_message(agent_config, message, blinking=True)
+        self.waiting_for_audio.wait()  # Wait for audio to finish
+
+    def _display_message(self, agent_config, message, blinking=False):
+        ui_callback = self.ui_callback
+        # Remove timestamp and message_id if present
+        message.pop('timestamp', None)
+        message.pop('message_id', None)
+        # Add agent_no, agent_id, agent_name to message
+        agent_no = agent_config.get('agent_no')
+        agent_id = agent_config.get('id')
+        agent_name = agent_config.get('name')
+        if agent_no is not None:
+            message['agent_no'] = agent_no
+        if agent_id:
+            message['agent_id'] = agent_id
+        if agent_name:
+            message['agent_name'] = agent_name
+        # Add blinking info to message
+        message['blinking'] = blinking
+        print(f"[RoundRobinEngine] Sending message to UI: {message}")
+        if ui_callback:
+            ui_callback(message)
+        # Only add to conversation once per agent turn
+        self._add_message_to_conversation(message)
+
+    def _update_conversation_json_messages(self):
+        # Use DataManager to update the messages for the current conversation
+        self.data_manager.add_message_to_conversation(self.convo_id, self.convo["messages"][-1])
+
+    def register_message_callback(self, conversation_id, callback):
+        """Allow UI or parent engine to register a callback for new messages."""
+        if not hasattr(self.parent_engine, 'message_callbacks'):
+            self.parent_engine.message_callbacks = {}
+        self.parent_engine.message_callbacks[conversation_id] = callback
+        self.ui_callback = callback
+
+    def _get_turn_delay(self):
+        return random.uniform(CONVERSATION_TIMING["agent_turn_delay_min"], CONVERSATION_TIMING["agent_turn_delay_max"])
+
+    def _should_remind_termination(self):
+        return self.termination_condition and (self.round_count % self.termination_reminder_frequency == 0)
+
+    def _maybe_remind_termination(self):
+        # Optionally send a reminder message to all agents
         pass
 
-    def invoke_next_agent(self, conversation_id: str):
-        """Invokes the next agent in the round-robin cycle."""
-        print(f"\n🟢 [ROUND-ROBIN] invoke_next_agent called for conversation {conversation_id}")
-        
-        if conversation_id not in self.conversation_engine.active_conversations:
-            print(f"❌ ERROR: Conversation {conversation_id} not found in active conversations")
-            return
-        
-        conv_data = self.conversation_engine.active_conversations[conversation_id]
-        if conv_data["status"] != "active":
-            print(f"⚠️ Conversation {conversation_id} status is {conv_data['status']}, not invoking agent")
-            return
-        
-        # Get current agent
-        agent_names = conv_data["agent_names"]
-        current_agent_index = conv_data["current_agent_index"]
-        current_agent_name = agent_names[current_agent_index]
-        current_agent_config = conv_data["agents_config"][current_agent_name]
-        
-        print(f"\n🤖 [ROUND-ROBIN] Invoking agent: {current_agent_name} (Index: {conv_data['current_agent_index']})")
-        
-        # Increment invocation count for current agent
-        conv_data["agent_invocation_counts"][current_agent_name] += 1
-        
-        # Determine if we should remind about termination condition
-        termination_condition = conv_data.get("termination_condition")
-        should_remind_termination = False
-        
-        if termination_condition:
-            reminder_frequency = AGENT_SETTINGS["termination_reminder_frequency"]
-            current_count = conv_data["agent_invocation_counts"][current_agent_name]
-            should_remind_termination = (current_count % reminder_frequency == 0)
-            if should_remind_termination:
-                print(f"🔔 [ROUND-ROBIN] Agent '{current_agent_name}' will be reminded about termination condition (invocation #{current_count})")
-        
-        # --- CONTEXT: Use all previous messages as context for the agent ---
-        all_messages = conv_data.get("messages", [])
-        print(f"📚 [ROUND-ROBIN] Passing {len(all_messages)} previous messages as context to agent '{current_agent_name}'")
-        
-        # Apply per-agent message summarization before creating prompt
-        self.conversation_engine._update_agent_sending_messages(conversation_id, current_agent_name)
-        
-        # Load agent tools
-        agent_tools = self.conversation_engine._load_agent_tools(conversation_id, current_agent_name)
-        tool_names = [tool.name for tool in agent_tools]
-        agent_obj = None  # If you have agent object logic, set it here
-        
-        # Use all previous messages as context
-        agent_messages = all_messages.copy()
-        prompt = self.conversation_engine.create_agent_prompt(
-            current_agent_config,
-            conv_data["environment"],
-            conv_data["scene_description"],
-            agent_messages,
-            conv_data["agent_names"],
-            termination_condition,
-            should_remind_termination,
-            conversation_id,
-            current_agent_name,
-            tool_names,
-            agent_obj
-        )
-        
-        print(f"📝 [ROUND-ROBIN] Generated prompt for agent '{current_agent_name}' - Length: {len(prompt)} chars")
+    def _next_agent(self):
+        self.current_agent_index = (self.current_agent_index + 1) % len(self.agent_order)
 
-        try:
-            print(f"🛠️ [ROUND-ROBIN] Creating agent model for '{current_agent_name}'")
-            
-            # Create individual model for this agent using their specific API key
-            agent_api_key = current_agent_config.get("api_key")
-            print(f"🔑 [ROUND-ROBIN] Agent '{current_agent_name}' has API key: {'Yes' if agent_api_key else 'No'}")
-            
-            if not agent_api_key:
-                agent_api_key = self.conversation_engine.default_api_key
-                if not agent_api_key:
-                    print(f"❌ [ROUND-ROBIN] No default API key available for agent '{current_agent_name}'")
-                    raise ValueError(f"No API key available for agent {current_agent_name}")
-            
+    def pause_cycle(self, conversation_id):
+        print(f"[RoundRobinEngine] pause_cycle called for conversation_id={conversation_id}")
+        # Terminate any ongoing round robin thread
+        self.active = False
+        self.paused = True
+        # Save all displayed messages to conversations.json
+        if self.convo and "messages" in self.convo:
+            print(f"[RoundRobinEngine] Saving displayed messages to conversations.json")
+            self.parent_engine._save_conversation_state(conversation_id)
+        # Remove all pending audio messages and their audio
+        if hasattr(self, 'audio_manager') and hasattr(self.audio_manager, 'pending_audio'):
+            print(f"[RoundRobinEngine] Removing pending audio messages")
+            self.audio_manager.pending_audio.clear()
+        # Remove messages that were waiting for audio and not displayed
+        if hasattr(self, 'waiting_for_audio'):
+            self.waiting_for_audio.clear()
+        # Optionally, remove any messages in convo that were not displayed due to waiting for audio
+        self.last_message = None
+        print(f"[RoundRobinEngine] pause_cycle complete")
+
+    def resume_cycle(self, conversation_id):
+        print(f"[RoundRobinEngine] resume_cycle called for conversation_id={conversation_id}")
+        # Ensure previous thread is stopped/paused before rebuilding agents
+        self.active = False
+        self.paused = True
+        # Reload messages from conversations.json
+        self.convo = self.parent_engine.active_conversations.get(conversation_id)
+        if not self.convo:
+            print(f"[RoundRobinEngine] No conversation found for id {conversation_id}")
+            return
+        messages = self.convo.get("messages", [])
+        print(f"[RoundRobinEngine] Loaded {len(messages)} messages from conversations.json")
+        # Rebuild agents and agent_order as in start_cycle
+        self.agents = []
+        missing_agents = []
+        for agent_id in self.convo.get("agents", []):
+            agent_obj = self.data_manager.get_agent_by_id(agent_id)
+            if agent_obj:
+                self.agents.append(agent_obj if isinstance(agent_obj, dict) else agent_obj.__dict__)
+            else:
+                missing_agents.append(agent_id)
+        if missing_agents:
+            print(f"❌ [RoundRobinEngine] Missing agent(s) in DataManager: {missing_agents}")
+        self.agent_numbers = self.convo.get("agent_numbers", {})
+        self.agent_order = sorted(self.agent_numbers, key=lambda k: self.agent_numbers[k])
+        # Map agent_id to agent_name
+        agent_id_to_name = {a["id"]: a["name"] for a in self.agents}
+        agent_name_to_id = {a["name"]: a["id"] for a in self.agents}
+        # Find last agent who responded
+        last_agent_name = None
+        for msg in reversed(messages):
+            if msg.get("agent_name"):
+                last_agent_name = msg["agent_name"]
+                break
+        print(f"[RoundRobinEngine] Last agent to respond: {last_agent_name}")
+        # Find agent_id of last agent
+        last_agent_id = agent_name_to_id.get(last_agent_name) if last_agent_name else None
+        print(f"[RoundRobinEngine] Last agent id: {last_agent_id}")
+        # Find next agent in round robin order
+        if last_agent_id and self.agent_order:
+            try:
+                last_index = self.agent_order.index(last_agent_id)
+                next_agent_index = (last_index + 1) % len(self.agent_order)
+                self.current_agent_index = next_agent_index
+                print(f"[RoundRobinEngine] Next agent index: {self.current_agent_index} ({self.agent_order[self.current_agent_index]})")
+            except ValueError:
+                print(f"[RoundRobinEngine] Last agent id not found in agent_order, defaulting to 0")
+                self.current_agent_index = 0
+        else:
+            self.current_agent_index = 0
+        print(f"[RoundRobinEngine] Ready to invoke next agent: {self.agent_order[self.current_agent_index] if self.agent_order else 'None'}")
+
+        # Rebuild agent_instances
+        self.agent_instances = []
+        for agent_id in self.agent_order:
+            agent_config = next(a for a in self.agents if a["id"] == agent_id)
+            agent_name = agent_config["name"]
+            print(f"🤖 [RoundRobin] Initializing agent: {agent_name}")
+            agent_tools = _load_agent_tools(agent_name)
+            base_prompt = create_agent_base_prompt(agent_config)
+            agent_api_key = agent_config.get("api_key") or getattr(self.parent_engine, "default_api_key", None)
+            from langchain_google_genai import ChatGoogleGenerativeAI
             agent_model = ChatGoogleGenerativeAI(
                 model=MODEL_SETTINGS["agent_model"],
                 temperature=AGENT_SETTINGS["response_temperature"],
                 max_retries=AGENT_SETTINGS["max_retries"],
                 google_api_key=agent_api_key
             )
-            
-            # Create system prompt
-            agent_system_prompt = self.conversation_engine.create_agent_prompt(
-                current_agent_config,
-                conv_data["environment"],
-                conv_data["scene_description"],
-                agent_messages,
-                conv_data["agent_names"],
-                termination_condition,
-                should_remind_termination,
-                conversation_id,
-                current_agent_name,
-                tool_names,
-                agent_obj
-            )
-            
-            agent = create_react_agent(
+            agent_variable = create_react_agent(
                 model=agent_model,
                 tools=agent_tools,
-                prompt=agent_system_prompt,
-                checkpointer=self.conversation_engine.memory
+                prompt=base_prompt,
+                checkpointer=InMemorySaver()
             )
-            
-            print(f"🚀 [ROUND-ROBIN] Invoking agent '{current_agent_name}' with their specific model")
-            config = {"configurable": {"thread_id": f"{conv_data['thread_id']}_{current_agent_name}"}}
-            
-            response = agent.invoke(
-                {"messages": [HumanMessage(content=prompt)]},
-                config
-            )
-            
-            print(f"✅ [ROUND-ROBIN] Agent '{current_agent_name}' responded successfully")
-            
-            # Extract the response
-            if response and "messages" in response and response["messages"]:
-                agent_message = response["messages"][-1].content
-                print(f"💬 [ROUND-ROBIN] Agent '{current_agent_name}' response: '{agent_message[:100]}...'")
-                
-                # Add to our messages list
-                conv_data["messages"].append({
-                    "agent_name": current_agent_name,
-                    "message": agent_message
-                })
-                
-                # Add to agent_sending_messages for this agent
-                if "agent_sending_messages" not in conv_data:
-                    conv_data["agent_sending_messages"] = {}
-                if current_agent_name not in conv_data["agent_sending_messages"]:
-                    conv_data["agent_sending_messages"][current_agent_name] = []
-                conv_data["agent_sending_messages"][current_agent_name].append(agent_message)
-                
-                # Save conversation to persistent storage after each message
-                self.conversation_engine._save_conversation_state(conversation_id)
-                
-                # Notify callback
-                if conversation_id in self.conversation_engine.message_callbacks:
-                    message_data = {
-                        "sender": current_agent_name,
-                        "content": agent_message,
-                        "timestamp": datetime.now().isoformat(),
-                        "type": "ai"
-                    }
-                    self.conversation_engine.message_callbacks[conversation_id](message_data)
-                    print(f"📤 [ROUND-ROBIN] Message sent to UI callback.")
-                    
-                    # If voices are enabled, track that audio generation is being requested
-                    if conv_data.get("voices_enabled", False):
-                        print(f"🔊 [ROUND-ROBIN] Sending message for audio generation...")
-                        if hasattr(self.conversation_engine, 'on_audio_generation_requested'):
-                            self.conversation_engine.on_audio_generation_requested(conversation_id, current_agent_name)
-                        else:
-                            print(f"❌ [ROUND-ROBIN] No on_audio_generation_requested callback set!")
-                    else:
-                        print(f"⏳ [ROUND-ROBIN] No audio, will schedule next agent after delay.")
-            else:
-                print(f"❌ [ROUND-ROBIN] No valid response from agent '{current_agent_name}'")
-                print(f"DEBUG: [ROUND-ROBIN] Response structure: {response}")
-            
-            # Move to next agent in round-robin cycle
-            conv_data["current_agent_index"] = (conv_data["current_agent_index"] + 1) % len(conv_data["agent_names"])
-            
-            # Check if we completed a round (all agents have spoken) and if there's a termination condition to check
-            if (conv_data["current_agent_index"] == 0 and 
-                termination_condition and 
-                len(conv_data["messages"]) >= len(conv_data["agent_names"])):
-                
-                print("🔚 [ROUND-ROBIN] Checking termination condition")
-                # Check if conversation should terminate
-                if self.conversation_engine._check_round_robin_termination(conversation_id):
-                    print("🛑 [ROUND-ROBIN] Termination condition met. Ending conversation.")
-                    # End the conversation
-                    if conversation_id in self.conversation_engine.message_callbacks:
-                        self.conversation_engine.message_callbacks[conversation_id]({
-                            "sender": "System",
-                            "content": "Termination condition reached.",
-                            "timestamp": datetime.now().isoformat(),
-                            "type": "system"
-                        })
-                    # Stop the conversation
-                    self.conversation_engine.stop_conversation(conversation_id)
-                    return
+            self.agent_instances.append({
+                "agent_name": agent_name,
+                "agent_no": self.agent_numbers[agent_id],
+                "agent_variable": agent_variable,
+                "config": agent_config
+            })
 
-        except Exception as e:
-            print(f"❌ [ROUND-ROBIN] Error invoking agent '{current_agent_name}': {e}")
-            print(f"ERROR: Exception type: {type(e).__name__}")
-            print(f"ERROR: Traceback: {traceback.format_exc()}")
-            # Retry after error delay
-            if conv_data["status"] == "active":
-                print(f"🔁 [ROUND-ROBIN] Retrying after {CONVERSATION_TIMING['error_retry_delay']} seconds")
-                threading.Timer(CONVERSATION_TIMING["error_retry_delay"], self.invoke_next_agent, args=(conversation_id,)).start()
-    
-    def on_audio_finished(self, conversation_id: str, agent_name: str):
-        """Called when audio finishes playing for round-robin mode."""
-        if conversation_id not in self.conversation_engine.active_conversations:
+        # Now safe to start the thread
+        self.active = True
+        self.paused = False
+        print(f"✅ [RoundRobin] Resuming convo: All agents initialized. Starting round robin thread.")
+        threading.Thread(target=self._run_round_robin, daemon=True).start()
+
+    def update_scene_environment(self, conversation_id, environment=None, scene_description=None):
+        if environment:
+            self.convo["environment"] = environment
+        if scene_description:
+            self.convo["scene_description"] = scene_description
+
+    def _on_audio_ready(self, conversation_id, agent_id, message_id):
+        print(f"[AUDIO READY] Audio received for agent: {agent_id}, message_id: {message_id}")
+        # Display chat bubble when audio is ready
+        # Find the last message for this agent in the active conversation
+        convo = self.parent_engine.active_conversations.get(conversation_id)
+        if not convo or not convo.get("messages"):
             return
-        
-        conv_data = self.conversation_engine.active_conversations[conversation_id]
-        
-        # Check if conversation is still active before proceeding
-        if conv_data.get("status") != "active":
-            print(f"DEBUG: [ROUND-ROBIN] Conversation {conversation_id} status is {conv_data.get('status')} - skipping audio finished processing")
+        for msg in reversed(convo["messages"]):
+            if msg.get("agent_name") == agent_id or msg.get("sender") == agent_id:
+                agent_config = next((a for a in self.agents if a["name"] == agent_id), None)
+                if agent_config:
+                    self._display_message(agent_config, msg, blinking=True)
+                break
+
+    def _on_audio_finished(self, conversation_id, agent_id, message_id):
+        print(f"[AUDIO FINISHED] Audio finished for agent: {agent_id}, message_id: {message_id}")
+        # Only proceed if not paused and still active
+        if not self.active or getattr(self, 'paused', False):
             return
-        
-        next_agent = conv_data.get("next_agent_scheduled")
-        if next_agent:
-            print(f"DEBUG: [ROUND-ROBIN] Audio finished for agent '{agent_name}' - invoking next agent")
-            conv_data["next_agent_scheduled"] = None
-            # Invoke the next agent immediately
-            self.invoke_next_agent(conversation_id)
-        else:
-            print(f"DEBUG: [ROUND-ROBIN] Audio finished for agent '{agent_name}' - no next agent scheduled")
+        # Notify UI to stop blinking
+        if hasattr(self.parent_engine, "message_callbacks"):
+            callback = self.parent_engine.message_callbacks.get(conversation_id)
+            if callback:
+                # Send a special signal to UI to stop blinking for this message_id
+                callback({
+                    "action": "stop_blinking",
+                    "agent_id": agent_id,
+                    "message_id": message_id
+                })
+        # Stop blinking in chat_canvas if present
+        if hasattr(self.parent_engine, "chat_canvas"):
+            try:
+                self.parent_engine.chat_canvas.stop_bubble_blink(message_id)
+            except Exception:
+                pass
+        if hasattr(self, 'waiting_for_audio'):
+            self.waiting_for_audio.set()
