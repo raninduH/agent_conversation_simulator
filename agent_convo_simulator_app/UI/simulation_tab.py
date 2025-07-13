@@ -289,10 +289,10 @@ class SimulationTab(ttk.Frame):
         message = self.app.message_var.get().strip()
         if not message or not self.app.conversation_active:
             return
-        
         self.app.message_var.set("")
-        self.display_message({"sender": "You", "content": message, "type": "user"})
-        self.app.send_user_message(message)
+        user_message_data = {"sender": "You", "content": message, "type": "user", "timestamp": datetime.now().strftime("%H:%M:%S")}
+        self.display_message(user_message_data)
+        self.app.send_user_message()
 
     def display_message(self, message_data, blinking=False):
         """Display a message in the chat canvas."""

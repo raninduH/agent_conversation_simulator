@@ -18,6 +18,20 @@ import os
 
 
 class RoundRobinEngine:
+    def on_user_message(self, message_data):
+        """Handle user message: terminate current thread, add message, and resume cycle."""
+        print(f"[RoundRobinEngine] on_user_message called with: {message_data}")
+        # Terminate current thread
+        self.active = True
+        self.paused = True
+        # Add user message to conversation
+        self._add_message_to_conversation(message_data)
+        # Resume cycle in a new thread
+        print("[RoundRobinEngine] Restarting round robin cycle after user message...")
+        self.active = True
+        self.paused = False
+        
+
     def __init__(self, parent_engine):
         self.parent_engine = parent_engine
         self.audio_manager = AudioManager()
@@ -304,7 +318,11 @@ class RoundRobinEngine:
 
     def _maybe_remind_termination(self):
         # Optionally send a reminder message to all agents
-        pass
+        if self.termination_condition and self._should_remind_termination():
+            print(f"[RoundRobinEngine] Sending termination condition reminder: {self.termination_condition}")
+            # You can implement actual reminder logic here if needed
+        else:
+            print(f"[RoundRobinEngine] No termination reminder needed this round.")
 
     def _next_agent(self):
         self.current_agent_index = (self.current_agent_index + 1) % len(self.agent_order)
@@ -438,9 +456,7 @@ class RoundRobinEngine:
 
     def _on_audio_finished(self, conversation_id, agent_id, message_id):
         print(f"[AUDIO FINISHED] Audio finished for agent: {agent_id}, message_id: {message_id}")
-        # Only proceed if not paused and still active
-        if not self.active or getattr(self, 'paused', False):
-            return
+
         # Notify UI to stop blinking
         if hasattr(self.parent_engine, "message_callbacks"):
             callback = self.parent_engine.message_callbacks.get(conversation_id)

@@ -29,6 +29,14 @@ class ConversationEngineFactory:
         return self.engines.get(invocation_method, self.engines["round_robin"])
 
 class ConversationEngine:
+    def on_user_message(self, conversation_id, message_data):
+        """Pass user message to the correct engine."""
+        print(f"[ConversationEngine] on_user_message called for {conversation_id}")
+        engine = self.current_engines.get(conversation_id)
+        if engine and hasattr(engine, "on_user_message"):
+            engine.on_user_message(message_data)
+        else:
+            print(f"[ConversationEngine] No engine found for on_user_message on {conversation_id}")
     def __init__(self):
         self.active_conversations = {}
         self.round_robin_engine = RoundRobinEngine(self)

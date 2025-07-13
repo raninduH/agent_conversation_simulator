@@ -317,17 +317,14 @@ class AgentConversationSimulatorGUI:
 
     def send_user_message(self, event=None):
         """Send a user message to the conversation."""
-        if not self.conversation_active or not self.conversation_engine:
+        if not self.conversation_active or not self.conversation_engine or not self.current_conversation_id:
             return
-        
         # Get message from the entry field
         message = getattr(self, 'message_var', tk.StringVar()).get().strip()
         if not message:
             return
-        
         # Clear the entry field
         self.message_var.set("")
-        
         # Display the user message in the chat
         user_message_data = {
             "sender": "You",
@@ -336,13 +333,8 @@ class AgentConversationSimulatorGUI:
             "timestamp": datetime.now().strftime("%H:%M:%S")
         }
         self.simulation_tab.display_message(user_message_data)
-        
-        # Send message to the conversation engine
-        threading.Thread(
-            target=self._send_message_thread,
-            args=(message, "user"),
-            daemon=True
-        ).start()
+        # Send message to the backend (RoundRobinEngine)
+        self.conversation_engine.on_user_message(self.current_conversation_id, user_message_data)
 
     def change_scene(self):
         """Change the environment and scene during a conversation."""
