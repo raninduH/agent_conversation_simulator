@@ -125,17 +125,41 @@ class RoundRobinEngine:
                 print(f"🔊 [RoundRobin] Requesting audio for {agent_name}...")
                 self.last_message = message
                 self.waiting_for_audio.clear()
+                # Show loading bubble using _display_message
+                loading_message_id = len(self.convo["messages"]) + 1
+                loading_message = {
+                    "agent_no": agent_config.get('agent_no'),
+                    "agent_id": agent_config.get('id'),
+                    "agent_name": agent_name,
+                    "message_id": loading_message_id,
+                    "sender": agent_name,
+                    "type": "ai",
+                    "timestamp": time.strftime("%H:%M:%S"),
+                    "loading": True
+                }
+                self._display_message(agent_config, loading_message)
                 # Request audio and wait for it to be ready
                 audio_data = self.audio_manager._generate_audio_sync(message["message"], agent_config["voice"])
                 print(f"[AUDIO READY] Audio received for agent: {agent_name}")
-                # Display chat bubble before playing audio
-                self._display_message(agent_config, message, blinking=True)
+                # Remove loading bubble and display actual message
+                actual_message = {
+                    "agent_no": agent_config.get('agent_no'),
+                    "agent_id": agent_config.get('id'),
+                    "agent_name": agent_name,
+                    "message_id": loading_message_id,
+                    "sender": agent_name,
+                    "type": "ai",
+                    "timestamp": time.strftime("%H:%M:%S"),
+                    "message": message["message"],
+                    "loading": False
+                }
+                self._display_message(agent_config, actual_message, blinking=True)
                 # Play audio
                 if audio_data:
                     self.audio_manager._play_audio(audio_data, {
                         'conversation_id': self.convo_id,
                         'agent_id': agent_name,
-                        'message_id': len(self.convo["messages"])+1,
+                        'message_id': loading_message_id,
                         'text': message["message"],
                         'voice': agent_config["voice"]
                     })

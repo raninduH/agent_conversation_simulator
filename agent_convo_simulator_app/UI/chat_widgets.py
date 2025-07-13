@@ -5,7 +5,7 @@ from ..config import UI_COLORS
 class ChatBubble(tk.Frame):
     """Represents a chat message bubble in the conversation UI."""
     
-    def __init__(self, parent, sender, message, timestamp, msg_type="ai", color=None, align_right=False, **kwargs):
+    def __init__(self, parent, sender, message, timestamp, msg_type="ai", color=None, align_right=False, loading=False, **kwargs):
         """Initialize the chat bubble.
         
         Args:
@@ -16,6 +16,7 @@ class ChatBubble(tk.Frame):
             msg_type: Type of message (user, system, ai)
             color: Background color for the bubble
             align_right: If True, align bubble to the right with right-aligned text
+            loading: If True, show animated loading dots instead of message
         """
         # Choose appropriate color
         if color is None:
@@ -34,30 +35,57 @@ class ChatBubble(tk.Frame):
         container_frame = tk.Frame(self, bg=UI_COLORS["chat_background"])
         container_frame.pack(fill="x")
         
-        # Configure the container with proper weights for 75% bubble width
-        container_frame.grid_columnconfigure(1, weight=3)  # 75% for bubble
-        if align_right:
-            container_frame.grid_columnconfigure(0, weight=1)  # 25% left spacer
-            container_frame.grid_columnconfigure(2, weight=0)  # No right spacer
-            
-            # Left spacer for right alignment
-            left_spacer = tk.Frame(container_frame, bg=UI_COLORS["chat_background"])
-            left_spacer.grid(row=0, column=0, sticky="ew")
-            
-            # Bubble frame takes 75% width, positioned on the right
-            self.bubble_frame = tk.Frame(container_frame, bg=color, padx=15, pady=8)
-            self.bubble_frame.grid(row=0, column=1, sticky="ew", pady=6)
+        # Configure the container with proper weights for bubble width
+        if loading:
+            # Loading bubble: 10% width
+            container_frame.grid_columnconfigure(1, weight=1)  # 10% for bubble
+            if align_right:
+                container_frame.grid_columnconfigure(0, weight=9)  # 90% left spacer
+                container_frame.grid_columnconfigure(2, weight=0)
+                
+                # Left spacer for right alignment
+                left_spacer = tk.Frame(container_frame, bg=UI_COLORS["chat_background"])
+                left_spacer.grid(row=0, column=0, sticky="ew")
+                
+                # Bubble frame takes 10% width, positioned on the right
+                self.bubble_frame = tk.Frame(container_frame, bg=color, padx=15, pady=8)
+                self.bubble_frame.grid(row=0, column=1, sticky="ew", pady=6)
+            else:
+                container_frame.grid_columnconfigure(0, weight=0)
+                container_frame.grid_columnconfigure(2, weight=9)  # 90% right spacer
+                
+                # Bubble frame takes 10% width, positioned on the left
+                self.bubble_frame = tk.Frame(container_frame, bg=color, padx=15, pady=8)
+                self.bubble_frame.grid(row=0, column=1, sticky="ew", pady=6)
+                
+                # Right spacer for left alignment
+                right_spacer = tk.Frame(container_frame, bg=UI_COLORS["chat_background"])
+                right_spacer.grid(row=0, column=2, sticky="ew")
         else:
-            container_frame.grid_columnconfigure(0, weight=0)  # No left spacer
-            container_frame.grid_columnconfigure(2, weight=1)  # 25% right spacer
-            
-            # Bubble frame takes 75% width, positioned on the left
-            self.bubble_frame = tk.Frame(container_frame, bg=color, padx=15, pady=8)
-            self.bubble_frame.grid(row=0, column=1, sticky="ew", pady=6)
-            
-            # Right spacer for left alignment
-            right_spacer = tk.Frame(container_frame, bg=UI_COLORS["chat_background"])
-            right_spacer.grid(row=0, column=2, sticky="ew")
+            # Actual message bubble: 75% width
+            container_frame.grid_columnconfigure(1, weight=3)  # 75% for bubble
+            if align_right:
+                container_frame.grid_columnconfigure(0, weight=1)  # 25% left spacer
+                container_frame.grid_columnconfigure(2, weight=0)
+                
+                # Left spacer for right alignment
+                left_spacer = tk.Frame(container_frame, bg=UI_COLORS["chat_background"])
+                left_spacer.grid(row=0, column=0, sticky="ew")
+                
+                # Bubble frame takes 75% width, positioned on the right
+                self.bubble_frame = tk.Frame(container_frame, bg=color, padx=15, pady=8)
+                self.bubble_frame.grid(row=0, column=1, sticky="ew", pady=6)
+            else:
+                container_frame.grid_columnconfigure(0, weight=0)
+                container_frame.grid_columnconfigure(2, weight=1)  # 25% right spacer
+                
+                # Bubble frame takes 75% width, positioned on the left
+                self.bubble_frame = tk.Frame(container_frame, bg=color, padx=15, pady=8)
+                self.bubble_frame.grid(row=0, column=1, sticky="ew", pady=6)
+                
+                # Right spacer for left alignment
+                right_spacer = tk.Frame(container_frame, bg=UI_COLORS["chat_background"])
+                right_spacer.grid(row=0, column=2, sticky="ew")
         
         # Add rounded corners by using themed frame
         self.bubble_frame.config(highlightbackground=color, highlightthickness=1, bd=0)
@@ -115,41 +143,65 @@ class ChatBubble(tk.Frame):
             )
             time_label.pack(side="right")
         
-        # Add message content with word wrapping - use container for proper text positioning
-        if align_right:
-            # For right-aligned bubbles: create a container for the text that can be positioned
-            text_container = tk.Frame(self.bubble_frame, bg=color)
-            text_container.pack(fill="x", pady=(5, 0))
-            
-            # Left-justify text within the container, but position container on the right
-            message_label = tk.Label(
-                text_container, 
-                text=message, 
-                font=("Arial", 10),
+        # Add message content or loading animation
+        if loading:
+            self.loading_label = tk.Label(
+                self.bubble_frame,
+                text="...",
+                font=("Arial", 10, "italic"),
                 bg=color,
-                justify="left",   # Left-justify text lines within the container
-                anchor="w",       # Anchor text to the left within the container
+                justify="center",
+                anchor="center",
                 wraplength=400
             )
-            message_label.pack(side="right")  # Position the text block to the right within container
+            self.loading_label.pack(fill="x", pady=(5, 0))
+            self._loading_animation_index = 0
+            self._loading_animation_job = None
+            self._start_loading_animation()
         else:
-            # For left-aligned bubbles: left-align the text content (default)
-            message_label = tk.Label(
-                self.bubble_frame, 
-                text=message, 
-                font=("Arial", 10),
-                bg=color,
-                justify="left",   # Left-align text content for left bubbles
-                anchor="w",       # Anchor text to the left
-                wraplength=400
-            )
-            message_label.pack(fill="x", pady=(5, 0))
+            if align_right:
+                text_container = tk.Frame(self.bubble_frame, bg=color)
+                text_container.pack(fill="x", pady=(5, 0))
+                message_label = tk.Label(
+                    text_container, 
+                    text=message, 
+                    font=("Arial", 10),
+                    bg=color,
+                    justify="left",   # Left-justify text lines within the container
+                    anchor="w",       # Anchor text to the left within the container
+                    wraplength=400
+                )
+                message_label.pack(side="right")  # Position the text block to the right within container
+            else:
+                message_label = tk.Label(
+                    self.bubble_frame, 
+                    text=message, 
+                    font=("Arial", 10),
+                    bg=color,
+                    justify="left",   # Left-align text content for left bubbles
+                    anchor="w",       # Anchor text to the left
+                    wraplength=400
+                )
+                message_label.pack(fill="x", pady=(5, 0))
         
         # Store original color for blinking animation
         self.original_color = color
         self.blink_active = False
         self.blink_job = None
+        self.loading = loading
+        self._loading_animation_job = None
         
+    def _start_loading_animation(self):
+        dots = [".", "..", "..."]
+        self._loading_animation_index = (self._loading_animation_index + 1) % len(dots)
+        self.loading_label.config(text=dots[self._loading_animation_index])
+        self._loading_animation_job = self.after(500, self._start_loading_animation)
+
+    def stop_loading_animation(self):
+        if self.loading and self._loading_animation_job:
+            self.after_cancel(self._loading_animation_job)
+            self._loading_animation_job = None
+
     def start_blink(self):
         """Start blinking animation."""
         if not self.blink_active:
@@ -166,6 +218,8 @@ class ChatBubble(tk.Frame):
         self.bubble_frame.config(bg=self.original_color)
         # Update all child widgets' background
         self._update_bg_color(self.original_color)
+        # Stop loading animation if present
+        self.stop_loading_animation()
     
     def _blink_animate(self):
         """Animate the blinking effect."""
@@ -279,6 +333,7 @@ class ChatCanvas(tk.Canvas):
         
         # Track message bubbles by message_id for blinking animations
         self.message_bubbles = {}  # message_id -> ChatBubble
+        self.agent_loading_bubbles = {}  # agent_id -> loading ChatBubble
         
         # Create window for the frame
         self.bubble_window = self.create_window((0, 0), window=self.bubble_frame, anchor="nw", width=self.winfo_width())
@@ -296,9 +351,8 @@ class ChatCanvas(tk.Canvas):
         """Update scroll region when the inner frame changes size."""
         self.configure(scrollregion=self.bbox("all"))
         
-    def add_bubble(self, sender, message, timestamp, msg_type="ai", color=None, align_right=False, message_id=None):
+    def add_bubble(self, sender, message, timestamp, msg_type="ai", color=None, align_right=False, message_id=None, loading=False, agent_id=None):
         """Add a new chat bubble to the canvas."""
-        
         # Add extra spacing between messages from different senders
         if self.previous_sender is not None and self.previous_sender != sender:
             # Add a small spacer frame between different agents' messages
@@ -306,7 +360,13 @@ class ChatCanvas(tk.Canvas):
             spacer.pack(fill="x", expand=True)
           # Update the previous sender
         self.previous_sender = sender
-        
+        # Remove loading bubble for this agent if not loading (actual message)
+        if not loading and agent_id and agent_id in self.agent_loading_bubbles:
+            old_bubble = self.agent_loading_bubbles[agent_id]
+            if hasattr(old_bubble, "stop_loading_animation"):
+                old_bubble.stop_loading_animation()
+            old_bubble.destroy()
+            del self.agent_loading_bubbles[agent_id]
         bubble = ChatBubble(
             self.bubble_frame,
             sender, 
@@ -314,25 +374,18 @@ class ChatCanvas(tk.Canvas):
             timestamp,
             msg_type,
             color,
-            align_right=align_right
+            align_right=align_right,
+            loading=loading
         )
-        # Pack with fill="x" but the bubble frame inside handles the width limitation
         bubble.pack(fill="x", expand=True)
-        
-        # Store bubble reference if message_id is provided
+        if loading and agent_id:
+            self.agent_loading_bubbles[agent_id] = bubble
         if message_id:
             self.message_bubbles[message_id] = bubble
-        
-        # Force update to ensure proper sizing and positioning
         self.bubble_frame.update_idletasks()
         self.update_idletasks()
-        
-        # Update scroll region
         self.configure(scrollregion=self.bbox("all"))
-        
-        # Auto-scroll to the bottom with a small delay to ensure it works
         self.after_idle(lambda: self.yview_moveto(1.0))
-        
         return bubble
         
     def clear(self):

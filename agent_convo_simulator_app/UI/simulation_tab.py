@@ -337,7 +337,17 @@ class SimulationTab(ttk.Frame):
         else:
             align_right = (msg_type == "user") or (sender == "You")
         print(f"[SimulationTab] align_right={align_right}")
-        bubble = self.chat_canvas.add_bubble(sender or agent_name or agent_id, message, timestamp, msg_type, color, align_right, message_id)
+        # Handle loading bubble
+        loading = message_data.get("loading", False)
+        if loading:
+            bubble = self.chat_canvas.add_bubble(sender or agent_name or agent_id, "...", timestamp, msg_type, color, align_right, message_id, loading=True, agent_id=agent_id)
+            if blinking:
+                bubble.start_blink()
+                self.blinking_messages[bubble] = True
+            return bubble
+
+        # Remove loading bubble for this agent if present (handled in add_bubble)
+        bubble = self.chat_canvas.add_bubble(sender or agent_name or agent_id, message, timestamp, msg_type, color, align_right, message_id, loading=False, agent_id=agent_id)
         blinking_flag = message_data.get("blinking", blinking)
         print(f"[SimulationTab] blinking_flag={blinking_flag}, bubble={bubble}")
         if blinking_flag and bubble:
@@ -348,13 +358,25 @@ class SimulationTab(ttk.Frame):
             print(f"[SimulationTab] Blinking requested but bubble missing: bubble={bubble}")
 
     def handle_message_callback(self, message_data):
-        """Handle messages from round robin engine, including stop_blinking action."""
-        if isinstance(message_data, dict) and message_data.get("action") == "stop_blinking":
-            print(f"[SimulationTab] Received stop_blinking callback from backend. Stopping all blinking bubbles.")
-            for bubble in list(self.blinking_messages.keys()):
-                print(f"[SimulationTab] Stopping blinking for bubble={bubble}")
-                bubble.stop_blink()
-            self.blinking_messages.clear()
+        """Handle messages from round robin engine, including loading bubble actions."""
+        if isinstance(message_data, dict):
+            action = message_data.get("action")
+            if action == "stop_blinking":
+                print(f"[SimulationTab] Received stop_blinking callback from backend. Stopping all blinking bubbles.")
+                for bubble in list(self.blinking_messages.keys()):
+                    print(f"[SimulationTab] Stopping blinking for bubble={bubble}")
+                    bubble.stop_blink()
+                self.blinking_messages.clear()
+            elif action == "show_loading":
+                print(f"[SimulationTab] Showing loading bubble for agent {message_data.get('agent_id')}")
+                self.display_message(message_data)
+            elif action == "replace_loading":
+                print(f"[SimulationTab] Replacing loading bubble for agent {message_data.get('agent_id')}")
+                # Remove loading and show actual message
+                message_data["loading"] = False
+                self.display_message(message_data)
+            else:
+                self.display_message(message_data)
         else:
             self.display_message(message_data)
 

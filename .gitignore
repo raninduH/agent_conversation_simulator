@@ -1,8 +1,7 @@
 venv
 .env
-services\services_venv
-services\services_env
-services
+services/services_venv
+
 agent_convo_simulator_app\.env
 
 # Python cache files

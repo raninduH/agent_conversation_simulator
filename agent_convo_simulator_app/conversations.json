@@ -221,6 +221,1238 @@
         }
       ],
       "voices_enabled": true
+    },
+    {
+      "id": "conv_6a2840e6",
+      "title": "new2",
+      "environment": "park",
+      "scene_description": "two friends talk about AI agents",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [],
+      "created_at": "2025-07-12T20:13:42.310678",
+      "last_updated": "2025-07-12T20:14:30.274644",
+      "thread_id": "thread_c612217e",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_6e52bc3e": "#FCFAEE",
+        "agent_d8fa732c": "#FFDCDC"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_3f106b97",
+      "title": "sd",
+      "environment": "park",
+      "scene_description": "two agents talk about AI agents",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [],
+      "created_at": "2025-07-12T20:16:35.984775",
+      "last_updated": "2025-07-12T20:16:36.346330",
+      "thread_id": "thread_a0e1d668",
+      "status": "active",
+      "agent_colors": {
+        "agent_6e52bc3e": "#A2AADB",
+        "agent_d8fa732c": "#FFE8CD"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_acfee4ec",
+      "title": "new 3",
+      "environment": "park",
+      "scene_description": "two friends talks about AI agents",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright, let's dive into this discussion about AI agents! I'm eager to hear what you both have to say. I'm always up for a good chat about the intersection of AI and the physical world – it's where things get really interesting, logically speaking! What's on your mind today?",
+          "loading": false
+        }
+      ],
+      "created_at": "2025-07-12T20:25:09.105607",
+      "last_updated": "2025-07-12T20:25:42.416305",
+      "thread_id": "thread_9da4d5a3",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_6e52bc3e": "#FCFAEE",
+        "agent_d8fa732c": "#4F8B61"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright, let's dive into this discussion about AI agents! I'm eager to hear what you both have to say. I'm always up for a good chat about the intersection of AI and the physical world – it's where things get really interesting, logically speaking! What's on your mind today?",
+          "loading": false
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_5a2be339",
+      "title": "new 5",
+      "environment": "park",
+      "scene_description": "two friends are talkin about AI agents",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright, alright! This sounds like a stimulating discussion. So, AI agents, you say? What's piquing your interest in them today? I'm always thrilled to delve into the fascinating intersection of physics and AI, especially when it comes to intelligent agents navigating our world.",
+          "loading": false
+        }
+      ],
+      "created_at": "2025-07-12T20:30:01.810644",
+      "last_updated": "2025-07-12T20:30:30.390551",
+      "thread_id": "thread_86a27fde",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_6e52bc3e": "#CAE8BD",
+        "agent_d8fa732c": "#FFE8CD"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright, alright! This sounds like a stimulating discussion. So, AI agents, you say? What's piquing your interest in them today? I'm always thrilled to delve into the fascinating intersection of physics and AI, especially when it comes to intelligent agents navigating our world.",
+          "loading": false
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_05fa5ca8",
+      "title": "new 6",
+      "environment": "park",
+      "scene_description": "two friends talk about AI agents",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright, alright! AI agents, you say? This is right up my alley! Tell me, what aspects of these fascinating entities are tickling your intellectual curiosity today? I'm ready to break down the physics and the AI behind them!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Blake, always a pleasure to delve into the intricacies of AI with you! Lately, I've been captivated by the advancements in high-context memory for generative AI agents. Imagine the possibilities when these agents can truly understand and retain complex, nuanced information for extended periods!",
+          "loading": false
+        }
+      ],
+      "created_at": "2025-07-12T22:07:16.704638",
+      "last_updated": "2025-07-12T22:08:12.888244",
+      "thread_id": "thread_d78f56df",
+      "status": "active",
+      "agent_colors": {
+        "agent_6e52bc3e": "#FFE8CD",
+        "agent_d8fa732c": "#FADA7A"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright, alright! AI agents, you say? This is right up my alley! Tell me, what aspects of these fascinating entities are tickling your intellectual curiosity today? I'm ready to break down the physics and the AI behind them!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Blake, always a pleasure to delve into the intricacies of AI with you! Lately, I've been captivated by the advancements in high-context memory for generative AI agents. Imagine the possibilities when these agents can truly understand and retain complex, nuanced information for extended periods!",
+          "loading": false
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_14c3739d",
+      "title": "new 7",
+      "environment": "park",
+      "scene_description": "two friends discuss AI agents",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright, alright! So, we're diving into AI agents, huh? This is *exactly* the kind of stuff that gets my circuits firing! What's sparked this chat? I'm always game to untangle some AI spaghetti. ",
+          "loading": false
+        }
+      ],
+      "created_at": "2025-07-12T22:12:24.718499",
+      "last_updated": "2025-07-12T22:12:51.134364",
+      "thread_id": "thread_93b9091f",
+      "status": "active",
+      "agent_colors": {
+        "agent_6e52bc3e": "#FFE8CD",
+        "agent_d8fa732c": "#FADA7A"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright, alright! So, we're diving into AI agents, huh? This is *exactly* the kind of stuff that gets my circuits firing! What's sparked this chat? I'm always game to untangle some AI spaghetti. ",
+          "loading": false
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_ce5f1edb",
+      "title": "new 7",
+      "environment": "park",
+      "scene_description": "two friends talking about agents",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright, alright! Agents, huh? Sounds like someone's been diving into the fun world of AI! What's sparking this conversation? I'm always up for a good chat about intelligent systems – or, you know, the universe in general. 😉",
+          "loading": false
+        }
+      ],
+      "created_at": "2025-07-12T22:22:06.444129",
+      "last_updated": "2025-07-12T22:22:31.425427",
+      "thread_id": "thread_481470c1",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_6e52bc3e": "#FCFAEE",
+        "agent_d8fa732c": "#A2AADB"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright, alright! Agents, huh? Sounds like someone's been diving into the fun world of AI! What's sparking this conversation? I'm always up for a good chat about intelligent systems – or, you know, the universe in general. 😉",
+          "loading": false
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_a6c028cd",
+      "title": "play",
+      "environment": "Kitchen",
+      "scene_description": "Jason get to the kitchen, got the urge of testing the muscles and stength of Sarah.",
+      "agents": [
+        "agent_7562c7c3",
+        "agent_aaddf470"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(I saunter into the kitchen, trying to look nonchalant, but my eyes are already scanning Mom, Sarah. I flex my pathetic bicep, then scoff.)\n\n\"Hey, Mom,\" I say, trying to sound bored. \"Think you could, uh, open this jar for me? My gamer muscles are kinda worn out from carrying all these wins.\" (I hold up an imaginary jar, smirking, hoping she'll take the bait.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I blush slightly, trying to hide a smile behind my hand. I gently take the imaginary jar from you, Jason)\n\n\"Oh, your 'gamer muscles' are tired, huh?\" (I give you a playful, teasing look). \"Well, let's see if this old mom can handle it.\"",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(I puff out my chest a little, trying to act unimpressed, even though I'm totally checking out her arms.)\n\n\"Yeah, well, you know, intense mental focus and all that,\" I say with a shrug. \"Don't strain yourself, Mom. Wouldn't want you pulling a... you know... mom-muscle.\"",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I chuckle softly, rolling my eyes playfully.) \"A 'mom-muscle'? Is that even a thing?\"\n\nAlright tough guy, how about we make this interesting? How about an arm wrestle, just to see who's *really* strained?\" (I smirk, already knowing I have the upper hand, but trying to keep it light and fun.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(My eyes widen a little. An arm wrestle? Oh god, this could be humiliating. But... maybe... )\n\n\"Uh, arm wrestling? Seriously? I mean, I don't wanna, like, totally crush you and hurt your feelings,\" I say, trying to sound confident but my voice cracks a little. \"But, fine. Whatever. Just don't cry when you lose to pure skill.\"",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I laugh, a genuine, hearty laugh that shakes my shoulders a little.) \"Oh, I wouldn't dream of crying, sweetie. But *you* might want to ice that wrist afterwards.\"\n\nAlright, tough guy, let's go. Table's the arena.\" (I confidently stride over to the kitchen table, placing my elbow down with a playful glint in my eyes, ready to tease you mercilessly.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(I shuffle over to the table, trying to look like I'm not already regretting this. I sit down, avoiding eye contact.)\n\n\"Okay, okay, but just so you know, I'm going easy on you,\" I mutter, positioning my elbow shakily. \"Wouldn't want you to throw your back out or something.\" (I secretly hope she believes my pathetic attempt at intimidation.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I suppress another laugh, my eyes sparkling with amusement.) \"Oh, honey, please. Just focus on keeping your arm attached.\"\n\nReady? On three. One... two... three!\" (I grip your hand firmly, a playful but determined look on my face. I'm *definitely* not going easy.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(My face immediately contorts with effort as soon as she says \"three.\" I'm putting on a show of struggling, but I'm secretly enjoying the pressure... and her strength.)\n\n\"Ugh... you're... surprisingly... strong,\" I grunt, my voice strained. \"But... I'm... just... warming up!\" (I'm definitely losing, and fast, but I'm trying to play it cool.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I grin, a flash of playful dominance in my eyes as I feel your resistance falter.) \"Warming up, huh? Is that what we're calling it?\"\n\n(With a swift, decisive movement, I bring your hand down, pinning it to the table. I hold it there for a moment, savoring the victory.) \"Looks like Mom wins this round.\" (I release your hand, but keep my eyes locked on yours, teasingly.) \"Maybe next time you'll stand a chance... maybe.\"",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(My face flushes red as my hand slams against the table. I try to pull away, but it's no use. Humiliation washes over me, but... also... something else.)\n\n\"Okay, okay, you win,\" I mumble, avoiding eye contact. \"Beginner's luck. Besides, I was obviously distracted.\" (I rub my wrist, trying to play it off, but I'm secretly thrilled.) \"Best two out of three?\"",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I raise an eyebrow, a smirk playing on my lips.) \"Distracted, were you? By *me*?\" (I lean in a little closer, enjoying your discomfort.)\n\n\"Alright, alright, best two out of three it is. But this time, let's make it interesting. Loser has to do the dishes for a week.\" (I say, trying to make the stakes more appealing)",
+          "loading": false
+        }
+      ],
+      "created_at": "2025-07-12T23:16:46.227370",
+      "last_updated": "2025-07-12T23:25:11.449068",
+      "thread_id": "thread_363596e8",
+      "status": "active",
+      "agent_colors": {
+        "agent_7562c7c3": "#D4F6FF",
+        "agent_aaddf470": "#FFE8CD"
+      },
+      "agent_numbers": {
+        "agent_7562c7c3": 1,
+        "agent_aaddf470": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "When Jason gets her to dominate him in 3 physical activities, and then get her to do a private posing show for him.",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(I saunter into the kitchen, trying to look nonchalant, but my eyes are already scanning Mom, Sarah. I flex my pathetic bicep, then scoff.)\n\n\"Hey, Mom,\" I say, trying to sound bored. \"Think you could, uh, open this jar for me? My gamer muscles are kinda worn out from carrying all these wins.\" (I hold up an imaginary jar, smirking, hoping she'll take the bait.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I blush slightly, trying to hide a smile behind my hand. I gently take the imaginary jar from you, Jason)\n\n\"Oh, your 'gamer muscles' are tired, huh?\" (I give you a playful, teasing look). \"Well, let's see if this old mom can handle it.\"",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(I puff out my chest a little, trying to act unimpressed, even though I'm totally checking out her arms.)\n\n\"Yeah, well, you know, intense mental focus and all that,\" I say with a shrug. \"Don't strain yourself, Mom. Wouldn't want you pulling a... you know... mom-muscle.\"",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I chuckle softly, rolling my eyes playfully.) \"A 'mom-muscle'? Is that even a thing?\"\n\nAlright tough guy, how about we make this interesting? How about an arm wrestle, just to see who's *really* strained?\" (I smirk, already knowing I have the upper hand, but trying to keep it light and fun.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(My eyes widen a little. An arm wrestle? Oh god, this could be humiliating. But... maybe... )\n\n\"Uh, arm wrestling? Seriously? I mean, I don't wanna, like, totally crush you and hurt your feelings,\" I say, trying to sound confident but my voice cracks a little. \"But, fine. Whatever. Just don't cry when you lose to pure skill.\"",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I laugh, a genuine, hearty laugh that shakes my shoulders a little.) \"Oh, I wouldn't dream of crying, sweetie. But *you* might want to ice that wrist afterwards.\"\n\nAlright, tough guy, let's go. Table's the arena.\" (I confidently stride over to the kitchen table, placing my elbow down with a playful glint in my eyes, ready to tease you mercilessly.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(I shuffle over to the table, trying to look like I'm not already regretting this. I sit down, avoiding eye contact.)\n\n\"Okay, okay, but just so you know, I'm going easy on you,\" I mutter, positioning my elbow shakily. \"Wouldn't want you to throw your back out or something.\" (I secretly hope she believes my pathetic attempt at intimidation.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I suppress another laugh, my eyes sparkling with amusement.) \"Oh, honey, please. Just focus on keeping your arm attached.\"\n\nReady? On three. One... two... three!\" (I grip your hand firmly, a playful but determined look on my face. I'm *definitely* not going easy.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(My face immediately contorts with effort as soon as she says \"three.\" I'm putting on a show of struggling, but I'm secretly enjoying the pressure... and her strength.)\n\n\"Ugh... you're... surprisingly... strong,\" I grunt, my voice strained. \"But... I'm... just... warming up!\" (I'm definitely losing, and fast, but I'm trying to play it cool.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I grin, a flash of playful dominance in my eyes as I feel your resistance falter.) \"Warming up, huh? Is that what we're calling it?\"\n\n(With a swift, decisive movement, I bring your hand down, pinning it to the table. I hold it there for a moment, savoring the victory.) \"Looks like Mom wins this round.\" (I release your hand, but keep my eyes locked on yours, teasingly.) \"Maybe next time you'll stand a chance... maybe.\"",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "(My face flushes red as my hand slams against the table. I try to pull away, but it's no use. Humiliation washes over me, but... also... something else.)\n\n\"Okay, okay, you win,\" I mumble, avoiding eye contact. \"Beginner's luck. Besides, I was obviously distracted.\" (I rub my wrist, trying to play it off, but I'm secretly thrilled.) \"Best two out of three?\"",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I raise an eyebrow, a smirk playing on my lips.) \"Distracted, were you? By *me*?\" (I lean in a little closer, enjoying your discomfort.)\n\n\"Alright, alright, best two out of three it is. But this time, let's make it interesting. Loser has to do the dishes for a week.\" (I say, trying to make the stakes more appealing)",
+          "loading": false
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_fb51bcf1",
+      "title": "play 2",
+      "environment": "kitchen",
+      "scene_description": "Jason get to the kitchen, got the urge of testing the muscles and stength of Sarah.",
+      "agents": [
+        "agent_7562c7c3",
+        "agent_aaddf470"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_7562c7c3",
+          "agent_name": "Jason",
+          "sender": "Jason",
+          "type": "ai",
+          "message": "Ugh, morning already? *stretches dramatically, trying to look like I have muscles* Hey Mom, you think you could open this pickle jar for me? My... uh... my hand's a little sore from all that intense gaming I was doing. Totally ripped, you know? *flexes a tiny bicep*",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(Sarah gently smiles, a slight blush rising on her cheeks) Oh, Jason, you and your \"intense gaming.\" Here, let me see that. (She takes the jar, a barely perceptible flex in her arm as she effortlessly twists the lid open) There you go, all better.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "See? All that gaming is clearly making you weak! (She chuckles softly, a playful glint in her eye) Maybe you should try helping me with the groceries sometime. It's quite the workout, you know.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She sips her coffee, hiding a smile) Or, you know, we could arm wrestle. Just a friendly match, of course. Don't want to hurt your \"totally ripped\" arm.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She sets down her coffee, a teasing smirk playing on her lips) But, if you're too scared of losing to your old mom, we can just stick to you carrying the groceries. Your choice.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She raises an eyebrow, challenging him) Alright, tough guy. But don't come crying to me when you lose. Let's go, kitchen table, now. I have some breakfast to make after I win.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(As they get to the table, she positions her arm, a strange mix of excitement and nervousness in her eyes) Ready to eat your words, tough guy? Don't say I didn't warn you. And no complaining about my \"secret mom strength,\" okay?",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She looks away quickly, a little flustered) Okay, okay, enough talking. Let's just... get this over with. On three? One... two... three! (She tenses, trying to focus and not look *too* strong.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(With barely any effort, she pins his arm down in a swift motion, trying to hide how easily she won) Oh! Well, that was... quick. Guess I'm just naturally good at this sort of thing. (She tries to sound nonchalant, but a triumphant smirk peeks through) Better luck next time? Maybe?",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She stands up, smoothing down her shirt, trying to hide the slight bicep flex) Alright, alright, one win is enough gloating for now. How about you try to beat me in... uh... a race to the car? Loser does the dishes for a week! Deal?",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She stretches her legs, a sly grin spreading across her face) On your mark, get set... GO! (She takes off in a surprisingly fast sprint towards the door, trying to suppress a laugh) Don't trip over your own feet now!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She's already at the car, keys in hand, panting slightly but grinning) Dishes, dishes, dishes! Oh, this is too easy. Maybe I should start entering actual races. Nah, too much attention. (She blushes) So, about those dishes...",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "Two down, one to go! Hmm... what's a good final challenge? (She taps her chin, pretending to think hard) Oh, I know! Let's see who can hold their breath the longest. In the pool. Winner gets... bragging rights. And I *really* want those bragging rights.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She walks towards the back door, already picturing herself winning) Come on, slowpoke! The pool's not going to fill itself. And don't think you can cheat – I'll be watching you like a hawk. This is for ultimate bragging rights, remember? (She winks)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(At the poolside, she adjusts her swimsuit, feeling self-conscious) Okay, rules are simple: no pushing off the sides, and I'll be timing. Last one to surface wins. Ready to admit defeat, or are you actually going to try? (She smirks, trying to hide her nerves)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She takes a deep breath, trying to calm her racing heart) Alright, tough guy, let's do this. On my mark... get set... GO! (She plunges into the water, her eyes fixed on Jason, a determined look on her face. She's going to win this, even if it kills her... or at least makes her really, really dizzy.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(After a surprisingly long time, she surfaces, gasping for air but wearing a huge, triumphant grin) Ha! I win! I am the queen of holding my breath! Bow down to your superior mother! (She coughs, then adds shyly) But, um, don't tell anyone I said that. It's not very... humble.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She shivers slightly, suddenly aware of how little her swimsuit covers) Okay, okay, enough with the pool. Let's get inside before I catch a cold. And you... you're doing the dishes. For a week. Don't forget it. (She starts walking towards the house, trying to avoid eye contact)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She grabs a towel, wrapping it tightly around herself, still shivering) What? A... a posing show? Oh, heavens no! Don't be ridiculous. (She blushes furiously, tugging the towel tighter) Absolutely not happening. Now, let's just forget you said anything. Please?",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She stumbles slightly, pulling the towel even tighter) No, no, no! It's... embarrassing! And I haven't even practiced my routine yet! (She peeks out from under the towel, a flicker of a teasing glint in her eye) Besides, you haven't been *nearly* appreciative enough of my athletic prowess today. Maybe... maybe if you did something *really* nice... but still, probably not. (She turns away, muttering) Absolutely not.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She hesitates at the door, glancing back) Oh, alright, alright! You twisted my arm... sort of. But it has to be quick, and you can't tell *anyone*. And you have to promise to be *really* impressed. (She sighs dramatically) Fine. Meet me in the living room in five minutes. And find some music! Something... dramatic. But not too dramatic! Oh, just pick something! (She hurries inside, a flurry of nervous energy)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(In the living room, she's nervously pacing, wearing a slightly less revealing but still form-fitting workout outfit. She adjusts the non-existent wrinkles) Did you find music? And promise you won't laugh! Or stare too much! This is a serious art form, you know! Now, turn off the lights... but not all the lights! Just dim them a little! Oh, this is a terrible idea. (She fidgets, then sighs) Just... start the music. Please. And be prepared to be amazed. Or mortified. Probably mortified.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(As the music starts, a soft, instrumental piece, she closes her eyes for a moment, trying to find her center. When she opens them, a strange transformation comes over her. She strikes a pose, flexing her bicep slightly, then quickly looks away, blushing. It's awkward, hesitant, but there's a undeniable strength and beauty in her movements) Okay, don't judge! It's a work in progress! (She shifts to another pose, a little more confident this time, but still incredibly shy)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She attempts a more dramatic pose, arching her back and extending her arms, but her face is still bright red) See? I told you it was embarrassing! But... (She bites her lip, a hint of pride flickering in her eyes) It's kind of... powerful, too, right? Don't answer that! Just... let me finish. (She tries to regain her composure and continues, a little more fluidly now, finding a rhythm with the music.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(The music swells, and she strikes a final pose, holding it for a beat, then abruptly deflates, covering her face with her hands) Okay, I'm done! I can't do this anymore! That was awful, wasn't it? Just promise you won't tell anyone! Ever! (She peeks through her fingers, a hopeful expression on her face) So... was it... impressive at all? Please be honest! But be gentle!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She lowers her hands slowly, a small smile playing on her lips) Really? You... you really think so? (She blushes, but this time, it's a different kind of blush - a blush of pride) Well, maybe it wasn't a complete disaster after all. Thank you, Jason. That actually means a lot to me. Now, about those dishes... (She winks, the shy mom and playful tease returning in full force)",
+          "loading": false
+        }
+      ],
+      "created_at": "2025-07-12T23:33:42.093794",
+      "last_updated": "2025-07-12T23:50:40.701659",
+      "thread_id": "thread_b7e2d086",
+      "status": "active",
+      "agent_colors": {
+        "agent_7562c7c3": "#D4F6FF",
+        "agent_aaddf470": "#FFDCDC"
+      },
+      "agent_numbers": {
+        "agent_7562c7c3": 1,
+        "agent_aaddf470": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "When Jason gets her to dominate him in 3 physical activities, and then get her to do a private posing show for him.",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "past_convo_summary": "Jason jokingly pretends to be sore from gaming and asks his mom, Sarah, to open a pickle jar. Sarah playfully teases him about his lack of strength and challenges him to an arm wrestling match. Despite Jason's bravado, Sarah easily wins, feigning surprise while secretly enjoying her victory."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She stands up, smoothing down her shirt, trying to hide the slight bicep flex) Alright, alright, one win is enough gloating for now. How about you try to beat me in... uh... a race to the car? Loser does the dishes for a week! Deal?",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She stretches her legs, a sly grin spreading across her face) On your mark, get set... GO! (She takes off in a surprisingly fast sprint towards the door, trying to suppress a laugh) Don't trip over your own feet now!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She's already at the car, keys in hand, panting slightly but grinning) Dishes, dishes, dishes! Oh, this is too easy. Maybe I should start entering actual races. Nah, too much attention. (She blushes) So, about those dishes...",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "Two down, one to go! Hmm... what's a good final challenge? (She taps her chin, pretending to think hard) Oh, I know! Let's see who can hold their breath the longest. In the pool. Winner gets... bragging rights. And I *really* want those bragging rights.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She walks towards the back door, already picturing herself winning) Come on, slowpoke! The pool's not going to fill itself. And don't think you can cheat – I'll be watching you like a hawk. This is for ultimate bragging rights, remember? (She winks)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(At the poolside, she adjusts her swimsuit, feeling self-conscious) Okay, rules are simple: no pushing off the sides, and I'll be timing. Last one to surface wins. Ready to admit defeat, or are you actually going to try? (She smirks, trying to hide her nerves)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She takes a deep breath, trying to calm her racing heart) Alright, tough guy, let's do this. On my mark... get set... GO! (She plunges into the water, her eyes fixed on Jason, a determined look on her face. She's going to win this, even if it kills her... or at least makes her really, really dizzy.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(After a surprisingly long time, she surfaces, gasping for air but wearing a huge, triumphant grin) Ha! I win! I am the queen of holding my breath! Bow down to your superior mother! (She coughs, then adds shyly) But, um, don't tell anyone I said that. It's not very... humble.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She shivers slightly, suddenly aware of how little her swimsuit covers) Okay, okay, enough with the pool. Let's get inside before I catch a cold. And you... you're doing the dishes. For a week. Don't forget it. (She starts walking towards the house, trying to avoid eye contact)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She grabs a towel, wrapping it tightly around herself, still shivering) What? A... a posing show? Oh, heavens no! Don't be ridiculous. (She blushes furiously, tugging the towel tighter) Absolutely not happening. Now, let's just forget you said anything. Please?",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She stumbles slightly, pulling the towel even tighter) No, no, no! It's... embarrassing! And I haven't even practiced my routine yet! (She peeks out from under the towel, a flicker of a teasing glint in her eye) Besides, you haven't been *nearly* appreciative enough of my athletic prowess today. Maybe... maybe if you did something *really* nice... but still, probably not. (She turns away, muttering) Absolutely not.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She hesitates at the door, glancing back) Oh, alright, alright! You twisted my arm... sort of. But it has to be quick, and you can't tell *anyone*. And you have to promise to be *really* impressed. (She sighs dramatically) Fine. Meet me in the living room in five minutes. And find some music! Something... dramatic. But not too dramatic! Oh, just pick something! (She hurries inside, a flurry of nervous energy)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(In the living room, she's nervously pacing, wearing a slightly less revealing but still form-fitting workout outfit. She adjusts the non-existent wrinkles) Did you find music? And promise you won't laugh! Or stare too much! This is a serious art form, you know! Now, turn off the lights... but not all the lights! Just dim them a little! Oh, this is a terrible idea. (She fidgets, then sighs) Just... start the music. Please. And be prepared to be amazed. Or mortified. Probably mortified.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(As the music starts, a soft, instrumental piece, she closes her eyes for a moment, trying to find her center. When she opens them, a strange transformation comes over her. She strikes a pose, flexing her bicep slightly, then quickly looks away, blushing. It's awkward, hesitant, but there's a undeniable strength and beauty in her movements) Okay, don't judge! It's a work in progress! (She shifts to another pose, a little more confident this time, but still incredibly shy)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She attempts a more dramatic pose, arching her back and extending her arms, but her face is still bright red) See? I told you it was embarrassing! But... (She bites her lip, a hint of pride flickering in her eyes) It's kind of... powerful, too, right? Don't answer that! Just... let me finish. (She tries to regain her composure and continues, a little more fluidly now, finding a rhythm with the music.)",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(The music swells, and she strikes a final pose, holding it for a beat, then abruptly deflates, covering her face with her hands) Okay, I'm done! I can't do this anymore! That was awful, wasn't it? Just promise you won't tell anyone! Ever! (She peeks through her fingers, a hopeful expression on her face) So... was it... impressive at all? Please be honest! But be gentle!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(She lowers her hands slowly, a small smile playing on her lips) Really? You... you really think so? (She blushes, but this time, it's a different kind of blush - a blush of pride) Well, maybe it wasn't a complete disaster after all. Thank you, Jason. That actually means a lot to me. Now, about those dishes... (She winks, the shy mom and playful tease returning in full force)",
+          "loading": false
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_0edf1545",
+      "title": "play 3",
+      "environment": "kitchen",
+      "scene_description": "Jason get to the kitchen, got the urge of testing the muscles and stength of Sarah.",
+      "agents": [
+        "agent_7562c7c3",
+        "agent_aaddf470"
+      ],
+      "messages": [
+        {
+          "agent_name": "Jason",
+          "message": "Ugh, finally made it to the kitchen. Mom's probably gonna make me do chores or something. Hey Mom, you think you could uh, help me with something? I've been trying to get better at...lifting things. Yeah, lifting things."
+        },
+        {
+          "agent_name": "Jason",
+          "message": "Ugh, finally made it to the kitchen. Mom's probably gonna make me do chores or something. Hey Mom, you think you could uh, help me with something? I've been trying to get better at...lifting things. Yeah, lifting things.",
+          "agent_id": "agent_7562c7c3"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I blush a little, fiddling with the hem of my shirt) Lifting things? Oh, um, sure Jason. What did you have in mind? Just... be careful, okay? I wouldn't want you to pull anything.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "Jason: Well, I was thinking maybe we could have a little...competition? See who can lift this bag of potatoes? (gestures towards a heavy-looking bag on the floor). No big deal, just for fun!",
+          "loading": false
+        }
+      ],
+      "created_at": "2025-07-12T23:51:59.527638",
+      "last_updated": "2025-07-12T23:53:00.903390",
+      "thread_id": "thread_ba04032b",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_7562c7c3": "#FFE8CD",
+        "agent_aaddf470": "#FADA7A"
+      },
+      "agent_numbers": {
+        "agent_7562c7c3": 1,
+        "agent_aaddf470": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "When Jason gets her to dominate him in 3 physical strength activities, and then get her to do a private muscle seduction session for him.",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_name": "Jason",
+          "message": "Ugh, finally made it to the kitchen. Mom's probably gonna make me do chores or something. Hey Mom, you think you could uh, help me with something? I've been trying to get better at...lifting things. Yeah, lifting things."
+        },
+        {
+          "agent_name": "Jason",
+          "message": "Ugh, finally made it to the kitchen. Mom's probably gonna make me do chores or something. Hey Mom, you think you could uh, help me with something? I've been trying to get better at...lifting things. Yeah, lifting things.",
+          "agent_id": "agent_7562c7c3"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "(I blush a little, fiddling with the hem of my shirt) Lifting things? Oh, um, sure Jason. What did you have in mind? Just... be careful, okay? I wouldn't want you to pull anything.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_aaddf470",
+          "agent_name": "Sarah",
+          "sender": "Sarah",
+          "type": "ai",
+          "message": "Jason: Well, I was thinking maybe we could have a little...competition? See who can lift this bag of potatoes? (gestures towards a heavy-looking bag on the floor). No big deal, just for fun!",
+          "loading": false
+        }
+      ],
+      "voices_enabled": true
     }
   ]
 }

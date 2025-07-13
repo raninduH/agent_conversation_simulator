@@ -125,11 +125,11 @@
         "gamer."
       ],
       "created_at": "2025-06-24T13:03:47.371492",
-      "api_key": "AIzaSyCsQTytBE9OSJJ9HJ5JPAGoFrKflBPs4z4",
+      "api_key": "AIzaSyCmu5sihwwzebBAs6DxS_0-IPl1hSGYbhI",
       "tools": [],
-      "knowledge_base": [],
       "gender": "Male",
-      "voice": "am_eric"
+      "voice": "",
+      "knowledge_base": []
     },
     {
       "id": "agent_df3ffcbf",
@@ -146,9 +146,9 @@
       "created_at": "2025-06-24T13:47:55.534142",
       "api_key": "AIzaSyCmu5sihwwzebBAs6DxS_0-IPl1hSGYbhI",
       "tools": [],
-      "knowledge_base": [],
       "gender": "Female",
-      "voice": "af_sarah"
+      "voice": "af_sarah",
+      "knowledge_base": []
     },
     {
       "id": "agent_aaddf470",
@@ -166,7 +166,7 @@
       "api_key": "AIzaSyAm9Lft4GO5Zxcx1irFPpCgl3xJoRlPgyc",
       "tools": [],
       "gender": "Female",
-      "voice": "af_sky",
+      "voice": "af_sarah",
       "knowledge_base": []
     },
     {
