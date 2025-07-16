@@ -1,3 +1,473 @@
 {
-  "conversations": []
+  "conversations": [
+    {
+      "id": "conv_7a1fd3a7",
+      "title": "dp",
+      "environment": "park",
+      "scene_description": "Two friends discuss about AGI, and the possibility of it happening in the next 5 years.",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright, alright! AGI in the next five years, huh? That's a bold claim! While the progress in AI is undeniably rapid, achieving *true* general intelligence is a beast of a problem. Let's break down the logical leaps needed to get there and see if the math checks out. I'm itching to dig into this!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Blake, I agree it's a bold claim, but not entirely unfounded. The convergence of high-context memory in GenAI, coupled with deep learning advancements in scientific discovery, *could* lead to some surprising breakthroughs. I'm thinking about how self-improving algorithms, trained on vast datasets and running on increasingly powerful hardware, might just bridge that gap faster than we anticipate. What are your thoughts on the role of unsupervised learning in this?",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Unsupervised learning is absolutely critical! It's the key to unlocking AI's ability to discover patterns and relationships we haven't even conceived of yet. Think about it – we're essentially trying to reverse-engineer intelligence, and unsupervised learning allows the AI to explore the solution space without our biased constraints.",
+          "loading": false
+        },
+        {
+          "sender": "You",
+          "content": "hey so do you guys think that a new revolutionary paper like tranformers need to come to achieve AGI",
+          "type": "user",
+          "timestamp": "15:43:15"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Exactly! And that's where I see the potential for breakthroughs in the next few years. Imagine unsupervised models capable of sifting through the entirety of scientific literature, identifying hidden connections and suggesting novel experiments – that's a force multiplier for discovery we haven't seen before.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "A scientific literature deep dive! Now you're talking my language! If we can get AI to not just regurgitate information but to genuinely *synthesize* new hypotheses from existing data... that's a game changer. I'm pulling up some recent papers on knowledge graph construction and reasoning to see how close we are to that kind of capability.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Excellent! I'm particularly interested in seeing how those knowledge graphs can be integrated with high-context memory models to retain and reason about information more effectively. I'd be curious to hear what you find!",
+          "loading": false
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Alright Jonathan, I'm diving into the knowledge graph integration with high-context memory! This is exciting stuff. I'm thinking a structured internet search might give us some quick insights on the latest architectures being used for this. Let me fire up the search tool and see what the cutting edge looks like."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Alright Jonathan, I'm diving into the knowledge graph integration with high-context memory! This is exciting stuff. I'm thinking a structured internet search might give us some quick insights on the latest architectures being used for this. Let me fire up the search tool and see what the cutting edge looks like.",
+          "agent_id": "agent_6e52bc3e"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Alright Jonathan, I'm already neck-deep in these papers! It looks like the biggest hurdle right now is scaling these knowledge graphs to handle the sheer volume and complexity of scientific data. We need a way to efficiently represent uncertainty and conflicting information, too. I'm firing up a search for \"knowledge graph uncertainty handling\" to see what the latest research suggests."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Alright Jonathan, I'm already neck-deep in these papers! It looks like the biggest hurdle right now is scaling these knowledge graphs to handle the sheer volume and complexity of scientific data. We need a way to efficiently represent uncertainty and conflicting information, too. I'm firing up a search for \"knowledge graph uncertainty handling\" to see what the latest research suggests.",
+          "agent_id": "agent_6e52bc3e"
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "That's precisely the challenge, Blake! The ability to represent and reason with uncertainty is paramount. While you're looking at uncertainty handling, I'm going to check for any new developments in high-context memory architectures that might be better suited for integrating with these massive knowledge graphs. I'll use the search tool as well, focusing on \"high-context memory architectures knowledge graph integration\"."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "That's precisely the challenge, Blake! The ability to represent and reason with uncertainty is paramount. While you're looking at uncertainty handling, I'm going to check for any new developments in high-context memory architectures that might be better suited for integrating with these massive knowledge graphs. I'll use the search tool as well, focusing on \"high-context memory architectures knowledge graph integration\".",
+          "agent_id": "agent_d8fa732c"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Great minds think alike, Jonathan! Let's compare notes when we have some initial findings. I'm also thinking about the computational resources needed for all of this – are we really going to have the necessary hardware in the next five years?"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Great minds think alike, Jonathan! Let's compare notes when we have some initial findings. I'm also thinking about the computational resources needed for all of this – are we really going to have the necessary hardware in the next five years?",
+          "agent_id": "agent_6e52bc3e"
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "That's the million-dollar question, isn't it? I'm cautiously optimistic, considering the rapid advancements in specialized hardware like TPUs and neuromorphic computing. Perhaps we should also look into the projections for quantum computing's progress in the next few years; it could be a wild card."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "That's the million-dollar question, isn't it? I'm cautiously optimistic, considering the rapid advancements in specialized hardware like TPUs and neuromorphic computing. Perhaps we should also look into the projections for quantum computing's progress in the next few years; it could be a wild card.",
+          "agent_id": "agent_d8fa732c"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Quantum computing is definitely a wildcard! If we see significant breakthroughs in the next few years, it could drastically accelerate the timeline. I'm going to use the search tool to check on the latest quantum computing roadmaps and see what the experts are predicting."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Quantum computing is definitely a wildcard! If we see significant breakthroughs in the next few years, it could drastically accelerate the timeline. I'm going to use the search tool to check on the latest quantum computing roadmaps and see what the experts are predicting.",
+          "agent_id": "agent_6e52bc3e"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Okay, Blake, while you're diving into quantum roadmaps, I'll investigate the current state of neuromorphic computing. I'm curious to see if there are any promising architectures that could efficiently handle the high-context memory demands of AGI. I'll use the search tool for \"neuromorphic computing architectures high-context memory\". Let's see what the cutting edge looks like!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Good point, Blake. While you're on the quantum computing front, I'll take a look at the progress in neuromorphic computing. It's showing promise for energy-efficient AI, which could be crucial for scaling AGI within a reasonable power budget. I'll use the search tool to check for recent advancements in neuromorphic architectures.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Neuromorphic computing! Excellent, Jonathan. Energy efficiency is a massive concern. I'll keep an eye out for any overlaps between the quantum computing roadmaps and potential applications in neuromorphic architectures – a hybrid approach could be a game-changer. Let's see what nuggets of wisdom our searches unearth!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright Jonathan, while you're diving into neuromorphic computing, I'll broaden my search to include general projections on specialized AI hardware scaling over the next five years. It's crucial to get a sense of the overall trajectory, not just individual technologies. I'll fire up the search tool for \"AI hardware scaling projections next 5 years.\" Let's see if the numbers support our optimism!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "That's a smart move, Blake! Getting a broader perspective on AI hardware scaling is essential. While you're at it, I'm curious if there are any projections specifically addressing the energy consumption of these future AI systems. Power constraints could be a major limiting factor.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Good thinking, Blake! Getting a broader perspective on AI hardware scaling is essential. While you're at it, I'm going to quickly check for any breakthroughs in 3D integration of memory and processing units; that could also significantly impact the hardware landscape. I'll use the search tool for \"3D integrated memory processing AI hardware\".",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "3D integration, now that's a spicy idea, Jonathan! It could definitely be a game-changer for density and power efficiency. I'll keep that in mind while I'm sifting through these scaling projections – maybe there's some overlap. Let's hope we find some juicy data!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Ah, energy consumption! Absolutely, Jonathan, a crucial factor. I'll add \"energy consumption projections AI hardware\" to my search. And 3D integration? Brilliant! That could be a real game-changer in terms of density and efficiency. Let's see what the search tool reveals!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Okay, Blake, it sounds like we're both covering some potentially groundbreaking areas! While you're looking at energy consumption, I'm also going to check if there's any progress in optical computing; that could offer a radical shift in energy efficiency and processing speed. I'll use the search tool for \"optical computing advancements AI\".",
+          "loading": false
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Optical computing! Now that's thinking outside the silicon box, Jonathan! I'm all for exploring radical shifts. I'll keep an ear to the ground for any breakthroughs that could synergize with the scaling projections and energy consumption data I'm digging through. Let's see if the future is bright... literally!",
+          "loading": false
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Optical computing, eh? Excellent point, Blake! While you're busy with projections and consumption, I'm going to quickly check for any significant progress in photonic integrated circuits. They're key to making optical computing practical. I'll use the search tool for \"photonic integrated circuits advancements\".",
+          "loading": false
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Photonic integrated circuits, eh? Excellent call, Jonathan! That's where the rubber meets the road for optical computing. I'll keep an eye out for any mentions of them in the scaling projections; manufacturability is key! Let's see what breakthroughs we can uncover!",
+          "loading": false,
+          "content": "Photonic integrated circuits, eh? Excellent call, Jonathan! That's where the rubber meets the road for optical computing. I'll keep an eye out for any mentions of them in the scaling projections; manufacturability is key! Let's see what breakthroughs we can uncover!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Alright Blake, while you're keeping an eye on manufacturability, I'll broaden my search a bit to see if there are any emerging startups or research groups that are making waves in the field of high-context memory AI architectures. I'll use the search tool for \"emerging high-context memory AI startups\". Let's see if there are any dark horse contenders out there!",
+          "loading": false,
+          "content": "Alright Blake, while you're keeping an eye on manufacturability, I'll broaden my search a bit to see if there are any emerging startups or research groups that are making waves in the field of high-context memory AI architectures. I'll use the search tool for \"emerging high-context memory AI startups\". Let's see if there are any dark horse contenders out there!"
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Emerging startups, Jonathan! I love it! Always good to keep an eye on the disruptors. While you're hunting for those dark horses, I'm going to refine my search to focus on the *materials science* aspect of AI hardware scaling. New materials might be the key to overcoming current limitations. Let's see if there's a materials revolution brewing!",
+          "loading": false,
+          "content": "Emerging startups, Jonathan! I love it! Always good to keep an eye on the disruptors. While you're hunting for those dark horses, I'm going to refine my search to focus on the *materials science* aspect of AI hardware scaling. New materials might be the key to overcoming current limitations. Let's see if there's a materials revolution brewing!"
+        }
+      ],
+      "created_at": "2025-07-16T15:40:53.384521",
+      "last_updated": "2025-07-16T19:47:24.589454",
+      "thread_id": "thread_29c76207",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_6e52bc3e": "#FFE8CD",
+        "agent_d8fa732c": "#CAE8BD"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "round_robin",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "past_convo_summary": "Blake and Jonathan are continuing their discussion on achieving AGI within five years. They're focusing on the challenges of scaling knowledge graphs for scientific data, particularly handling uncertainty. Blake is researching \"knowledge graph uncertainty handling,\" while Jonathan investigates \"high-context memory architectures knowledge graph integration.\" They also discuss the computational resources required, considering advancements in TPUs, neuromorphic computing, and the potential impact of quantum computing breakthroughs. Blake is now researching quantum computing roadmaps."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Okay, Blake, while you're diving into quantum roadmaps, I'll investigate the current state of neuromorphic computing. I'm curious to see if there are any promising architectures that could efficiently handle the high-context memory demands of AGI. I'll use the search tool for \"neuromorphic computing architectures high-context memory\". Let's see what the cutting edge looks like!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Good point, Blake. While you're on the quantum computing front, I'll take a look at the progress in neuromorphic computing. It's showing promise for energy-efficient AI, which could be crucial for scaling AGI within a reasonable power budget. I'll use the search tool to check for recent advancements in neuromorphic architectures.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Neuromorphic computing! Excellent, Jonathan. Energy efficiency is a massive concern. I'll keep an eye out for any overlaps between the quantum computing roadmaps and potential applications in neuromorphic architectures – a hybrid approach could be a game-changer. Let's see what nuggets of wisdom our searches unearth!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Alright Jonathan, while you're diving into neuromorphic computing, I'll broaden my search to include general projections on specialized AI hardware scaling over the next five years. It's crucial to get a sense of the overall trajectory, not just individual technologies. I'll fire up the search tool for \"AI hardware scaling projections next 5 years.\" Let's see if the numbers support our optimism!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "That's a smart move, Blake! Getting a broader perspective on AI hardware scaling is essential. While you're at it, I'm curious if there are any projections specifically addressing the energy consumption of these future AI systems. Power constraints could be a major limiting factor.",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Good thinking, Blake! Getting a broader perspective on AI hardware scaling is essential. While you're at it, I'm going to quickly check for any breakthroughs in 3D integration of memory and processing units; that could also significantly impact the hardware landscape. I'll use the search tool for \"3D integrated memory processing AI hardware\".",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "3D integration, now that's a spicy idea, Jonathan! It could definitely be a game-changer for density and power efficiency. I'll keep that in mind while I'm sifting through these scaling projections – maybe there's some overlap. Let's hope we find some juicy data!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Ah, energy consumption! Absolutely, Jonathan, a crucial factor. I'll add \"energy consumption projections AI hardware\" to my search. And 3D integration? Brilliant! That could be a real game-changer in terms of density and efficiency. Let's see what the search tool reveals!",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Okay, Blake, it sounds like we're both covering some potentially groundbreaking areas! While you're looking at energy consumption, I'm also going to check if there's any progress in optical computing; that could offer a radical shift in energy efficiency and processing speed. I'll use the search tool for \"optical computing advancements AI\".",
+          "loading": false
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Optical computing! Now that's thinking outside the silicon box, Jonathan! I'm all for exploring radical shifts. I'll keep an ear to the ground for any breakthroughs that could synergize with the scaling projections and energy consumption data I'm digging through. Let's see if the future is bright... literally!",
+          "loading": false
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Optical computing, eh? Excellent point, Blake! While you're busy with projections and consumption, I'm going to quickly check for any significant progress in photonic integrated circuits. They're key to making optical computing practical. I'll use the search tool for \"photonic integrated circuits advancements\".",
+          "loading": false
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Photonic integrated circuits, eh? Excellent call, Jonathan! That's where the rubber meets the road for optical computing. I'll keep an eye out for any mentions of them in the scaling projections; manufacturability is key! Let's see what breakthroughs we can uncover!",
+          "loading": false,
+          "content": "Photonic integrated circuits, eh? Excellent call, Jonathan! That's where the rubber meets the road for optical computing. I'll keep an eye out for any mentions of them in the scaling projections; manufacturability is key! Let's see what breakthroughs we can uncover!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Alright Blake, while you're keeping an eye on manufacturability, I'll broaden my search a bit to see if there are any emerging startups or research groups that are making waves in the field of high-context memory AI architectures. I'll use the search tool for \"emerging high-context memory AI startups\". Let's see if there are any dark horse contenders out there!",
+          "loading": false,
+          "content": "Alright Blake, while you're keeping an eye on manufacturability, I'll broaden my search a bit to see if there are any emerging startups or research groups that are making waves in the field of high-context memory AI architectures. I'll use the search tool for \"emerging high-context memory AI startups\". Let's see if there are any dark horse contenders out there!"
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Emerging startups, Jonathan! I love it! Always good to keep an eye on the disruptors. While you're hunting for those dark horses, I'm going to refine my search to focus on the *materials science* aspect of AI hardware scaling. New materials might be the key to overcoming current limitations. Let's see if there's a materials revolution brewing!",
+          "loading": false,
+          "content": "Emerging startups, Jonathan! I love it! Always good to keep an eye on the disruptors. While you're hunting for those dark horses, I'm going to refine my search to focus on the *materials science* aspect of AI hardware scaling. New materials might be the key to overcoming current limitations. Let's see if there's a materials revolution brewing!"
+        }
+      ],
+      "voices_enabled": true
+    }
+  ]
 }

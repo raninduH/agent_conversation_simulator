@@ -180,10 +180,10 @@ class AgentManagementTab(ttk.Frame):
         self.app.agent_gender_var.set(getattr(agent, 'gender', 'Unspecified'))  # Load gender with default
         self.app.agent_traits_var.set(", ".join(agent.personality_traits))
         self.app.agent_api_key_var.set(agent.api_key or "")  # Load API key
-        
+
         self.app.agent_prompt_text.delete(1.0, tk.END)
         self.app.agent_prompt_text.insert(1.0, agent.base_prompt)
-        
+
         # Set tool checkboxes (excluding auto-managed tools)
         if hasattr(agent, 'tools') and self.tool_vars:
             for tool_name, var in self.tool_vars.items():
@@ -196,10 +196,16 @@ class AgentManagementTab(ttk.Frame):
         self.app.knowledge_files_label.config(text="No files selected.")
         self.knowledge_files = {}
 
-        # Set voice selection
-        self.app.agent_voice_var.set(getattr(agent, 'voice', ''))
+        # Set voice selection and update combobox
+        selected_voice = getattr(agent, 'voice', '')
         self.update_voice_options()  # Update options based on gender
-        self.app.play_voice_btn.config(state=tk.NORMAL if agent.voice else tk.DISABLED)
+        if selected_voice:
+            self.app.agent_voice_var.set(selected_voice)
+            self.app.agent_voice_combo.set(selected_voice)
+        else:
+            self.app.agent_voice_var.set('')
+            self.app.agent_voice_combo.set('')
+        self.app.play_voice_btn.config(state=tk.NORMAL if selected_voice else tk.DISABLED)
 
     def new_agent(self):
         """Create a new agent."""

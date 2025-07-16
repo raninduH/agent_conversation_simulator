@@ -59,6 +59,8 @@ class RoundRobinEngine:
 
     def start_cycle(self, conversation_id, agents, voices_enabled, termination_condition, agent_selector_api_key):
         print(f"🚦 [RoundRobin] Starting round robin cycle for conversation: {conversation_id}")
+        import threading as _threading
+        print(f"🚦 [RoundRobin] Starting round robin cycle for conversation: {conversation_id} (thread: {_threading.current_thread().ident})")
         self.convo_id = conversation_id
         self.convo = self.parent_engine.active_conversations[conversation_id]
         # agents is now a list of agent IDs, so fetch full agent dicts
@@ -117,6 +119,8 @@ class RoundRobinEngine:
             })
         print(f"✅ [RoundRobin] All agents initialized. Starting round robin thread.")
         threading.Thread(target=self._run_round_robin, daemon=True).start()
+        self._thread = threading.Thread(target=self._run_round_robin, daemon=True)
+        self._thread.start()
 
     def _run_round_robin(self):
         while self.active:
@@ -154,6 +158,14 @@ class RoundRobinEngine:
                 self._display_message(agent_config, loading_message)
                 # Request audio and wait for it to be ready
                 audio_data = self.audio_manager._generate_audio_sync(message["message"], agent_config["voice"])
+                
+                if self.paused:
+                    loading_message["loading"] = False
+                    self._display_message(agent_config, loading_message)
+                    self.current_agent_index = (self.current_agent_index - 1) % len(self.agent_order)
+                    time.sleep(0.2)
+                    continue
+
                 print(f"[AUDIO READY] Audio received for agent: {agent_name}")
                 # Remove loading bubble and display actual message
                 actual_message = {
@@ -293,6 +305,9 @@ class RoundRobinEngine:
             message['agent_name'] = agent_name
         # Add blinking info to message
         message['blinking'] = blinking
+        if 'message' in message and 'content' not in message:
+            message['content'] = message['message']
+
         print(f"[RoundRobinEngine] Sending message to UI: {message}")
         if ui_callback:
             ui_callback(message)
@@ -348,11 +363,24 @@ class RoundRobinEngine:
         print(f"[RoundRobinEngine] pause_cycle complete")
 
     def resume_cycle(self, conversation_id):
-        print(f"[RoundRobinEngine] resume_cycle called for conversation_id={conversation_id}")
+        import time as _time
+        import threading as _threading
+        print(f"[RoundRobinEngine] resume_cycle called for conversation_id={conversation_id} (thread: {_threading.current_thread().ident})")
         # Ensure previous thread is stopped/paused before rebuilding agents
         self.active = False
         self.paused = True
-        # Reload messages from conversations.json
+        self.ui_callback = self.parent_engine.message_callbacks.get(conversation_id)
+        # Wait for previous thread to finish if it exists
+        if hasattr(self, '_thread') and self._thread is not None:
+            if self._thread.is_alive():
+                print("[RoundRobinEngine] Waiting for previous round robin thread to finish...")
+                self._thread.join(timeout=5)
+                if self._thread.is_alive():
+                    print("[RoundRobinEngine] Warning: Previous thread did not finish in time.")
+        # Restore all state
+        self.convo_id = conversation_id
+        import threading as _threading
+        print(f"[RoundRobinEngine] _run_round_robin started (thread: {_threading.current_thread().ident})")
         self.convo = self.parent_engine.active_conversations.get(conversation_id)
         if not self.convo:
             print(f"[RoundRobinEngine] No conversation found for id {conversation_id}")
@@ -362,16 +390,21 @@ class RoundRobinEngine:
         # Rebuild agents and agent_order as in start_cycle
         self.agents = []
         missing_agents = []
+
+        self.agent_numbers = self.convo.get("agent_numbers", {})
+        self.agent_order = sorted(self.agent_numbers, key=lambda k: self.agent_numbers[k])
+
         for agent_id in self.convo.get("agents", []):
             agent_obj = self.data_manager.get_agent_by_id(agent_id)
             if agent_obj:
-                self.agents.append(agent_obj if isinstance(agent_obj, dict) else agent_obj.__dict__)
+                agent_dict = agent_obj if isinstance(agent_obj, dict) else agent_obj.__dict__
+                agent_dict["agent_no"] = self.agent_numbers.get(agent_id)
+                self.agents.append(agent_dict)
             else:
                 missing_agents.append(agent_id)
         if missing_agents:
             print(f"❌ [RoundRobinEngine] Missing agent(s) in DataManager: {missing_agents}")
-        self.agent_numbers = self.convo.get("agent_numbers", {})
-        self.agent_order = sorted(self.agent_numbers, key=lambda k: self.agent_numbers[k])
+
         # Map agent_id to agent_name
         agent_id_to_name = {a["id"]: a["name"] for a in self.agents}
         agent_name_to_id = {a["name"]: a["id"] for a in self.agents}
@@ -427,12 +460,20 @@ class RoundRobinEngine:
                 "agent_variable": agent_variable,
                 "config": agent_config
             })
-
+            print({
+                "agent_name": agent_name,
+                "agent_no": self.agent_numbers[agent_id],
+                "agent_variable": agent_variable,
+                "config": agent_config
+            })
+        _time.sleep(20)
         # Now safe to start the thread
         self.active = True
         self.paused = False
+        self.voices_enabled = self.convo.get("voices_enabled", False)
         print(f"✅ [RoundRobin] Resuming convo: All agents initialized. Starting round robin thread.")
-        threading.Thread(target=self._run_round_robin, daemon=True).start()
+        self._thread = threading.Thread(target=self._run_round_robin, daemon=True)
+        self._thread.start()
 
     def update_scene_environment(self, conversation_id, environment=None, scene_description=None):
         if environment:

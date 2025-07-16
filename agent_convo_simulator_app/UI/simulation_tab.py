@@ -400,11 +400,7 @@ class SimulationTab(ttk.Frame):
     def resume_loaded_conversation(self, conversation):
         """Resume a loaded conversation by using ConversationEngine's resume logic."""
         try:
-            # Use the main app's conversation engine to resume
-            if not self.app.conversation_engine:
-                from ..conversation_engine import ConversationEngine
-                self.app.conversation_engine = ConversationEngine()
-            self.app.conversation_engine.resume_conversation(conversation.id)
+
             self.app.current_conversation_id = conversation.id
             self.app.conversation_active = True
             self.update_simulation_controls(True)
