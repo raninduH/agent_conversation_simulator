@@ -108,13 +108,23 @@ class ConversationEngine:
         engine = self.engine_factory.get_engine(invocation_method)
         self.current_engines[conversation_id] = engine
         print(f"🤝 [ConversationEngine] Handing over to engine: {engine.__class__.__name__}")
-        engine.start_cycle(
+        # Use AgentSelectorEngine for 'agent_selector' invocation method
+        if invocation_method == "agent_selector":
+            engine.start_cycle(
                 conversation_id,
                 agents_config,
                 voices_enabled,
                 termination_condition,
                 agent_selector_api_key
-        )
+            )
+        else:
+            engine.start_cycle(
+                conversation_id,
+                agents_config,
+                voices_enabled,
+                termination_condition,
+                agent_selector_api_key
+            )
         print(f"✅ [ConversationEngine] Conversation '{conversation_id}' started.")
 
     def pause_conversation(self, conversation_id):
@@ -181,10 +191,10 @@ class ConversationEngine:
         engine = self.engine_factory.get_engine(conversation.invocation_method)
         self.current_engines[conversation_id] = engine
         print(f"🤝 [ConversationEngine] Handing over to engine: {engine.__class__.__name__}")
-        # If round robin, call start_cycle for new, resume_cycle for existing
-        if hasattr(engine, 'start_cycle') and hasattr(engine, 'resume_cycle'):
+        # Use AgentSelectorEngine for 'agent_selector' invocation method
+        if conversation.invocation_method == "agent_selector":
             if not conversation.messages or len(conversation.messages) == 0:
-                print(f"� [ConversationEngine] No messages found, starting new round robin cycle...")
+                print(f"� [ConversationEngine] No messages found, starting new agent selector cycle...")
                 engine.start_cycle(
                     conversation_id,
                     conversation.agents,
@@ -193,7 +203,21 @@ class ConversationEngine:
                     conversation.agent_selector_api_key
                 )
             else:
-                print(f"🔁 [ConversationEngine] Messages found, resuming round robin cycle...")
+                print(f"🔁 [ConversationEngine] Messages found, resuming agent selector cycle...")
                 engine.resume_cycle(conversation_id)
+        else:
+            if hasattr(engine, 'start_cycle') and hasattr(engine, 'resume_cycle'):
+                if not conversation.messages or len(conversation.messages) == 0:
+                    print(f"� [ConversationEngine] No messages found, starting new round robin cycle...")
+                    engine.start_cycle(
+                        conversation_id,
+                        conversation.agents,
+                        conversation.voices_enabled,
+                        conversation.termination_condition,
+                        conversation.agent_selector_api_key
+                    )
+                else:
+                    print(f"🔁 [ConversationEngine] Messages found, resuming round robin cycle...")
+                    engine.resume_cycle(conversation_id)
         print(f"✅ [ConversationEngine] Conversation '{conversation_id}' resumed and set to active.")
 
