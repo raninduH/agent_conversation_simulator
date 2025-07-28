@@ -378,6 +378,7 @@ class AgentConversationSimulatorGUI:
 
     def start_conversation(self):
         """Start a new conversation."""
+        print(f"[MainApp] Entered Start conversation method")
         title = self.conv_title_var.get().strip()
         environment = self.conv_env_var.get().strip()
         scene = self.conv_scene_text.get(1.0, tk.END).strip()
@@ -414,11 +415,23 @@ class AgentConversationSimulatorGUI:
             self.conversation_active = True
             # Register message callback for the correct engine
             if hasattr(self.conversation_engine, 'register_message_callback'):
+                print(f"[MainApp] Registering message callback for '{conversation.id}' with invocation method '{conversation.invocation_method}'")
                 self.conversation_engine.register_message_callback(conversation.id, self.simulation_tab.handle_message_callback)
+           
+
+                
             self.simulation_tab.load_conversation(conversation)
             # After starting, switch to Simulation tab
             self.notebook.select(self.simulation_tab)
             self.update_status("Conversation started. Switched to Simulation tab.")
+
+            try:
+                self.conversation_engine.resume_conversation(conversation.id)
+            except Exception as e:
+                print(f"[MainApp] Error in start_conversation: {e}")
+                import traceback
+                traceback.print_exc()
+                
         except Exception as e:
             messagebox.showerror("Error", f"Failed to start conversation: {str(e)}")
             self.update_status("Failed to start conversation.")

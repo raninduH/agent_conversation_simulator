@@ -496,6 +496,324 @@
       "agent_selector_api_key": "***************************************",
       "LLM_sending_messages": [],
       "voices_enabled": false
+    },
+    {
+      "id": "conv_4040f050",
+      "title": "beach",
+      "environment": "beach",
+      "scene_description": "two friends talk about intelligence",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [],
+      "created_at": "2025-07-28T21:27:38.724911",
+      "last_updated": "2025-07-28T21:27:47.729517",
+      "thread_id": "thread_a16bfa14",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_6e52bc3e": "#FFE8CD",
+        "agent_d8fa732c": "#FADA7A"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [],
+      "voices_enabled": false
+    },
+    {
+      "id": "conv_51111480",
+      "title": "beach1",
+      "environment": "beach",
+      "scene_description": "two friends talk abouit intelligence",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [],
+      "created_at": "2025-07-28T21:46:57.000527",
+      "last_updated": "2025-07-28T21:46:57.007818",
+      "thread_id": "thread_4b8aea27",
+      "status": "active",
+      "agent_colors": {
+        "agent_6e52bc3e": "#CAE8BD",
+        "agent_d8fa732c": "#FFDCDC"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "",
+      "agent_selector_api_key": "***************************************",
+      "LLM_sending_messages": [],
+      "voices_enabled": false
+    },
+    {
+      "id": "conv_95b1f392",
+      "title": "beach1",
+      "environment": "beach",
+      "scene_description": "two friends talk abouit intelligence",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [],
+      "created_at": "2025-07-28T21:47:27.649614",
+      "last_updated": "2025-07-28T21:47:27.649801",
+      "thread_id": "thread_b7dedbc8",
+      "status": "active",
+      "agent_colors": {
+        "agent_6e52bc3e": "#D4F6FF",
+        "agent_d8fa732c": "#FFE8CD"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "",
+      "agent_selector_api_key": "***************************************",
+      "LLM_sending_messages": [],
+      "voices_enabled": false
+    },
+    {
+      "id": "conv_16c2a1cf",
+      "title": "tt",
+      "environment": "beach",
+      "scene_description": "two friends discuss on AI",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [],
+      "created_at": "2025-07-28T22:07:28.391457",
+      "last_updated": "2025-07-28T22:07:28.391742",
+      "thread_id": "thread_0a7293c7",
+      "status": "active",
+      "agent_colors": {
+        "agent_6e52bc3e": "#FFE8CD",
+        "agent_d8fa732c": "#CAE8BD"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [],
+      "voices_enabled": false
+    },
+    {
+      "id": "conv_66aa6dc5",
+      "title": "tt2",
+      "environment": "beach",
+      "scene_description": "two friends talk about AI",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [],
+      "created_at": "2025-07-28T22:15:16.750107",
+      "last_updated": "2025-07-28T22:15:16.949240",
+      "thread_id": "thread_dd288ede",
+      "status": "active",
+      "agent_colors": {
+        "agent_6e52bc3e": "#FADA7A",
+        "agent_d8fa732c": "#FCFAEE"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "",
+      "agent_selector_api_key": "***************************************",
+      "LLM_sending_messages": [],
+      "voices_enabled": false
+    },
+    {
+      "id": "conv_175780c2",
+      "title": "tt3",
+      "environment": "beach",
+      "scene_description": "Two friends talk about AI",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [
+        {
+          "agent_name": "Blake",
+          "message": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?",
+          "agent_id": "agent_6e52bc3e",
+          "content": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?"
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do.",
+          "agent_id": "agent_d8fa732c",
+          "content": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding.",
+          "agent_id": "agent_6e52bc3e",
+          "content": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!"
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!",
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "content": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding.",
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "content": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities.",
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "content": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\""
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\"",
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "content": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\""
+        }
+      ],
+      "created_at": "2025-07-28T22:24:48.364944",
+      "last_updated": "2025-07-28T22:57:58.542071",
+      "thread_id": "thread_77eb7dde",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_6e52bc3e": "#4F8B61",
+        "agent_d8fa732c": "#CAE8BD"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "",
+      "agent_selector_api_key": "AIzaSyBESS4U1Uha0u4vbLXcl-f5_mRaWnpOObg",
+      "LLM_sending_messages": [
+        {
+          "agent_name": "Blake",
+          "message": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?",
+          "agent_id": "agent_6e52bc3e",
+          "content": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?"
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do.",
+          "agent_id": "agent_d8fa732c",
+          "content": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding.",
+          "agent_id": "agent_6e52bc3e",
+          "content": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!"
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!",
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "content": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding.",
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "content": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities.",
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "content": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\""
+        },
+        {
+          "agent_name": "Blake",
+          "message": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\"",
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "content": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\""
+        }
+      ],
+      "voices_enabled": false
     }
   ]
 }

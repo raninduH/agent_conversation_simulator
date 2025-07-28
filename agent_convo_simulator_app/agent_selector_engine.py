@@ -319,6 +319,7 @@ class AgentSelectorEngine:
     def resume_cycle(self, conversation_id):
         import time as _time
         import threading as _threading
+        self.ui_callback = self.parent_engine.message_callbacks.get(conversation_id)
         print(f"[AgentSelectorEngine] resume_cycle called for conversation_id={conversation_id} (thread: {_threading.current_thread().ident})")
         self.active = False
         self.paused = True

@@ -69,7 +69,6 @@ class ConversationEngine:
 
     def start_conversation(self, conversation_id, agents_config, environment, scene_description, title=None, invocation_method="round_robin", termination_condition=None, agent_selector_api_key=None, voices_enabled=False):
         print(f"🚀 [ConversationEngine] Starting conversation '{conversation_id}' with method '{invocation_method}'...")
-        agent_temp_numbers, agent_colors = self._assign_agent_numbers_and_colors(agents_config)
         now = None
         try:
             from datetime import datetime
@@ -80,8 +79,6 @@ class ConversationEngine:
             "id": conversation_id,
             "title": title if title else conversation_id,
             "agents": agents_config,
-            "agent_temp_numbers": agent_temp_numbers,
-            "agent_colors": agent_colors,
             "environment": environment,
             "scene_description": scene_description,
             "invocation_method": invocation_method,
@@ -130,9 +127,7 @@ class ConversationEngine:
     def pause_conversation(self, conversation_id):
         print(f"⏸️ [ConversationEngine] Pausing conversation '{conversation_id}'...")
         engine = self.current_engines.get(conversation_id)
-        convo = self.active_conversations.get(conversation_id)
-        invocation_method = convo.get('invocation_method') if convo else None
-        if invocation_method == 'round_robin' and engine and hasattr(engine, "pause_cycle"):
+        if engine and hasattr(engine, "pause_cycle"):
             print(f"[ConversationEngine] Calling pause_cycle for round_robin engine...")
             engine.pause_cycle(conversation_id)
             print(f"✅ [ConversationEngine] Conversation '{conversation_id}' paused.")
