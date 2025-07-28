@@ -52,9 +52,9 @@ class AgentSelectorEngine:
         self.selector = None
 
     def start_cycle(self, conversation_id, agents, voices_enabled, termination_condition, agent_selector_api_key):
-        print(f"🚦 [AgentSelector] Starting agent selector cycle for conversation: {conversation_id}")
+        print(f"🚦 [AgentSelectorEngine] Agent selector engine STARTED for conversation: {conversation_id}")
         import threading as _threading
-        print(f"🚦 [AgentSelector] Starting agent selector cycle for conversation: {conversation_id} (thread: {_threading.current_thread().ident})")
+        print(f"🚦 [AgentSelectorEngine] Thread ID: {_threading.current_thread().ident}")
         self.convo_id = conversation_id
         self.convo = self.parent_engine.active_conversations[conversation_id]
         self.agents = []
@@ -108,17 +108,18 @@ class AgentSelectorEngine:
                 "agent_variable": agent_variable,
                 "config": agent_config
             })
-        print(f"✅ [AgentSelector] All agents initialized. Starting agent selector thread.")
+        print(f"✅ [AgentSelectorEngine] All agents initialized. Starting agent selector thread.")
         self._thread = threading.Thread(target=self._run_agent_selector, daemon=True)
         self._thread.start()
 
     def _run_agent_selector(self):
+        print(f"[AgentSelectorEngine] Agent selector main loop started.")
         while self.active:
             if self.paused:
-                print("⏸️ [AgentSelector] Paused. Waiting...")
+                print("⏸️ [AgentSelectorEngine] Paused. Waiting...")
                 time.sleep(0.2)
                 continue
-            # Use LLM to select next agent
+            print(f"[AgentSelectorEngine] Selecting next agent using LLM...")
             llm_messages = self.convo.get("LLM_sending_messages", [])
             environment = self.convo.get("environment", "")
             scene = self.convo.get("scene_description", "")
@@ -134,27 +135,28 @@ class AgentSelectorEngine:
                 agent_invocation_counts
             )
             next_agent_name = selector_response.get("next_response")
-            print(f"[AgentSelector] LLM selected next agent: {next_agent_name}")
+            print(f"[AgentSelectorEngine] LLM selected next agent: {next_agent_name}")
             if next_agent_name == "terminate":
-                print("[AgentSelector] Termination condition met. Ending conversation.")
+                print("[AgentSelectorEngine] Termination condition met. Ending conversation.")
                 self.active = False
                 break
             # Find agent config and instance
             agent_config = next((a for a in self.agents if a["name"] == next_agent_name), None)
             agent_instance = next((a for a in self.agent_instances if a["agent_name"] == next_agent_name), None)
             if not agent_config or not agent_instance:
-                print(f"❌ [AgentSelector] Agent '{next_agent_name}' not found. Skipping.")
+                print(f"❌ [AgentSelectorEngine] Agent '{next_agent_name}' not found. Skipping.")
                 time.sleep(1)
                 continue
+            print(f"[AgentSelectorEngine] Invoking agent: {next_agent_name}")
             should_remind = self._should_remind_termination()
             message = self._invoke_agent(agent_config, agent_instance, should_remind)
             if not message:
-                print(f"⚠️ [AgentSelector] No message from agent: {next_agent_name}. Skipping.")
+                print(f"⚠️ [AgentSelectorEngine] No message from agent: {next_agent_name}. Skipping.")
                 time.sleep(1)
                 continue
-            print(f"📩 [AgentSelector] Message received from {next_agent_name}: {message['message'][:60]}...")
+            print(f"[AgentSelectorEngine] Message received from {next_agent_name}: {message['message'][:60]}...")
             if self.voices_enabled and agent_config.get("voice"):
-                print(f"🔊 [AgentSelector] Requesting audio for {next_agent_name}...")
+                print(f"🔊 [AgentSelectorEngine] Requesting audio for {next_agent_name}...")
                 self.last_message = message
                 self.waiting_for_audio.clear()
                 loading_message_id = len(self.convo["messages"]) + 1
@@ -175,7 +177,7 @@ class AgentSelectorEngine:
                     self._display_message(agent_config, loading_message)
                     time.sleep(0.2)
                     continue
-                print(f"[AUDIO READY] Audio received for agent: {next_agent_name}")
+                print(f"[AgentSelectorEngine] Audio received for agent: {next_agent_name}")
                 actual_message = {
                     "agent_no": agent_config.get('agent_no'),
                     "agent_id": agent_config.get('id'),
@@ -196,12 +198,12 @@ class AgentSelectorEngine:
                         'text': message["message"],
                         'voice': agent_config["voice"]
                     })
-                print(f"✅ [AgentSelector] Audio finished for {next_agent_name}.")
+                print(f"[AgentSelectorEngine] Audio finished for {next_agent_name}.")
             else:
                 self._add_message_to_conversation(message)
                 self._display_message(agent_config, message)
                 delay = self._get_turn_delay()
-                print(f"⏲️ [AgentSelector] Waiting {delay:.2f} seconds before next agent.")
+                print(f"[AgentSelectorEngine] Waiting {delay:.2f} seconds before next agent.")
                 time.sleep(delay)
             self.round_count += 1
             self._maybe_remind_termination()

@@ -468,6 +468,34 @@
         }
       ],
       "voices_enabled": true
+    },
+    {
+      "id": "conv_1a821f5d",
+      "title": "testAgentSelec",
+      "environment": "beach",
+      "scene_description": "two friends talk about what is intelligence?",
+      "agents": [
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [],
+      "created_at": "2025-07-28T19:51:42.708407",
+      "last_updated": "2025-07-28T19:53:03.723663",
+      "thread_id": "thread_468c8bf1",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_6e52bc3e": "#FCFAEE",
+        "agent_d8fa732c": "#FADA7A"
+      },
+      "agent_numbers": {
+        "agent_6e52bc3e": 1,
+        "agent_d8fa732c": 2
+      },
+      "invocation_method": "agent_selector",
+      "termination_condition": "",
+      "agent_selector_api_key": "***************************************",
+      "LLM_sending_messages": [],
+      "voices_enabled": false
     }
   ]
 }
