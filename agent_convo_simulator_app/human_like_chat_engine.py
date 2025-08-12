@@ -168,9 +168,7 @@ class HumanLikeChatEngine:
             # Wait for the last agent's message to finish (voice or not)
             # After a message is received, invoke all other agents in parallel
             last_message = self.last_message
-            if not last_message:
-                time.sleep(0.2)
-                continue
+        
             last_agent_name = last_message.get("agent_name")
             print(f"[HumanLikeChatEngine] Last agent to respond: {last_agent_name}")
             threads = []
@@ -194,7 +192,6 @@ class HumanLikeChatEngine:
                 t.join()
             self.round_count += 1
             self._maybe_remind_termination()
-            self.last_message = None
             print(f"[HumanLikeChatEngine]: ended round {self.round_count-1}")
 
     def _invoke_and_handle_agent(self, agent_config, agent_instance):
@@ -301,7 +298,7 @@ class HumanLikeChatEngine:
     
         prompt = f"""
                 Always answer based on the given characteristics of yourself. Stay in character always.
-                INITIAL SCENE: {environment}
+                INITIAL environment: {environment}
                 SCENE DESCRIPTION: {scene_description}
                 \nPARTICIPANTS: {', '.join(all_agents)}\n\nTool Usage: Use your tools freely in the first instance you feel,  just like a noraml person using their mobile phone as a tool. No need to get permsission from other agents. But when it's necessary discuss with other agents how the tools should be used.\n\n"""
         
@@ -313,8 +310,7 @@ class HumanLikeChatEngine:
             else:
                 recent_messages = messages
 
-            if len(recent_messages) > 0:
-                self.agents_last_seen_messages[agent_name] = recent_messages[-1]
+            
 
             if recent_messages:
                 prompt += "CONVERSATION SO FAR:\n"
@@ -332,8 +328,8 @@ class HumanLikeChatEngine:
                 if hasattr(doc, 'metadata') and 'description' in doc.metadata:
                     knowledge_descriptions.append(doc.metadata['description'])
             prompt += f"""PERSONAL KNOWLEDGE BASE: You have access to a personal knowledge base containing the following documents:\n{chr(10).join(knowledge_descriptions)}\n\nUse the knowledge_base_retriever tool to search through these documents when relevant to the conversation. \nThis knowledge base contains specialized information that can help you stay true to your role and provide more informed responses.\nOnly search your knowledge base when the conversation topic relates to the content of your documents.\n\n"""
-        
-        if self.agents_last_seen_messages[agent_name]:
+       
+        if self.agents_last_seen_messages[agent_name]: 
             last_seen_message = self.agents_last_seen_messages[agent_name]
             truncated_last_seen_message_text = ' '.join(last_seen_message['message'].split()[:10])
             prompt += f"""The last message you saw was: '{truncated_last_seen_message_text}...' by {last_seen_message['agent_name']}
@@ -342,18 +338,21 @@ class HumanLikeChatEngine:
                     \n"""
             
         prompt += f"""if you want or feel like it or you are needed to or if you can valuably contribute to the conversation Give your response to the ongoing conversation as {agent_name} , otherwise no need to send a response.
-                    Only output a JSON of the following format.
+                    But if they were no previous messages based on the scene start the conversation pls. But all you responses should come under the necessary key in the JSON output.
+                    Only output a JSON of the following format. do not output anything else.
                     {{
-                        is_responding: "yes"/"no",
-                        response: null/string
+                        is_responding: "yes"/"no", : "no" if you decide not to respond
+                        response: None/string : None if you decide not to respond
                     }}
 
         """
         prompt += f""" \nKeep your response natural, conversational, and true to your character. Always respons with the charateristics/personality of your character. \nRespond as if you're speaking directly in the conversation (don't say \"As {agent_name}, I would say...\" just respond naturally).\nRespond only to the dialog parts said by the other agents.\nKeep responses to 1-3 sentences to maintain good conversation flow."""
         
-        if messages and len(recent_messages) > 0:
-            self.agents_last_seen_messages[agent_name] = recent_messages[-1]
-        
+
+        if messages:
+            if len(recent_messages) > 0:
+                self.agents_last_seen_messages[agent_name] = recent_messages[-1]
+                
         return prompt
 
 
