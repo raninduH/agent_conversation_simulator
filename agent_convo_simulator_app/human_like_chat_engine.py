@@ -279,7 +279,16 @@ class HumanLikeChatEngine:
                     self.is_txt_n_audio_playing = False
 
                 else:
+                    while self.is_txt_n_audio_playing:
+                        time.sleep(0.5) 
+                        
                     self._display_message(agent_config, message)
+
+                    # delay a bit between parallel message displays
+                    self.is_txt_n_audio_playing = True
+                    time.sleep(5) 
+                    self.is_txt_n_audio_playing = False
+
             else:
                 print(f"[HumanLikeChatEngine] {agent_name} chose not to respond.")
         except Exception as e:
