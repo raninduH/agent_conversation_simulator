@@ -127,7 +127,7 @@ class RoundRobinEngine:
             if self.paused:
                 print("⏸️ [RoundRobin] Paused. Waiting...")
                 time.sleep(0.2)
-                continue
+                return
             agent_id = self.agent_order[self.current_agent_index]
             agent_config = next(a for a in self.agents if a["id"] == agent_id)
             agent_name = agent_config["name"]

@@ -108,11 +108,9 @@ def create_agent_prompt(agent_config, environment, scene_description, messages, 
     """
     if not agent_name:
         agent_name = agent_config["name"]
-    agent_role = agent_config["role"]
-    base_prompt = agent_config["base_prompt"]
-    prompt = f"""You are {agent_name}, a {agent_role}.
-            \n{base_prompt}
-            Always answer based on the above characteristics. Stay in character always.
+
+    prompt = f"""
+            Always answer based on the given characteristics. Stay in character always.
             INITIAL SCENE: {environment}
             SCENE DESCRIPTION: {scene_description}
             \nPARTICIPANTS: {', '.join(all_agents)}\n\nTool Usage: Use your tools freely in the first instance you feel,  just like a noraml person using their mobile phone as a tool. No need to get permsission from other agents. But when it's necessary discuss with other agents how the tools should be used.\n\n"""
@@ -140,6 +138,8 @@ def create_agent_prompt(agent_config, environment, scene_description, messages, 
             if hasattr(doc, 'metadata') and 'description' in doc.metadata:
                 knowledge_descriptions.append(doc.metadata['description'])
         prompt += f"""PERSONAL KNOWLEDGE BASE: You have access to a personal knowledge base containing the following documents:\n{chr(10).join(knowledge_descriptions)}\n\nUse the knowledge_base_retriever tool to search through these documents when relevant to the conversation. \nThis knowledge base contains specialized information that can help you stay true to your role and provide more informed responses.\nOnly search your knowledge base when the conversation topic relates to the content of your documents.\n\n"""
+
+    prompt += f""" You haven't seen before any of the messages from other agents since your last response. Consider all the messages since your last response when responding. """
     prompt += f"""Give your response to the ongoing conversation as {agent_name}. \nKeep your response natural, conversational, and true to your character. Always respons with the charateristics/personality of your character. \nRespond as if you're speaking directly in the conversation (don't say \"As {agent_name}, I would say...\" just respond naturally).\nRespond only to the dialog parts said by the other agents.\nKeep responses to 1-3 sentences to maintain good conversation flow."""
     return prompt
 

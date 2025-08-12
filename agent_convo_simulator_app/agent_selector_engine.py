@@ -118,7 +118,7 @@ class AgentSelectorEngine:
             if self.paused:
                 print("⏸️ [AgentSelectorEngine] Paused. Waiting...")
                 time.sleep(0.2)
-                continue
+                return
             print(f"[AgentSelectorEngine] Selecting next agent using LLM...")
             llm_messages = self.convo.get("LLM_sending_messages", [])
             environment = self.convo.get("environment", "")
@@ -232,8 +232,9 @@ class AgentSelectorEngine:
                 conversation_id=self.convo_id,
                 agent_name=agent_name,
                 available_tools=tool_names,
-                agent_obj=agent_config
-            )
+                agent_obj=agent_config            )
+
+
             print(f"📝 [AgentSelector] Sending prompt to {agent_name} (length: {len(prompt)} chars)")
             config = {"configurable": {"thread_id": f"{thread_id}_{agent_name}"}}
             response = agent_variable.invoke({"messages": [HumanMessage(content=prompt)]}, config)

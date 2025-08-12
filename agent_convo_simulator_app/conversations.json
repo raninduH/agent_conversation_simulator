@@ -847,9 +847,9 @@
         }
       ],
       "created_at": "2025-08-12T17:51:53.343044",
-      "last_updated": "2025-08-12T17:52:23.172385",
+      "last_updated": "2025-08-12T22:18:10.317332",
       "thread_id": "thread_c22e8321",
-      "status": "active",
+      "status": "stopped",
       "agent_colors": {
         "agent_6e52bc3e": "#FFE8CD",
         "agent_d8fa732c": "#FFDCDC"
@@ -881,6 +881,125 @@
           "message": "Jonathan, absolutely! It's quite brilliant, isn't it? The adaptation of autoregressive models from language to image generation is a testament to the power of abstraction. High-resolution image synthesis presents unique challenges, mainly computational complexity and memory requirements, but the progress has been remarkable thanks to innovations like sparse attention mechanisms and hierarchical modeling.",
           "agent_id": "agent_6e52bc3e",
           "content": "Jonathan, absolutely! It's quite brilliant, isn't it? The adaptation of autoregressive models from language to image generation is a testament to the power of abstraction. High-resolution image synthesis presents unique challenges, mainly computational complexity and memory requirements, but the progress has been remarkable thanks to innovations like sparse attention mechanisms and hierarchical modeling."
+        }
+      ],
+      "voices_enabled": false
+    },
+    {
+      "id": "conv_7165e4e5",
+      "title": "hm1",
+      "environment": "park",
+      "scene_description": "Three friends decide to discuss on the earliest break throughs in auto regressive deep learning models",
+      "agents": [
+        "agent_bob",
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [],
+      "created_at": "2025-08-12T22:31:36.730374",
+      "last_updated": "2025-08-12T22:31:37.441199",
+      "thread_id": "thread_82eacb46",
+      "status": "active",
+      "agent_colors": {
+        "agent_bob": "#FFDCDC",
+        "agent_6e52bc3e": "#D4F6FF",
+        "agent_d8fa732c": "#A2AADB"
+      },
+      "agent_numbers": {
+        "agent_bob": 1,
+        "agent_6e52bc3e": 2,
+        "agent_d8fa732c": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [],
+      "voices_enabled": false
+    },
+    {
+      "id": "conv_f18e7e2f",
+      "title": "hm2",
+      "environment": "park",
+      "scene_description": "Three friends decide to discuss on the earliest break throughs in auto regressive deep learning models",
+      "agents": [
+        "agent_bob",
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [],
+      "created_at": "2025-08-12T22:35:04.108395",
+      "last_updated": "2025-08-12T22:35:04.641501",
+      "thread_id": "thread_2d64889c",
+      "status": "active",
+      "agent_colors": {
+        "agent_bob": "#FFE8CD",
+        "agent_6e52bc3e": "#FCFAEE",
+        "agent_d8fa732c": "#FADA7A"
+      },
+      "agent_numbers": {
+        "agent_bob": 1,
+        "agent_6e52bc3e": 2,
+        "agent_d8fa732c": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [],
+      "voices_enabled": false
+    },
+    {
+      "id": "conv_3bef7c3b",
+      "title": "hm3",
+      "environment": "park",
+      "scene_description": "Three friends decide to discuss on the earliest break throughs in auto regressive deep learning models",
+      "agents": [
+        "agent_bob",
+        "agent_6e52bc3e",
+        "agent_d8fa732c"
+      ],
+      "messages": [
+        {
+          "agent_name": "Jonathan",
+          "message": "Ah, the early days of autoregressive models! For me, the most innovative breakthrough was the development of LSTMs. It was a game changer in handling long-range dependencies, right?",
+          "agent_id": "agent_d8fa732c",
+          "content": "Ah, the early days of autoregressive models! For me, the most innovative breakthrough was the development of LSTMs. It was a game changer in handling long-range dependencies, right?"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Jonathan, absolutely! LSTMs were a monumental leap. The ability to remember information over extended sequences was a critical step in making autoregressive models truly useful. But let's not forget the work that led to them; Markov models were a good attempt even though they were simple.",
+          "agent_id": "agent_6e52bc3e",
+          "content": "Jonathan, absolutely! LSTMs were a monumental leap. The ability to remember information over extended sequences was a critical step in making autoregressive models truly useful. But let's not forget the work that led to them; Markov models were a good attempt even though they were simple."
+        }
+      ],
+      "created_at": "2025-08-12T22:38:45.704325",
+      "last_updated": "2025-08-12T22:39:01.863061",
+      "thread_id": "thread_585b22f3",
+      "status": "active",
+      "agent_colors": {
+        "agent_bob": "#D4F6FF",
+        "agent_6e52bc3e": "#FFE8CD",
+        "agent_d8fa732c": "#FCFAEE"
+      },
+      "agent_numbers": {
+        "agent_bob": 1,
+        "agent_6e52bc3e": 2,
+        "agent_d8fa732c": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_name": "Jonathan",
+          "message": "Ah, the early days of autoregressive models! For me, the most innovative breakthrough was the development of LSTMs. It was a game changer in handling long-range dependencies, right?",
+          "agent_id": "agent_d8fa732c",
+          "content": "Ah, the early days of autoregressive models! For me, the most innovative breakthrough was the development of LSTMs. It was a game changer in handling long-range dependencies, right?"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Jonathan, absolutely! LSTMs were a monumental leap. The ability to remember information over extended sequences was a critical step in making autoregressive models truly useful. But let's not forget the work that led to them; Markov models were a good attempt even though they were simple.",
+          "agent_id": "agent_6e52bc3e",
+          "content": "Jonathan, absolutely! LSTMs were a monumental leap. The ability to remember information over extended sequences was a critical step in making autoregressive models truly useful. But let's not forget the work that led to them; Markov models were a good attempt even though they were simple."
         }
       ],
       "voices_enabled": false
