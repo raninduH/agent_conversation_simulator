@@ -32,7 +32,7 @@ class HumanLikeChatEngine:
         self.parent_engine = parent_engine
         self.audio_manager = AudioManager()
         self.lock = threading.Lock()
-        self.data_manager = DataManager(os.path.dirname(__file__))
+        self.data_manager = DataManager()
         self.active = True
         self.paused = False
         self.convo_id = None

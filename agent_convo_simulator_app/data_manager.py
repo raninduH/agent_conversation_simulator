@@ -100,22 +100,66 @@ class Conversation:
             LLM_sending_messages=[],
             voices_enabled=voices_enabled
         )
+
+# --- New ResearchConversation dataclass ---
+@dataclass
+class ResearchConversation:
+    """Represents a research group conversation session."""
+    id: str
+    research_name: str
+    research_problem: str
+    extra_consider: str
+    research_goal: str
+    agents: List[str]  # Agent IDs only
+    messages: List[Dict[str, Any]]
+    created_at: str
+    last_updated: str
+    thread_id: str
+    status: str = "active"
+    voices_enabled: bool = False
+    agent_colors: Dict[str, str] = field(default_factory=dict)
+    agent_numbers: Dict[str, int] = field(default_factory=dict)
+
+    @classmethod
+    def create_new(cls, research_name: str, research_problem: str, extra_consider: str, research_goal: str, agent_ids: List[str], voices_enabled: bool = False, agent_colors: Dict[str, str] = None, agent_numbers: Dict[str, int] = None) -> 'ResearchConversation':
+        """Create a new research conversation with auto-generated ID and timestamps."""
+        now = datetime.now().isoformat()
+        return cls(
+            id=f"research_{uuid.uuid4().hex[:8]}",
+            research_name=research_name,
+            research_problem=research_problem,
+            extra_consider=extra_consider,
+            research_goal=research_goal,
+            agents=agent_ids,
+            messages=[],
+            created_at=now,
+            last_updated=now,
+            thread_id=f"thread_{uuid.uuid4().hex[:8]}",
+            status='active',
+            voices_enabled=voices_enabled,
+            agent_colors=agent_colors or {},
+            agent_numbers=agent_numbers or {}
+        )
     
 class DataManager:
+
     """Manages JSON file operations for agents and conversations."""
     
-    def __init__(self, data_dir: str):
-        self.data_dir = data_dir
-        self.agents_file = os.path.join(data_dir, "agents.json")
-        self.conversations_file = os.path.join(data_dir, "conversations.json")
-        
+    def __init__(self):
+        self.data_dir = os.path.dirname(__file__)
+        self.agents_file = os.path.join(self.data_dir, "agents.json")
+        self.conversations_file = os.path.join(self.data_dir, "conversations.json")
+        # Add research_conversations_file in memory/ subfolder
+        self.research_conversations_file = os.path.join(self.data_dir, "memory", "research_conversations.json")
+
         # Caching
         self._agents_cache = None
         self._agents_cache_timestamp = None
-        
+
         # Ensure data directory exists
-        os.makedirs(data_dir, exist_ok=True)
-        
+        os.makedirs(self.data_dir, exist_ok=True)
+        os.makedirs(os.path.join(os.path.dirname(self.data_dir), "memory"), exist_ok=True)
+
         # Initialize files if they don't exist
         self._init_files()
     
@@ -396,3 +440,68 @@ class DataManager:
         self.save_conversation(conversation)
         
         print(f"DEBUG: Reassigned voices for conversation {conversation_id}: {new_assignments}")
+
+
+    # --- Research Conversation management methods ---
+    def load_research_conversations(self) -> List[ResearchConversation]:
+        """Load all research conversations from JSON file."""
+        data = self._load_json(self.research_conversations_file)
+        research_conversations = []
+        for conv_data in data.get("research_conversations", []):
+            try:
+                allowed_keys = {f.name for f in ResearchConversation.__dataclass_fields__.values()}
+                filtered_conv_data = {k: v for k, v in conv_data.items() if k in allowed_keys}
+                for key in allowed_keys:
+                    if key not in filtered_conv_data:
+                        if ResearchConversation.__dataclass_fields__[key].default_factory is not None:
+                            filtered_conv_data[key] = ResearchConversation.__dataclass_fields__[key].default_factory()
+                        else:
+                            filtered_conv_data[key] = ResearchConversation.__dataclass_fields__[key].default if ResearchConversation.__dataclass_fields__[key].default is not None else None
+                research_conversations.append(ResearchConversation(**filtered_conv_data))
+            except Exception as e:
+                print(f"Error loading research conversation {conv_data.get('id', 'unknown')}: {e}")
+        return research_conversations
+
+    def save_research_conversation(self, research_conversation: ResearchConversation):
+        """Save a single research conversation to JSON file."""
+        research_conversation.last_updated = datetime.now().isoformat()
+        data = self._load_json(self.research_conversations_file)
+        conversations = data.get("research_conversations", [])
+        conv_dict = asdict(research_conversation)
+        for i, existing_conv in enumerate(conversations):
+            if existing_conv["id"] == research_conversation.id:
+                conversations[i] = conv_dict
+                break
+        else:
+            conversations.append(conv_dict)
+        data["research_conversations"] = conversations
+        self._save_json(self.research_conversations_file, data)
+
+    def delete_research_conversation(self, research_id: str):
+        """Delete a research conversation from JSON file."""
+        data = self._load_json(self.research_conversations_file)
+        conversations = data.get("research_conversations", [])
+        data["research_conversations"] = [c for c in conversations if c["id"] != research_id]
+        self._save_json(self.research_conversations_file, data)
+
+    def get_research_conversation_by_id(self, research_id: str) -> Optional[ResearchConversation]:
+        """Get a specific research conversation by ID."""
+        conversations = self.load_research_conversations()
+        for conversation in conversations:
+            if conversation.id == research_id:
+                return conversation
+        return None
+
+    def add_message_to_research_conversation(self, research_id, message):
+        """Add a message to a research conversation and save to disk."""
+        message.pop('timestamp', None)
+        message.pop('message_id', None)
+        conversation = self.get_research_conversation_by_id(research_id)
+        if conversation:
+            conversation.messages.append(message)
+            self.save_research_conversation(conversation)
+
+    def get_research_conversations(self) -> List[ResearchConversation]:
+        """Retrieve all research conversations from the JSON file."""
+        data = self._load_json(self.research_conversations_file)
+        return [ResearchConversation(**c) for c in data.get("research_conversations", [])]

@@ -27,6 +27,8 @@ from agent_convo_simulator_app.UI.agent_management import AgentManagementTab
 from agent_convo_simulator_app.UI.conversation_setup import ConversationSetupTab
 from agent_convo_simulator_app.UI.simulation_tab import SimulationTab
 from agent_convo_simulator_app.UI.past_conversations import PastConversationsTab
+from agent_convo_simulator_app.UI.group_research_tab import GroupResearchTab
+from agent_convo_simulator_app.UI.research_conversation_tab import ResearchConversationTab
 
 class AgentConversationSimulatorGUI:
     """Main GUI application for the multi-agent conversation simulator."""
@@ -42,7 +44,7 @@ class AgentConversationSimulatorGUI:
         self.tooltip_window = None
         
         # Initialize data manager
-        self.data_manager = DataManager(os.path.dirname(__file__))
+        self.data_manager = DataManager()
         
         # Initialize audio manager
         try:
@@ -168,7 +170,15 @@ class AgentConversationSimulatorGUI:
 
         self.simulation_tab = SimulationTab(self.notebook, self, self.data_manager)
         self.notebook.add(self.simulation_tab, text="Simulation")
-        
+
+        # Add Group Research tab
+        self.group_research_tab = GroupResearchTab(self.notebook, self, self.data_manager)
+        self.notebook.add(self.group_research_tab, text="Group Research")
+
+        # Add Research Conversation tab
+        self.research_conversation_tab = ResearchConversationTab(self.notebook, self, self.data_manager)
+        self.notebook.add(self.research_conversation_tab, text="Research Conversation")
+                
         # Status bar
         status_text = "Ready"
         self.status_bar = ttk.Label(self.root, text=status_text, relief=tk.SUNKEN, anchor=tk.W)

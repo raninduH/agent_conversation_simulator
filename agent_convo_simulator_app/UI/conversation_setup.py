@@ -4,7 +4,6 @@ from datetime import datetime
 import threading
 
 from ..data_manager import Conversation, Agent
-from ..conversation_engine_old import ConversationSimulatorEngine
 from ..config import UI_COLORS
 from .main_utils import _toggle_termination_condition
 
