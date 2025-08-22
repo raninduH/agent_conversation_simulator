@@ -447,6 +447,8 @@ class AgentManagementTab(ttk.Frame):
         self.current_editing_agent_id = None
         self.refresh_agents_list()
         self.app.conversation_setup_tab.refresh_agent_checkboxes()
+        # Clear the agent details form after saving
+        self.clear_agent_form()
 
     def _update_knowledge_base_tool(self, agent):
         """Update the knowledge_base_retriever tool based on agent's knowledge_base content."""

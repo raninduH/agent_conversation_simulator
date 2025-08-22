@@ -171,13 +171,13 @@ class AgentConversationSimulatorGUI:
         self.simulation_tab = SimulationTab(self.notebook, self, self.data_manager)
         self.notebook.add(self.simulation_tab, text="Simulation")
 
-        # Add Group Research tab
-        self.group_research_tab = GroupResearchTab(self.notebook, self, self.data_manager)
-        self.notebook.add(self.group_research_tab, text="Group Research")
+        # # Add Group Research tab
+        # self.group_research_tab = GroupResearchTab(self.notebook, self, self.data_manager)
+        # self.notebook.add(self.group_research_tab, text="Group Research")
 
-        # Add Research Conversation tab
-        self.research_conversation_tab = ResearchConversationTab(self.notebook, self, self.data_manager)
-        self.notebook.add(self.research_conversation_tab, text="Research Conversation")
+        # # Add Research Conversation tab
+        # self.research_conversation_tab = ResearchConversationTab(self.notebook, self, self.data_manager)
+        # self.notebook.add(self.research_conversation_tab, text="Research Conversation")
                 
         # Status bar
         status_text = "Ready"

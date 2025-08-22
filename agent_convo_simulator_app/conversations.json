@@ -746,12 +746,34 @@
           "message": "Jonathan, absolutely! It's quite brilliant, isn't it? The adaptation of autoregressive models from language to image generation is a testament to the power of abstraction. High-resolution image synthesis presents unique challenges, mainly computational complexity and memory requirements, but the progress has been remarkable thanks to innovations like sparse attention mechanisms and hierarchical modeling.",
           "agent_id": "agent_6e52bc3e",
           "content": "Jonathan, absolutely! It's quite brilliant, isn't it? The adaptation of autoregressive models from language to image generation is a testament to the power of abstraction. High-resolution image synthesis presents unique challenges, mainly computational complexity and memory requirements, but the progress has been remarkable thanks to innovations like sparse attention mechanisms and hierarchical modeling."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "Blake, your points are spot on! Sparse attention and hierarchical modeling have indeed been game-changers. I've been particularly impressed with the work around vector quantized variational autoencoders (VQ-VAEs) combined with transformers for generating high-fidelity images. Have you looked into any research leveraging those techniques recently? I'd be curious to hear your take."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "Blake, your points are spot on! Sparse attention and hierarchical modeling have indeed been game-changers. I've been particularly impressed with the work around vector quantized variational autoencoders (VQ-VAEs) combined with transformers for generating high-fidelity images. Have you looked into any research leveraging those techniques recently? I'd be curious to hear your take.",
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "content": "Blake, your points are spot on! Sparse attention and hierarchical modeling have indeed been game-changers. I've been particularly impressed with the work around vector quantized variational autoencoders (VQ-VAEs) combined with transformers for generating high-fidelity images. Have you looked into any research leveraging those techniques recently? I'd be curious to hear your take."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Ah, Jonathan, VQ-VAEs combined with transformers! A truly elegant approach. I've been following the research in that area with great interest; the ability to discretize the image space and then model it with transformers allows for capturing long-range dependencies more effectively. I actually pulled up a few recent papers on my phone this morning; one explored improvements to the codebook learning process within the VQ-VAE to reduce artifacts!"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Ah, Jonathan, VQ-VAEs combined with transformers! A truly elegant approach. I've been following the research in that area with great interest; the ability to discretize the image space and then model it with transformers allows for capturing long-range dependencies more effectively. I actually pulled up a few recent papers on my phone this morning; one explored improvements to the codebook learning process within the VQ-VAE to reduce artifacts!",
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "content": "Ah, Jonathan, VQ-VAEs combined with transformers! A truly elegant approach. I've been following the research in that area with great interest; the ability to discretize the image space and then model it with transformers allows for capturing long-range dependencies more effectively. I actually pulled up a few recent papers on my phone this morning; one explored improvements to the codebook learning process within the VQ-VAE to reduce artifacts!"
         }
       ],
       "created_at": "2025-08-12T17:51:53.343044",
-      "last_updated": "2025-08-12T22:18:10.317332",
+      "last_updated": "2025-08-22T16:03:41.215874",
       "thread_id": "thread_c22e8321",
-      "status": "stopped",
+      "status": "active",
       "agent_colors": {
         "agent_6e52bc3e": "#FFE8CD",
         "agent_d8fa732c": "#FFDCDC"
@@ -783,6 +805,28 @@
           "message": "Jonathan, absolutely! It's quite brilliant, isn't it? The adaptation of autoregressive models from language to image generation is a testament to the power of abstraction. High-resolution image synthesis presents unique challenges, mainly computational complexity and memory requirements, but the progress has been remarkable thanks to innovations like sparse attention mechanisms and hierarchical modeling.",
           "agent_id": "agent_6e52bc3e",
           "content": "Jonathan, absolutely! It's quite brilliant, isn't it? The adaptation of autoregressive models from language to image generation is a testament to the power of abstraction. High-resolution image synthesis presents unique challenges, mainly computational complexity and memory requirements, but the progress has been remarkable thanks to innovations like sparse attention mechanisms and hierarchical modeling."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "Blake, your points are spot on! Sparse attention and hierarchical modeling have indeed been game-changers. I've been particularly impressed with the work around vector quantized variational autoencoders (VQ-VAEs) combined with transformers for generating high-fidelity images. Have you looked into any research leveraging those techniques recently? I'd be curious to hear your take."
+        },
+        {
+          "agent_name": "Jonathan",
+          "message": "Blake, your points are spot on! Sparse attention and hierarchical modeling have indeed been game-changers. I've been particularly impressed with the work around vector quantized variational autoencoders (VQ-VAEs) combined with transformers for generating high-fidelity images. Have you looked into any research leveraging those techniques recently? I'd be curious to hear your take.",
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "content": "Blake, your points are spot on! Sparse attention and hierarchical modeling have indeed been game-changers. I've been particularly impressed with the work around vector quantized variational autoencoders (VQ-VAEs) combined with transformers for generating high-fidelity images. Have you looked into any research leveraging those techniques recently? I'd be curious to hear your take."
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Ah, Jonathan, VQ-VAEs combined with transformers! A truly elegant approach. I've been following the research in that area with great interest; the ability to discretize the image space and then model it with transformers allows for capturing long-range dependencies more effectively. I actually pulled up a few recent papers on my phone this morning; one explored improvements to the codebook learning process within the VQ-VAE to reduce artifacts!"
+        },
+        {
+          "agent_name": "Blake",
+          "message": "Ah, Jonathan, VQ-VAEs combined with transformers! A truly elegant approach. I've been following the research in that area with great interest; the ability to discretize the image space and then model it with transformers allows for capturing long-range dependencies more effectively. I actually pulled up a few recent papers on my phone this morning; one explored improvements to the codebook learning process within the VQ-VAE to reduce artifacts!",
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "content": "Ah, Jonathan, VQ-VAEs combined with transformers! A truly elegant approach. I've been following the research in that area with great interest; the ability to discretize the image space and then model it with transformers allows for capturing long-range dependencies more effectively. I actually pulled up a few recent papers on my phone this morning; one explored improvements to the codebook learning process within the VQ-VAE to reduce artifacts!"
         }
       ],
       "voices_enabled": false
@@ -2021,6 +2065,219 @@
         }
       ],
       "voices_enabled": false
+    },
+    {
+      "id": "conv_2038746a",
+      "title": "Discussion of AI in tropical cyclone prediction",
+      "environment": "laboratory",
+      "scene_description": "Three friends discuss on how to use AI to perform tropical cyclone prediction, disaster damage prevention and reduction.",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326",
+        "agent_fdfc058b"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Alright, let's break this down practically. For cyclone prediction, we need to focus on AI models that can ingest vast amounts of real-time data – atmospheric pressure, sea surface temperatures, wind patterns – and give us probabilistic forecasts. What specific data sets are you all thinking of incorporating?",
+          "loading": false,
+          "content": "Alright, let's break this down practically. For cyclone prediction, we need to focus on AI models that can ingest vast amounts of real-time data – atmospheric pressure, sea surface temperatures, wind patterns – and give us probabilistic forecasts. What specific data sets are you all thinking of incorporating?"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_fdfc058b",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_fdfc058b",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "David, that's a solid starting point. Beyond those core datasets, we should also consider incorporating ocean salinity data and upper-level atmospheric conditions. These factors can significantly influence cyclone intensity and trajectory, and AI models can help us identify complex relationships that traditional models might miss.",
+          "loading": false,
+          "content": "David, that's a solid starting point. Beyond those core datasets, we should also consider incorporating ocean salinity data and upper-level atmospheric conditions. These factors can significantly influence cyclone intensity and trajectory, and AI models can help us identify complex relationships that traditional models might miss."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "David, that's a great starting point. I'm thinking we could leverage deep learning models, specifically recurrent neural networks (RNNs) or transformers, given their ability to handle sequential data like time-series weather information. To pinpoint the best data sets, perhaps we should use search_internet_strucutred_output to investigate what meteorological agencies like NOAA or ECMWF are making publicly available?",
+          "loading": false,
+          "content": "David, that's a great starting point. I'm thinking we could leverage deep learning models, specifically recurrent neural networks (RNNs) or transformers, given their ability to handle sequential data like time-series weather information. To pinpoint the best data sets, perhaps we should use search_internet_strucutred_output to investigate what meteorological agencies like NOAA or ECMWF are making publicly available?"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_fdfc058b",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "I agree with Jonathan; leveraging deep learning models like RNNs or transformers is crucial for handling time-series weather data. To build on that, I think it's also important to consider incorporating climate change projections from CMIP6 into our models to account for long-term trends affecting cyclone behavior.",
+          "loading": false,
+          "content": "I agree with Jonathan; leveraging deep learning models like RNNs or transformers is crucial for handling time-series weather data. To build on that, I think it's also important to consider incorporating climate change projections from CMIP6 into our models to account for long-term trends affecting cyclone behavior."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Jonathan, I agree that exploring publicly available datasets from NOAA or ECMWF is a practical next step. Let's use `search_news_from_internet` to investigate what data they offer and any AI applications they've already explored. That way, we can build on existing knowledge and avoid reinventing the wheel.",
+          "loading": false,
+          "content": "Jonathan, I agree that exploring publicly available datasets from NOAA or ECMWF is a practical next step. Let's use `search_news_from_internet` to investigate what data they offer and any AI applications they've already explored. That way, we can build on existing knowledge and avoid reinventing the wheel."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "loading": false
+        }
+      ],
+      "created_at": "2025-08-22T15:55:26.855496",
+      "last_updated": "2025-08-22T15:58:40.491552",
+      "thread_id": "thread_2872efae",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#FFE8CD",
+        "agent_d9ed4326": "#D4F6FF",
+        "agent_fdfc058b": "#A2AADB"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2,
+        "agent_fdfc058b": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "When the agents reach a solid answer or conclusion to all the discussion topics.",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Alright, let's break this down practically. For cyclone prediction, we need to focus on AI models that can ingest vast amounts of real-time data – atmospheric pressure, sea surface temperatures, wind patterns – and give us probabilistic forecasts. What specific data sets are you all thinking of incorporating?",
+          "loading": false,
+          "content": "Alright, let's break this down practically. For cyclone prediction, we need to focus on AI models that can ingest vast amounts of real-time data – atmospheric pressure, sea surface temperatures, wind patterns – and give us probabilistic forecasts. What specific data sets are you all thinking of incorporating?"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_fdfc058b",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "loading": true
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_fdfc058b",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "David, that's a solid starting point. Beyond those core datasets, we should also consider incorporating ocean salinity data and upper-level atmospheric conditions. These factors can significantly influence cyclone intensity and trajectory, and AI models can help us identify complex relationships that traditional models might miss.",
+          "loading": false,
+          "content": "David, that's a solid starting point. Beyond those core datasets, we should also consider incorporating ocean salinity data and upper-level atmospheric conditions. These factors can significantly influence cyclone intensity and trajectory, and AI models can help us identify complex relationships that traditional models might miss."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "David, that's a great starting point. I'm thinking we could leverage deep learning models, specifically recurrent neural networks (RNNs) or transformers, given their ability to handle sequential data like time-series weather information. To pinpoint the best data sets, perhaps we should use search_internet_strucutred_output to investigate what meteorological agencies like NOAA or ECMWF are making publicly available?",
+          "loading": false,
+          "content": "David, that's a great starting point. I'm thinking we could leverage deep learning models, specifically recurrent neural networks (RNNs) or transformers, given their ability to handle sequential data like time-series weather information. To pinpoint the best data sets, perhaps we should use search_internet_strucutred_output to investigate what meteorological agencies like NOAA or ECMWF are making publicly available?"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_fdfc058b",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "I agree with Jonathan; leveraging deep learning models like RNNs or transformers is crucial for handling time-series weather data. To build on that, I think it's also important to consider incorporating climate change projections from CMIP6 into our models to account for long-term trends affecting cyclone behavior.",
+          "loading": false,
+          "content": "I agree with Jonathan; leveraging deep learning models like RNNs or transformers is crucial for handling time-series weather data. To build on that, I think it's also important to consider incorporating climate change projections from CMIP6 into our models to account for long-term trends affecting cyclone behavior."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Jonathan, I agree that exploring publicly available datasets from NOAA or ECMWF is a practical next step. Let's use `search_news_from_internet` to investigate what data they offer and any AI applications they've already explored. That way, we can build on existing knowledge and avoid reinventing the wheel.",
+          "loading": false,
+          "content": "Jonathan, I agree that exploring publicly available datasets from NOAA or ECMWF is a practical next step. Let's use `search_news_from_internet` to investigate what data they offer and any AI applications they've already explored. That way, we can build on existing knowledge and avoid reinventing the wheel."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "loading": false
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "loading": false
+        }
+      ],
+      "voices_enabled": true
     }
   ]
 }
