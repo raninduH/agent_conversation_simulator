@@ -17,3 +17,5 @@ build/
 # IDE specific files
 .vscode/
 .idea/
+
+agent_convo_simulator_app/agents_backup.json

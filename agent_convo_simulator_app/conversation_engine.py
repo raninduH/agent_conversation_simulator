@@ -59,7 +59,7 @@ class ConversationEngine:
 
     def _load_conversation_details(self, conversation_id):
         print(f"📂 [ConversationEngine] Loading conversation details for ID: {conversation_id}")
-        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager(os.path.dirname(__file__))
+        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager()
         conversation = data_manager.get_conversation_by_id(conversation_id)
         if not conversation:
             print(f"❌ [ConversationEngine] Conversation ID '{conversation_id}' not found!")
@@ -145,7 +145,7 @@ class ConversationEngine:
 
     def _save_conversation_state(self, conversation_id):
         print(f"💾 [ConversationEngine] Saving conversation state for '{conversation_id}'...")
-        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager(os.path.dirname(__file__))
+        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager()
         convo = self.active_conversations.get(conversation_id)
         if convo is not None:
             from dataclasses import asdict
@@ -166,7 +166,7 @@ class ConversationEngine:
 
     def resume_conversation(self, conversation_id):
         print(f"🔄 [ConversationEngine] Resuming past conversation '{conversation_id}'...")
-        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager(os.path.dirname(__file__))
+        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager()
         print(f"📖 [ConversationEngine] Loading conversation from JSON...")
         conversation = data_manager.get_conversation_by_id(conversation_id)
         if not conversation:

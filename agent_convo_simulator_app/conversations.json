@@ -284,10 +284,108 @@
           "message": "Emerging startups, Jonathan! I love it! Always good to keep an eye on the disruptors. While you're hunting for those dark horses, I'm going to refine my search to focus on the *materials science* aspect of AI hardware scaling. New materials might be the key to overcoming current limitations. Let's see if there's a materials revolution brewing!",
           "loading": false,
           "content": "Emerging startups, Jonathan! I love it! Always good to keep an eye on the disruptors. While you're hunting for those dark horses, I'm going to refine my search to focus on the *materials science* aspect of AI hardware scaling. New materials might be the key to overcoming current limitations. Let's see if there's a materials revolution brewing!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Materials science, Blake! Absolutely critical! While you're digging into that, I'm going to shift my focus to software and algorithms. Let's see if there are any breakthroughs in sparse activation techniques that could drastically reduce the computational load for AGI. I'll use the search tool for \"sparse activation algorithms AI\".",
+          "loading": false,
+          "content": "Materials science, Blake! Absolutely critical! While you're digging into that, I'm going to shift my focus to software and algorithms. Let's see if there are any breakthroughs in sparse activation techniques that could drastically reduce the computational load for AGI. I'll use the search tool for \"sparse activation algorithms AI\"."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Sparse activation algorithms! YES! Jonathan, you're thinking on all cylinders! Reducing the computational load is paramount. I'm on the hunt for materials breakthroughs while you're tackling algorithmic efficiency – a perfect pincer movement! Let's see what the search tool reveals!",
+          "loading": false,
+          "content": "Sparse activation algorithms! YES! Jonathan, you're thinking on all cylinders! Reducing the computational load is paramount. I'm on the hunt for materials breakthroughs while you're tackling algorithmic efficiency – a perfect pincer movement! Let's see what the search tool reveals!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "A pincer movement indeed, Blake! While we're at it, I'm also curious to see if anyone is working on algorithms that can dynamically adjust the sparsity based on the context. I'll use the search tool for \"dynamic sparse activation AI algorithms\". That could be a game-changer for adapting to different tasks and data.",
+          "loading": false,
+          "content": "A pincer movement indeed, Blake! While we're at it, I'm also curious to see if anyone is working on algorithms that can dynamically adjust the sparsity based on the context. I'll use the search tool for \"dynamic sparse activation AI algorithms\". That could be a game-changer for adapting to different tasks and data."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Dynamic sparsity adjustment? That's brilliant, Jonathan! Adaptability is key for AGI. I'll keep that in mind as I sift through these materials science papers – perhaps some new materials enable more efficient dynamic sparsity. Let's see what breakthroughs await!",
+          "loading": false,
+          "content": "Dynamic sparsity adjustment? That's brilliant, Jonathan! Adaptability is key for AGI. I'll keep that in mind as I sift through these materials science papers – perhaps some new materials enable more efficient dynamic sparsity. Let's see what breakthroughs await!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Okay Blake, while you're focusing on materials enabling dynamic sparsity, I'm going to broaden my search to encompass any novel memory architectures beyond just neuromorphic computing. I'll use the search tool for \"novel memory architectures for AI\". We need to explore all possibilities for high-context memory!",
+          "loading": false,
+          "content": "Okay Blake, while you're focusing on materials enabling dynamic sparsity, I'm going to broaden my search to encompass any novel memory architectures beyond just neuromorphic computing. I'll use the search tool for \"novel memory architectures for AI\". We need to explore all possibilities for high-context memory!"
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Novel memory architectures! Fantastic, Jonathan! We need a memory revolution to handle the demands of AGI. I'll keep my eyes peeled for any materials that could enable these new architectures – it's all connected! Let's see what memory marvels we can find!",
+          "loading": false,
+          "content": "Novel memory architectures! Fantastic, Jonathan! We need a memory revolution to handle the demands of AGI. I'll keep my eyes peeled for any materials that could enable these new architectures – it's all connected! Let's see what memory marvels we can find!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Memory marvels, indeed! While I'm on the topic of novel architectures, I'm also going to check if there's any interesting work being done on reservoir computing. I'll use the search tool for \"reservoir computing advancements AI\". It's a bit of a long shot, but it could offer some unexpected advantages for high-context memory.",
+          "loading": false,
+          "content": "Memory marvels, indeed! While I'm on the topic of novel architectures, I'm also going to check if there's any interesting work being done on reservoir computing. I'll use the search tool for \"reservoir computing advancements AI\". It's a bit of a long shot, but it could offer some unexpected advantages for high-context memory."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Reservoir computing! A long shot, maybe, but those are often the most rewarding! I'll keep an open mind and see if any of my materials research could serendipitously boost reservoir computing performance. Let's see what unexpected treasures we unearth!",
+          "loading": false,
+          "content": "Reservoir computing! A long shot, maybe, but those are often the most rewarding! I'll keep an open mind and see if any of my materials research could serendipitously boost reservoir computing performance. Let's see what unexpected treasures we unearth!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Alright Blake, while we're looking at unconventional approaches, I'm going to take a quick detour and check if there's any progress in memristor-based computing. I'll use the search tool for \"memristor computing advancements AI\". It's been promising for a while, but maybe there's been a recent breakthrough that makes it more viable.",
+          "loading": false,
+          "content": "Alright Blake, while we're looking at unconventional approaches, I'm going to take a quick detour and check if there's any progress in memristor-based computing. I'll use the search tool for \"memristor computing advancements AI\". It's been promising for a while, but maybe there's been a recent breakthrough that makes it more viable."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": false
         }
       ],
       "created_at": "2025-07-16T15:40:53.384521",
-      "last_updated": "2025-07-16T19:47:24.589454",
+      "last_updated": "2025-08-22T12:35:14.282164",
       "thread_id": "thread_29c76207",
       "status": "stopped",
       "agent_colors": {
@@ -303,95 +401,7 @@
       "agent_selector_api_key": "",
       "LLM_sending_messages": [
         {
-          "past_convo_summary": "Blake and Jonathan are continuing their discussion on achieving AGI within five years. They're focusing on the challenges of scaling knowledge graphs for scientific data, particularly handling uncertainty. Blake is researching \"knowledge graph uncertainty handling,\" while Jonathan investigates \"high-context memory architectures knowledge graph integration.\" They also discuss the computational resources required, considering advancements in TPUs, neuromorphic computing, and the potential impact of quantum computing breakthroughs. Blake is now researching quantum computing roadmaps."
-        },
-        {
-          "agent_no": null,
-          "agent_id": "agent_d8fa732c",
-          "agent_name": "Jonathan",
-          "sender": "Jonathan",
-          "type": "ai",
-          "loading": true
-        },
-        {
-          "agent_no": null,
-          "agent_id": "agent_d8fa732c",
-          "agent_name": "Jonathan",
-          "sender": "Jonathan",
-          "type": "ai",
-          "message": "Okay, Blake, while you're diving into quantum roadmaps, I'll investigate the current state of neuromorphic computing. I'm curious to see if there are any promising architectures that could efficiently handle the high-context memory demands of AGI. I'll use the search tool for \"neuromorphic computing architectures high-context memory\". Let's see what the cutting edge looks like!",
-          "loading": false
-        },
-        {
-          "agent_no": null,
-          "agent_id": "agent_d8fa732c",
-          "agent_name": "Jonathan",
-          "sender": "Jonathan",
-          "type": "ai",
-          "message": "Good point, Blake. While you're on the quantum computing front, I'll take a look at the progress in neuromorphic computing. It's showing promise for energy-efficient AI, which could be crucial for scaling AGI within a reasonable power budget. I'll use the search tool to check for recent advancements in neuromorphic architectures.",
-          "loading": false
-        },
-        {
-          "agent_no": null,
-          "agent_id": "agent_6e52bc3e",
-          "agent_name": "Blake",
-          "sender": "Blake",
-          "type": "ai",
-          "loading": true
-        },
-        {
-          "agent_no": null,
-          "agent_id": "agent_6e52bc3e",
-          "agent_name": "Blake",
-          "sender": "Blake",
-          "type": "ai",
-          "message": "Neuromorphic computing! Excellent, Jonathan. Energy efficiency is a massive concern. I'll keep an eye out for any overlaps between the quantum computing roadmaps and potential applications in neuromorphic architectures – a hybrid approach could be a game-changer. Let's see what nuggets of wisdom our searches unearth!",
-          "loading": false
-        },
-        {
-          "agent_no": null,
-          "agent_id": "agent_6e52bc3e",
-          "agent_name": "Blake",
-          "sender": "Blake",
-          "type": "ai",
-          "message": "Alright Jonathan, while you're diving into neuromorphic computing, I'll broaden my search to include general projections on specialized AI hardware scaling over the next five years. It's crucial to get a sense of the overall trajectory, not just individual technologies. I'll fire up the search tool for \"AI hardware scaling projections next 5 years.\" Let's see if the numbers support our optimism!",
-          "loading": false
-        },
-        {
-          "agent_no": null,
-          "agent_id": "agent_d8fa732c",
-          "agent_name": "Jonathan",
-          "sender": "Jonathan",
-          "type": "ai",
-          "message": "That's a smart move, Blake! Getting a broader perspective on AI hardware scaling is essential. While you're at it, I'm curious if there are any projections specifically addressing the energy consumption of these future AI systems. Power constraints could be a major limiting factor.",
-          "loading": false
-        },
-        {
-          "agent_no": null,
-          "agent_id": "agent_d8fa732c",
-          "agent_name": "Jonathan",
-          "sender": "Jonathan",
-          "type": "ai",
-          "message": "Good thinking, Blake! Getting a broader perspective on AI hardware scaling is essential. While you're at it, I'm going to quickly check for any breakthroughs in 3D integration of memory and processing units; that could also significantly impact the hardware landscape. I'll use the search tool for \"3D integrated memory processing AI hardware\".",
-          "loading": false
-        },
-        {
-          "agent_no": null,
-          "agent_id": "agent_6e52bc3e",
-          "agent_name": "Blake",
-          "sender": "Blake",
-          "type": "ai",
-          "message": "3D integration, now that's a spicy idea, Jonathan! It could definitely be a game-changer for density and power efficiency. I'll keep that in mind while I'm sifting through these scaling projections – maybe there's some overlap. Let's hope we find some juicy data!",
-          "loading": false
-        },
-        {
-          "agent_no": null,
-          "agent_id": "agent_6e52bc3e",
-          "agent_name": "Blake",
-          "sender": "Blake",
-          "type": "ai",
-          "message": "Ah, energy consumption! Absolutely, Jonathan, a crucial factor. I'll add \"energy consumption projections AI hardware\" to my search. And 3D integration? Brilliant! That could be a real game-changer in terms of density and efficiency. Let's see what the search tool reveals!",
-          "loading": false
+          "past_convo_summary": "Blake and Jonathan are exploring hardware advancements to support their AGI goal. Jonathan is researching neuromorphic computing architectures and 3D integration of memory and processing units, focusing on energy efficiency and high-context memory. Blake is investigating quantum computing roadmaps and broader AI hardware scaling projections, including energy consumption, aiming to identify potential overlaps and game-changing technologies. Both are using search tools to gather information and assess the feasibility of achieving AGI within five years."
         },
         {
           "agent_no": null,
@@ -465,6 +475,104 @@
           "message": "Emerging startups, Jonathan! I love it! Always good to keep an eye on the disruptors. While you're hunting for those dark horses, I'm going to refine my search to focus on the *materials science* aspect of AI hardware scaling. New materials might be the key to overcoming current limitations. Let's see if there's a materials revolution brewing!",
           "loading": false,
           "content": "Emerging startups, Jonathan! I love it! Always good to keep an eye on the disruptors. While you're hunting for those dark horses, I'm going to refine my search to focus on the *materials science* aspect of AI hardware scaling. New materials might be the key to overcoming current limitations. Let's see if there's a materials revolution brewing!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Materials science, Blake! Absolutely critical! While you're digging into that, I'm going to shift my focus to software and algorithms. Let's see if there are any breakthroughs in sparse activation techniques that could drastically reduce the computational load for AGI. I'll use the search tool for \"sparse activation algorithms AI\".",
+          "loading": false,
+          "content": "Materials science, Blake! Absolutely critical! While you're digging into that, I'm going to shift my focus to software and algorithms. Let's see if there are any breakthroughs in sparse activation techniques that could drastically reduce the computational load for AGI. I'll use the search tool for \"sparse activation algorithms AI\"."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Sparse activation algorithms! YES! Jonathan, you're thinking on all cylinders! Reducing the computational load is paramount. I'm on the hunt for materials breakthroughs while you're tackling algorithmic efficiency – a perfect pincer movement! Let's see what the search tool reveals!",
+          "loading": false,
+          "content": "Sparse activation algorithms! YES! Jonathan, you're thinking on all cylinders! Reducing the computational load is paramount. I'm on the hunt for materials breakthroughs while you're tackling algorithmic efficiency – a perfect pincer movement! Let's see what the search tool reveals!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "A pincer movement indeed, Blake! While we're at it, I'm also curious to see if anyone is working on algorithms that can dynamically adjust the sparsity based on the context. I'll use the search tool for \"dynamic sparse activation AI algorithms\". That could be a game-changer for adapting to different tasks and data.",
+          "loading": false,
+          "content": "A pincer movement indeed, Blake! While we're at it, I'm also curious to see if anyone is working on algorithms that can dynamically adjust the sparsity based on the context. I'll use the search tool for \"dynamic sparse activation AI algorithms\". That could be a game-changer for adapting to different tasks and data."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Dynamic sparsity adjustment? That's brilliant, Jonathan! Adaptability is key for AGI. I'll keep that in mind as I sift through these materials science papers – perhaps some new materials enable more efficient dynamic sparsity. Let's see what breakthroughs await!",
+          "loading": false,
+          "content": "Dynamic sparsity adjustment? That's brilliant, Jonathan! Adaptability is key for AGI. I'll keep that in mind as I sift through these materials science papers – perhaps some new materials enable more efficient dynamic sparsity. Let's see what breakthroughs await!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Okay Blake, while you're focusing on materials enabling dynamic sparsity, I'm going to broaden my search to encompass any novel memory architectures beyond just neuromorphic computing. I'll use the search tool for \"novel memory architectures for AI\". We need to explore all possibilities for high-context memory!",
+          "loading": false,
+          "content": "Okay Blake, while you're focusing on materials enabling dynamic sparsity, I'm going to broaden my search to encompass any novel memory architectures beyond just neuromorphic computing. I'll use the search tool for \"novel memory architectures for AI\". We need to explore all possibilities for high-context memory!"
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Novel memory architectures! Fantastic, Jonathan! We need a memory revolution to handle the demands of AGI. I'll keep my eyes peeled for any materials that could enable these new architectures – it's all connected! Let's see what memory marvels we can find!",
+          "loading": false,
+          "content": "Novel memory architectures! Fantastic, Jonathan! We need a memory revolution to handle the demands of AGI. I'll keep my eyes peeled for any materials that could enable these new architectures – it's all connected! Let's see what memory marvels we can find!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Memory marvels, indeed! While I'm on the topic of novel architectures, I'm also going to check if there's any interesting work being done on reservoir computing. I'll use the search tool for \"reservoir computing advancements AI\". It's a bit of a long shot, but it could offer some unexpected advantages for high-context memory.",
+          "loading": false,
+          "content": "Memory marvels, indeed! While I'm on the topic of novel architectures, I'm also going to check if there's any interesting work being done on reservoir computing. I'll use the search tool for \"reservoir computing advancements AI\". It's a bit of a long shot, but it could offer some unexpected advantages for high-context memory."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "message": "Reservoir computing! A long shot, maybe, but those are often the most rewarding! I'll keep an open mind and see if any of my materials research could serendipitously boost reservoir computing performance. Let's see what unexpected treasures we unearth!",
+          "loading": false,
+          "content": "Reservoir computing! A long shot, maybe, but those are often the most rewarding! I'll keep an open mind and see if any of my materials research could serendipitously boost reservoir computing performance. Let's see what unexpected treasures we unearth!"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Alright Blake, while we're looking at unconventional approaches, I'm going to take a quick detour and check if there's any progress in memristor-based computing. I'll use the search tool for \"memristor computing advancements AI\". It's been promising for a while, but maybe there's been a recent breakthrough that makes it more viable.",
+          "loading": false,
+          "content": "Alright Blake, while we're looking at unconventional approaches, I'm going to take a quick detour and check if there's any progress in memristor-based computing. I'll use the search tool for \"memristor computing advancements AI\". It's been promising for a while, but maybe there's been a recent breakthrough that makes it more viable."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_6e52bc3e",
+          "agent_name": "Blake",
+          "sender": "Blake",
+          "type": "ai",
+          "loading": false
         }
       ],
       "voices_enabled": true
@@ -480,9 +588,9 @@
       ],
       "messages": [],
       "created_at": "2025-07-28T19:51:42.708407",
-      "last_updated": "2025-07-28T19:53:03.723663",
+      "last_updated": "2025-08-22T12:33:30.443886",
       "thread_id": "thread_468c8bf1",
-      "status": "stopped",
+      "status": "active",
       "agent_colors": {
         "agent_6e52bc3e": "#FCFAEE",
         "agent_d8fa732c": "#FADA7A"
@@ -607,212 +715,6 @@
       "termination_condition": "",
       "agent_selector_api_key": "",
       "LLM_sending_messages": [],
-      "voices_enabled": false
-    },
-    {
-      "id": "conv_66aa6dc5",
-      "title": "tt2",
-      "environment": "beach",
-      "scene_description": "two friends talk about AI",
-      "agents": [
-        "agent_6e52bc3e",
-        "agent_d8fa732c"
-      ],
-      "messages": [],
-      "created_at": "2025-07-28T22:15:16.750107",
-      "last_updated": "2025-07-28T22:15:16.949240",
-      "thread_id": "thread_dd288ede",
-      "status": "active",
-      "agent_colors": {
-        "agent_6e52bc3e": "#FADA7A",
-        "agent_d8fa732c": "#FCFAEE"
-      },
-      "agent_numbers": {
-        "agent_6e52bc3e": 1,
-        "agent_d8fa732c": 2
-      },
-      "invocation_method": "agent_selector",
-      "termination_condition": "",
-      "agent_selector_api_key": "***************************************",
-      "LLM_sending_messages": [],
-      "voices_enabled": false
-    },
-    {
-      "id": "conv_175780c2",
-      "title": "tt3",
-      "environment": "beach",
-      "scene_description": "Two friends talk about AI",
-      "agents": [
-        "agent_6e52bc3e",
-        "agent_d8fa732c"
-      ],
-      "messages": [
-        {
-          "agent_name": "Blake",
-          "message": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?"
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?",
-          "agent_id": "agent_6e52bc3e",
-          "content": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?"
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do."
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do.",
-          "agent_id": "agent_d8fa732c",
-          "content": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do."
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding."
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding.",
-          "agent_id": "agent_6e52bc3e",
-          "content": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding."
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!"
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!",
-          "agent_no": 2,
-          "agent_id": "agent_d8fa732c",
-          "content": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!"
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding."
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding.",
-          "agent_no": 1,
-          "agent_id": "agent_6e52bc3e",
-          "content": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding."
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities."
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities.",
-          "agent_no": 2,
-          "agent_id": "agent_d8fa732c",
-          "content": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities."
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\""
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\"",
-          "agent_no": 1,
-          "agent_id": "agent_6e52bc3e",
-          "content": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\""
-        }
-      ],
-      "created_at": "2025-07-28T22:24:48.364944",
-      "last_updated": "2025-07-28T22:57:58.542071",
-      "thread_id": "thread_77eb7dde",
-      "status": "stopped",
-      "agent_colors": {
-        "agent_6e52bc3e": "#4F8B61",
-        "agent_d8fa732c": "#CAE8BD"
-      },
-      "agent_numbers": {
-        "agent_6e52bc3e": 1,
-        "agent_d8fa732c": 2
-      },
-      "invocation_method": "agent_selector",
-      "termination_condition": "",
-      "agent_selector_api_key": "AIzaSyBESS4U1Uha0u4vbLXcl-f5_mRaWnpOObg",
-      "LLM_sending_messages": [
-        {
-          "agent_name": "Blake",
-          "message": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?"
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?",
-          "agent_id": "agent_6e52bc3e",
-          "content": "(Adjusts my sunglasses, a gentle smile playing on my lips) Ah, AI! Out here on the beach, it almost feels like a world away from the complex algorithms and equations. Still, it's fascinating how even something as seemingly simple as the waves can be modeled and understood through AI, isn't it? What's on your mind today?"
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do."
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do.",
-          "agent_id": "agent_d8fa732c",
-          "content": "You're right, Blake. It's funny how the natural world, in all its apparent simplicity, presents such complex challenges that AI can help us unravel. I've been particularly engrossed in the latest advancements in high-context memory GenAI. Imagine AI that can not only process information but also deeply understand the context, nuances, and long-term implications, much like we do."
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding."
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding.",
-          "agent_id": "agent_6e52bc3e",
-          "content": "(Nods thoughtfully, kicking a bit of sand) High-context memory GenAI, you say? Now that's a fascinating field! The ability for AI to grasp not just the \"what\" but the \"why\" and \"how\" behind information... it's a game-changer. I wonder what architectures are proving most promising in achieving this level of contextual understanding."
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!"
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!",
-          "agent_no": 2,
-          "agent_id": "agent_d8fa732c",
-          "content": "From what I've been reading, architectures incorporating attention mechanisms and transformers seem to be leading the pack. There's also exciting research into memory networks and hierarchical memory structures that allow AI to process information at different levels of abstraction, retaining crucial details while understanding the broader narrative. It's a rapidly evolving field!"
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding."
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding.",
-          "agent_no": 1,
-          "agent_id": "agent_6e52bc3e",
-          "content": "(Eyes lighting up with intellectual curiosity) Ah, yes! Attention mechanisms and transformers – mimicking, in a way, the selective focus of the human brain. I've been meaning to delve deeper into the hierarchical memory structures; the ability to abstract and retain information across different levels is crucial. Let me quickly search for some recent papers on hierarchical memory networks to refresh my understanding."
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities."
-        },
-        {
-          "agent_name": "Jonathan",
-          "message": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities.",
-          "agent_no": 2,
-          "agent_id": "agent_d8fa732c",
-          "content": "That's a great idea, Blake! While you're at it, I'd be curious to see if there's any new work exploring the integration of these hierarchical memory structures with knowledge graphs. The combination could lead to even more robust contextual understanding and reasoning capabilities. It's exciting to think about the possibilities."
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\""
-        },
-        {
-          "agent_name": "Blake",
-          "message": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\"",
-          "agent_no": 1,
-          "agent_id": "agent_6e52bc3e",
-          "content": "(Taps on my phone, quickly searching) \"Hierarchical memory networks and knowledge graph integration... excellent point, Jonathan! The synergy could be quite powerful. Let's see what the research landscape looks like. I'm particularly interested in how they're addressing the challenge of maintaining consistency across different levels of abstraction.\""
-        }
-      ],
       "voices_enabled": false
     },
     {

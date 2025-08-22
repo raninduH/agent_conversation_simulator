@@ -50,7 +50,7 @@ class ResearchTriggerEngine:
 
     def _load_research_details(self, research_id):
         print(f"📂 [ResearchTriggerEngine] Loading research details for ID: {research_id}")
-        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager(os.path.dirname(__file__))
+        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager()
         research = data_manager.get_conversation_by_id(research_id)
         if not research:
             print(f"❌ [ResearchTriggerEngine] Research ID '{research_id}' not found!")
@@ -168,7 +168,7 @@ class ResearchTriggerEngine:
 
     def _save_research_state(self, research_id):
         print(f"💾 [ResearchTriggerEngine] Saving research state for '{research_id}'...")
-        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager(os.path.dirname(__file__))
+        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager()
         research = self.active_researches.get(research_id)
         if research is not None:
             from dataclasses import asdict
@@ -189,7 +189,7 @@ class ResearchTriggerEngine:
 
     def resume_research(self, research_id):
         print(f"🔄 [ResearchTriggerEngine] Resuming past research '{research_id}'...")
-        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager(os.path.dirname(__file__))
+        data_manager = self.data_manager if hasattr(self, 'data_manager') else DataManager()
         print(f"📖 [ResearchTriggerEngine] Loading research from JSON...")
         research = data_manager.get_conversation_by_id(research_id)
         if not research:
