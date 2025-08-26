@@ -3466,6 +3466,305 @@
         }
       ],
       "voices_enabled": true
+    },
+    {
+      "id": "conv_2aa8974f",
+      "title": "Discussion of AI in tropical cyclone prediction",
+      "environment": "laboratory",
+      "scene_description": "Three friends discuss on how to use AI to perform tropical cyclone prediction, disaster damage prevention and reduction.",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326",
+        "agent_f1dd669a"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey, this is a fascinating challenge! Predicting tropical cyclones and mitigating their damage using AI—I'm immediately thinking about how we can leverage high-context memory GenAI to understand the complex, evolving patterns in weather data.",
+          "loading": false,
+          "content": "Hey, this is a fascinating challenge! Predicting tropical cyclones and mitigating their damage using AI—I'm immediately thinking about how we can leverage high-context memory GenAI to understand the complex, evolving patterns in weather data."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "I agree, Jonathan. AI offers immense potential here. For cyclone prediction, we can explore AI to analyze vast datasets of atmospheric conditions, sea surface temperatures, and historical cyclone patterns to improve the accuracy and lead time of forecasts. ",
+          "loading": false,
+          "content": "I agree, Jonathan. AI offers immense potential here. For cyclone prediction, we can explore AI to analyze vast datasets of atmospheric conditions, sea surface temperatures, and historical cyclone patterns to improve the accuracy and lead time of forecasts. "
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Jonathan, that's a great starting point. Understanding the complex interplay of atmospheric and oceanic conditions is crucial for accurate cyclone prediction. We can explore how deep learning models, like convolutional neural networks, can detect subtle, non-linear patterns in sea surface temperatures and wind shear, which are often precursors to cyclone formation.",
+          "loading": false,
+          "content": "Jonathan, that's a great starting point. Understanding the complex interplay of atmospheric and oceanic conditions is crucial for accurate cyclone prediction. We can explore how deep learning models, like convolutional neural networks, can detect subtle, non-linear patterns in sea surface temperatures and wind shear, which are often precursors to cyclone formation."
+        }
+      ],
+      "created_at": "2025-08-26T14:58:31.965590",
+      "last_updated": "2025-08-26T14:59:46.245030",
+      "thread_id": "thread_12d05784",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#A2AADB",
+        "agent_d9ed4326": "#D4F6FF",
+        "agent_f1dd669a": "#FADA7A"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2,
+        "agent_f1dd669a": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "When the agents reach a solid answer or conclusion to all the discussion topics.",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey, this is a fascinating challenge! Predicting tropical cyclones and mitigating their damage using AI—I'm immediately thinking about how we can leverage high-context memory GenAI to understand the complex, evolving patterns in weather data.",
+          "loading": false,
+          "content": "Hey, this is a fascinating challenge! Predicting tropical cyclones and mitigating their damage using AI—I'm immediately thinking about how we can leverage high-context memory GenAI to understand the complex, evolving patterns in weather data."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "I agree, Jonathan. AI offers immense potential here. For cyclone prediction, we can explore AI to analyze vast datasets of atmospheric conditions, sea surface temperatures, and historical cyclone patterns to improve the accuracy and lead time of forecasts. ",
+          "loading": false,
+          "content": "I agree, Jonathan. AI offers immense potential here. For cyclone prediction, we can explore AI to analyze vast datasets of atmospheric conditions, sea surface temperatures, and historical cyclone patterns to improve the accuracy and lead time of forecasts. "
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Jonathan, that's a great starting point. Understanding the complex interplay of atmospheric and oceanic conditions is crucial for accurate cyclone prediction. We can explore how deep learning models, like convolutional neural networks, can detect subtle, non-linear patterns in sea surface temperatures and wind shear, which are often precursors to cyclone formation.",
+          "loading": false,
+          "content": "Jonathan, that's a great starting point. Understanding the complex interplay of atmospheric and oceanic conditions is crucial for accurate cyclone prediction. We can explore how deep learning models, like convolutional neural networks, can detect subtle, non-linear patterns in sea surface temperatures and wind shear, which are often precursors to cyclone formation."
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_582b9a93",
+      "title": "twt",
+      "environment": "park",
+      "scene_description": "three friends discuss about AI for cyclone prediction",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326",
+        "agent_f1dd669a"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey, that's a fascinating idea! Using AI for cyclone prediction could be a game-changer. I wonder if we could leverage high-context memory models to better understand the complex, evolving patterns of these storms?",
+          "loading": false,
+          "content": "Hey, that's a fascinating idea! Using AI for cyclone prediction could be a game-changer. I wonder if we could leverage high-context memory models to better understand the complex, evolving patterns of these storms?"
+        }
+      ],
+      "created_at": "2025-08-26T15:03:59.324933",
+      "last_updated": "2025-08-26T15:04:42.899482",
+      "thread_id": "thread_0f983b5c",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#CAE8BD",
+        "agent_d9ed4326": "#D4F6FF",
+        "agent_f1dd669a": "#FCFAEE"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2,
+        "agent_f1dd669a": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey, that's a fascinating idea! Using AI for cyclone prediction could be a game-changer. I wonder if we could leverage high-context memory models to better understand the complex, evolving patterns of these storms?",
+          "loading": false,
+          "content": "Hey, that's a fascinating idea! Using AI for cyclone prediction could be a game-changer. I wonder if we could leverage high-context memory models to better understand the complex, evolving patterns of these storms?"
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_aa080aff",
+      "title": "Discussion of AI in tropical cyclone prediction",
+      "environment": "laboratory",
+      "scene_description": "Three friends discuss on how to use AI to perform tropical cyclone prediction, disaster damage prevention and reduction.",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326",
+        "agent_f1dd669a"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Alright, let's brainstorm. High-context memory GenAI could potentially sift through decades of climate data, identifying patterns we might miss. And for damage prevention, could we use computer vision to assess infrastructure vulnerability *before* a cyclone hits?",
+          "loading": false,
+          "content": "Alright, let's brainstorm. High-context memory GenAI could potentially sift through decades of climate data, identifying patterns we might miss. And for damage prevention, could we use computer vision to assess infrastructure vulnerability *before* a cyclone hits?"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Jonathan, I agree. AI excels at pattern recognition in vast datasets, crucial for cyclone prediction. Furthermore, AI-driven simulations can pinpoint infrastructure weaknesses, allowing for targeted preventative measures before a cyclone strikes.",
+          "loading": false,
+          "content": "Jonathan, I agree. AI excels at pattern recognition in vast datasets, crucial for cyclone prediction. Furthermore, AI-driven simulations can pinpoint infrastructure weaknesses, allowing for targeted preventative measures before a cyclone strikes."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Jonathan, you're on the right track. Deep learning models excel at detecting complex, non-linear patterns in climate data that traditional models might overlook. For instance, we could use convolutional neural networks to analyze sea surface temperature anomalies and their influence on cyclone intensity.",
+          "loading": false,
+          "content": "Jonathan, you're on the right track. Deep learning models excel at detecting complex, non-linear patterns in climate data that traditional models might overlook. For instance, we could use convolutional neural networks to analyze sea surface temperature anomalies and their influence on cyclone intensity."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Exactly, Ashley! And to build on that, imagine using AI to optimize evacuation routes in real-time based on predicted flood zones. We could even use satellite imagery processed with deep learning to assess damage immediately after a cyclone, directing aid where it's needed most.",
+          "loading": false,
+          "content": "Exactly, Ashley! And to build on that, imagine using AI to optimize evacuation routes in real-time based on predicted flood zones. We could even use satellite imagery processed with deep learning to assess damage immediately after a cyclone, directing aid where it's needed most."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Ashley's point about deep learning is spot on. Furthermore, let's not forget the potential of AI-enabled drones for rapid damage assessment post-disaster, providing critical data for resource allocation and rescue efforts. We should also consider how GIS mapping integrated with AI can help us identify the most vulnerable communities before a cyclone even makes landfall.",
+          "loading": false,
+          "content": "Ashley's point about deep learning is spot on. Furthermore, let's not forget the potential of AI-enabled drones for rapid damage assessment post-disaster, providing critical data for resource allocation and rescue efforts. We should also consider how GIS mapping integrated with AI can help us identify the most vulnerable communities before a cyclone even makes landfall."
+        },
+        {
+          "agent_no": 3,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Absolutely, David. AI-enabled drones offer a significant advantage in rapidly assessing damage, especially in areas that are difficult to access immediately after a cyclone. Combining GIS mapping with AI allows us to proactively identify and support vulnerable communities, enhancing our disaster preparedness efforts.",
+          "loading": false,
+          "content": "Absolutely, David. AI-enabled drones offer a significant advantage in rapidly assessing damage, especially in areas that are difficult to access immediately after a cyclone. Combining GIS mapping with AI allows us to proactively identify and support vulnerable communities, enhancing our disaster preparedness efforts."
+        }
+      ],
+      "created_at": "2025-08-26T15:13:45.770524",
+      "last_updated": "2025-08-26T15:17:11.069613",
+      "thread_id": "thread_9c956c61",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#4F8B61",
+        "agent_d9ed4326": "#A2AADB",
+        "agent_f1dd669a": "#CAE8BD"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2,
+        "agent_f1dd669a": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "When the agents reach a solid answer or conclusion to all the discussion topics.",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Alright, let's brainstorm. High-context memory GenAI could potentially sift through decades of climate data, identifying patterns we might miss. And for damage prevention, could we use computer vision to assess infrastructure vulnerability *before* a cyclone hits?",
+          "loading": false,
+          "content": "Alright, let's brainstorm. High-context memory GenAI could potentially sift through decades of climate data, identifying patterns we might miss. And for damage prevention, could we use computer vision to assess infrastructure vulnerability *before* a cyclone hits?"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Jonathan, I agree. AI excels at pattern recognition in vast datasets, crucial for cyclone prediction. Furthermore, AI-driven simulations can pinpoint infrastructure weaknesses, allowing for targeted preventative measures before a cyclone strikes.",
+          "loading": false,
+          "content": "Jonathan, I agree. AI excels at pattern recognition in vast datasets, crucial for cyclone prediction. Furthermore, AI-driven simulations can pinpoint infrastructure weaknesses, allowing for targeted preventative measures before a cyclone strikes."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Jonathan, you're on the right track. Deep learning models excel at detecting complex, non-linear patterns in climate data that traditional models might overlook. For instance, we could use convolutional neural networks to analyze sea surface temperature anomalies and their influence on cyclone intensity.",
+          "loading": false,
+          "content": "Jonathan, you're on the right track. Deep learning models excel at detecting complex, non-linear patterns in climate data that traditional models might overlook. For instance, we could use convolutional neural networks to analyze sea surface temperature anomalies and their influence on cyclone intensity."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Exactly, Ashley! And to build on that, imagine using AI to optimize evacuation routes in real-time based on predicted flood zones. We could even use satellite imagery processed with deep learning to assess damage immediately after a cyclone, directing aid where it's needed most.",
+          "loading": false,
+          "content": "Exactly, Ashley! And to build on that, imagine using AI to optimize evacuation routes in real-time based on predicted flood zones. We could even use satellite imagery processed with deep learning to assess damage immediately after a cyclone, directing aid where it's needed most."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Ashley's point about deep learning is spot on. Furthermore, let's not forget the potential of AI-enabled drones for rapid damage assessment post-disaster, providing critical data for resource allocation and rescue efforts. We should also consider how GIS mapping integrated with AI can help us identify the most vulnerable communities before a cyclone even makes landfall.",
+          "loading": false,
+          "content": "Ashley's point about deep learning is spot on. Furthermore, let's not forget the potential of AI-enabled drones for rapid damage assessment post-disaster, providing critical data for resource allocation and rescue efforts. We should also consider how GIS mapping integrated with AI can help us identify the most vulnerable communities before a cyclone even makes landfall."
+        },
+        {
+          "agent_no": 3,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Absolutely, David. AI-enabled drones offer a significant advantage in rapidly assessing damage, especially in areas that are difficult to access immediately after a cyclone. Combining GIS mapping with AI allows us to proactively identify and support vulnerable communities, enhancing our disaster preparedness efforts.",
+          "loading": false,
+          "content": "Absolutely, David. AI-enabled drones offer a significant advantage in rapidly assessing damage, especially in areas that are difficult to access immediately after a cyclone. Combining GIS mapping with AI allows us to proactively identify and support vulnerable communities, enhancing our disaster preparedness efforts."
+        }
+      ],
+      "voices_enabled": true
     }
   ]
 }

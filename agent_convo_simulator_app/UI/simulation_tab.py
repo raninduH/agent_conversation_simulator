@@ -16,6 +16,15 @@ class SimulationTab(ttk.Frame):
         self.app.conversation_engine = ConversationEngine()
         self.create_widgets()
         self.blinking_messages = {}
+        self.conversation_paused = False  # Track paused state
+    def __init__(self, parent, app, data_manager):
+        super().__init__(parent)
+        self.app = app
+        self.data_manager = data_manager
+        # Use new ConversationEngine
+        self.app.conversation_engine = ConversationEngine()
+        self.create_widgets()
+        self.blinking_messages = {}
 
     def create_widgets(self):
         """Create the conversation simulation tab."""
@@ -195,6 +204,7 @@ class SimulationTab(ttk.Frame):
                 print("[SimulationTab] Updating status for pause...")
                 self.app.update_status("Conversation paused.")
                 print("[SimulationTab] Stopping all blinking...")
+                self.conversation_paused = True
                 # self.chat_canvas.stop_all_blinking()
                 # Remove all loading chat bubbles from the canvas and memory
                 if hasattr(self, '_loading_bubbles'):
@@ -221,6 +231,7 @@ class SimulationTab(ttk.Frame):
                 self.update_simulation_controls(True)
                 print("[SimulationTab] Updating status for resume...")
                 self.app.update_status("Conversation resumed.")
+                self.conversation_paused = False
                 # Show system message in chat canvas
                 resume_message = "▶️ System: Conversation has been resumed."
                 print(f"[SimulationTab] Adding system resume message: {resume_message}")
@@ -301,6 +312,9 @@ class SimulationTab(ttk.Frame):
         self.app.send_user_message()
 
     def display_message(self, message_data, blinking=False):
+        # Only allow message display if conversation is not paused
+        if getattr(self, 'conversation_paused', False):
+            return
         """Display a message in the chat canvas."""
         print(f"[SimulationTab] display_message called with: {message_data}")
         agent_id = message_data.get("agent_id")
@@ -361,7 +375,7 @@ class SimulationTab(ttk.Frame):
 
         if loading:
             # Remove loading bubble with same message_id (avoid duplicates)
-            self._loading_bubbles = [m for m in self._loading_bubbles if m.get('message_id') != message_id]
+            # self._loading_bubbles = [m for m in self._loading_bubbles if m.get('message_id') != message_id]
             self._loading_bubbles.append(dict(message_data))
             # # Display the new loading bubble in the canvas
             # bubble = self.chat_canvas.add_bubble(
@@ -384,9 +398,9 @@ class SimulationTab(ttk.Frame):
             remove_loading_by_agent(agent_id, agent_name, sender)
             self._non_loading_bubbles.append(dict(message_data))
 
-        # Optimized redraw: remove only loading bubbles, add new message, then redraw loading bubbles
-        if hasattr(self.chat_canvas, 'remove_loading_bubbles'):
-            self.chat_canvas.remove_loading_bubbles()
+            # Optimized redraw: remove only loading bubbles, add new message, then redraw loading bubbles
+            if hasattr(self.chat_canvas, 'remove_loading_bubbles'):
+                self.chat_canvas.remove_loading_bubbles()
         # else:
         #     # fallback: clear all and re-add non-loading bubbles (legacy)
         #     self.chat_canvas.clear()
