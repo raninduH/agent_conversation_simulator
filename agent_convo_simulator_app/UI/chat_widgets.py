@@ -310,6 +310,17 @@ class ChatBubble(tk.Frame):
 
 
 class ChatCanvas(tk.Canvas):
+    def remove_loading_bubbles(self):
+        """Remove all loading bubbles from the canvas and clear their references."""
+        for agent_id, bubble in list(self.agent_loading_bubbles.items()):
+            if hasattr(bubble, "stop_loading_animation"):
+                bubble.stop_loading_animation()
+            bubble.destroy()
+            del self.agent_loading_bubbles[agent_id]
+        # No need to touch self.message_bubbles (non-loading)
+        self.bubble_frame.update_idletasks()
+        self.update_idletasks()
+        self.configure(scrollregion=self.bbox("all"))
     """A scrollable canvas for displaying chat bubbles."""
     
     def __init__(self, parent, **kwargs):

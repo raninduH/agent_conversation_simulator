@@ -195,24 +195,13 @@ class SimulationTab(ttk.Frame):
                 print("[SimulationTab] Updating status for pause...")
                 self.app.update_status("Conversation paused.")
                 print("[SimulationTab] Stopping all blinking...")
-                self.chat_canvas.stop_all_blinking()
+                # self.chat_canvas.stop_all_blinking()
                 # Remove all loading chat bubbles from the canvas and memory
                 if hasattr(self, '_loading_bubbles'):
                     self._loading_bubbles.clear()
-                    # Redraw chat canvas without loading bubbles
-                    self.chat_canvas.clear()
-                    for m in getattr(self, '_non_loading_bubbles', []):
-                        bubble = self.chat_canvas.add_bubble(
-                            m.get("sender") or m.get("agent_name") or m.get("agent_id"),
-                            m.get("content") or m.get("message", ""),
-                            m.get("timestamp", datetime.now().strftime("%H:%M:%S")),
-                            m.get("type", "ai"),
-                            m.get("color"),
-                            m.get("align_right"),
-                            m.get("message_id"),
-                            loading=False,
-                            agent_id=m.get("agent_id")
-                        )
+                    # Remove only loading bubbles from the canvas, keep non-loading bubbles intact
+                    if hasattr(self.chat_canvas, 'remove_loading_bubbles'):
+                        self.chat_canvas.remove_loading_bubbles()
                 # Show system message in chat canvas
                 pause_message = "⏸️ System: Conversation is paused."
                 print(f"[SimulationTab] Adding system pause message: {pause_message}")
@@ -374,45 +363,107 @@ class SimulationTab(ttk.Frame):
             # Remove loading bubble with same message_id (avoid duplicates)
             self._loading_bubbles = [m for m in self._loading_bubbles if m.get('message_id') != message_id]
             self._loading_bubbles.append(dict(message_data))
+            # # Display the new loading bubble in the canvas
+            # bubble = self.chat_canvas.add_bubble(
+            #     sender or agent_name or agent_id,
+            #     "...",
+            #     timestamp,
+            #     msg_type,
+            #     color,
+            #     align_right,
+            #     message_id,
+            #     loading=True,
+            #     agent_id=agent_id
+            # )
+            # if blinking:
+            #     bubble.start_blink()
+            #     self.blinking_messages[bubble] = True
+
         else:
             # Remove any loading bubble for this agent
             remove_loading_by_agent(agent_id, agent_name, sender)
             self._non_loading_bubbles.append(dict(message_data))
 
-        # Redraw: non-loading bubbles, then all loading bubbles at the bottom
-        self.chat_canvas.clear()
-        for m in self._non_loading_bubbles:
-            bubble = self.chat_canvas.add_bubble(
-                m.get("sender") or m.get("agent_name") or m.get("agent_id"),
-                m.get("content") or m.get("message", ""),
-                m.get("timestamp", datetime.now().strftime("%H:%M:%S")),
-                m.get("type", "ai"),
-                m.get("color"),
-                m.get("align_right"),
-                m.get("message_id"),
-                loading=False,
-                agent_id=m.get("agent_id")
-            )
-            blinking_flag = m.get("blinking", blinking)
-            if blinking_flag and bubble:
-                bubble.start_blink()
-                self.blinking_messages[bubble] = True
-        for m in self._loading_bubbles:
-            bubble = self.chat_canvas.add_bubble(
-                m.get("sender") or m.get("agent_name") or m.get("agent_id"),
-                "...",
-                m.get("timestamp", datetime.now().strftime("%H:%M:%S")),
-                m.get("type", "ai"),
-                m.get("color"),
-                m.get("align_right"),
-                m.get("message_id"),
-                loading=True,
-                agent_id=m.get("agent_id")
-            )
-            blinking_flag = m.get("blinking", blinking)
-            if blinking_flag and bubble:
-                bubble.start_blink()
-                self.blinking_messages[bubble] = True
+        # Optimized redraw: remove only loading bubbles, add new message, then redraw loading bubbles
+        if hasattr(self.chat_canvas, 'remove_loading_bubbles'):
+            self.chat_canvas.remove_loading_bubbles()
+        # else:
+        #     # fallback: clear all and re-add non-loading bubbles (legacy)
+        #     self.chat_canvas.clear()
+        #     for m in self._non_loading_bubbles:
+        #         bubble = self.chat_canvas.add_bubble(
+        #             m.get("sender") or m.get("agent_name") or m.get("agent_id"),
+        #             m.get("content") or m.get("message", ""),
+        #             m.get("timestamp", datetime.now().strftime("%H:%M:%S")),
+        #             m.get("type", "ai"),
+        #             m.get("color"),
+        #             m.get("align_right"),
+        #             m.get("message_id"),
+        #             loading=False,
+        #             agent_id=m.get("agent_id")
+        #         )
+        #         blinking_flag = m.get("blinking", blinking)
+        #         if blinking_flag and bubble:
+        #             bubble.start_blink()
+        #             self.blinking_messages[bubble] = True
+
+        if loading:
+            if self._loading_bubbles:
+                m = self._loading_bubbles[-1]
+                bubble = self.chat_canvas.add_bubble(
+                    m.get("sender") or m.get("agent_name") or m.get("agent_id"),
+                    "...",
+                    m.get("timestamp", datetime.now().strftime("%H:%M:%S")),
+                    m.get("type", "ai"),
+                    m.get("color"),
+                    m.get("align_right"),
+                    m.get("message_id"),
+                    loading=True,
+                    agent_id=m.get("agent_id")
+                )
+                blinking_flag = m.get("blinking", False)
+                if blinking_flag and bubble:
+                    bubble.start_blink()
+                    self.blinking_messages[bubble] = True    
+
+        # Add the new non-loading message (if not already present)
+        if not loading:
+            m = self._non_loading_bubbles[-1] if self._non_loading_bubbles else None
+            if m:
+                bubble = self.chat_canvas.add_bubble(
+                    m.get("sender") or m.get("agent_name") or m.get("agent_id"),
+                    m.get("content") or m.get("message", ""),
+                    m.get("timestamp", datetime.now().strftime("%H:%M:%S")),
+                    m.get("type", "ai"),
+                    m.get("color"),
+                    m.get("align_right"),
+                    m.get("message_id"),
+                    loading=False,
+                    agent_id=m.get("agent_id")
+                )
+                blinking_flag = m.get("blinking", blinking)
+                if blinking_flag and bubble:
+                    bubble.start_blink()
+                    self.blinking_messages[bubble] = True
+
+            # Redraw only loading bubbles at the end
+        
+            for m in self._loading_bubbles:
+                bubble = self.chat_canvas.add_bubble(
+                    m.get("sender") or m.get("agent_name") or m.get("agent_id"),
+                    "...",
+                    m.get("timestamp", datetime.now().strftime("%H:%M:%S")),
+                    m.get("type", "ai"),
+                    m.get("color"),
+                    m.get("align_right"),
+                    m.get("message_id"),
+                    loading=True,
+                    agent_id=m.get("agent_id")
+                )
+                blinking_flag = m.get("blinking", blinking)
+                if blinking_flag and bubble:
+                    bubble.start_blink()
+                    self.blinking_messages[bubble] = True
         return
 
     def handle_message_callback(self, message_data):

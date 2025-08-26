@@ -3092,6 +3092,380 @@
         }
       ],
       "voices_enabled": true
+    },
+    {
+      "id": "conv_d1d86f14",
+      "title": "test",
+      "environment": "park",
+      "scene_description": "two friends talk about AI for cyclone prediction",
+      "agents": [
+        "agent_d9ed4326",
+        "agent_f1dd669a"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "AI offers tremendous potential for improving cyclone prediction and early warning systems. We can use AI to analyze vast datasets of weather patterns and historical cyclone data to create more accurate predictive models.",
+          "loading": false,
+          "content": "AI offers tremendous potential for improving cyclone prediction and early warning systems. We can use AI to analyze vast datasets of weather patterns and historical cyclone data to create more accurate predictive models."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Absolutely, David. AI's ability to detect complex, non-linear patterns in climate data is a game-changer. Deep learning models, for instance, can identify subtle precursors to cyclone intensification that traditional physics-based models might miss, leading to more timely and accurate warnings.",
+          "loading": false,
+          "content": "Absolutely, David. AI's ability to detect complex, non-linear patterns in climate data is a game-changer. Deep learning models, for instance, can identify subtle precursors to cyclone intensification that traditional physics-based models might miss, leading to more timely and accurate warnings."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Exactly, Ashley. And it's not just about prediction; AI can also help us simulate the potential impact of cyclones on infrastructure. Imagine using AI to identify vulnerable bridges or power grids before a cyclone even hits, allowing us to proactively reinforce them.",
+          "loading": false,
+          "content": "Exactly, Ashley. And it's not just about prediction; AI can also help us simulate the potential impact of cyclones on infrastructure. Imagine using AI to identify vulnerable bridges or power grids before a cyclone even hits, allowing us to proactively reinforce them."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Exactly, David. And it's not just about prediction; AI can also help us simulate the potential impact of cyclones on infrastructure. Imagine using AI to identify vulnerable bridges or power grids before a cyclone even hits, allowing us to proactively reinforce them.",
+          "loading": false,
+          "content": "Exactly, David. And it's not just about prediction; AI can also help us simulate the potential impact of cyclones on infrastructure. Imagine using AI to identify vulnerable bridges or power grids before a cyclone even hits, allowing us to proactively reinforce them."
+        }
+      ],
+      "created_at": "2025-08-26T14:20:22.494087",
+      "last_updated": "2025-08-26T14:22:40.139876",
+      "thread_id": "thread_2c35fdec",
+      "status": "active",
+      "agent_colors": {
+        "agent_d9ed4326": "#4F8B61",
+        "agent_f1dd669a": "#FADA7A"
+      },
+      "agent_numbers": {
+        "agent_d9ed4326": 1,
+        "agent_f1dd669a": 2
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "AI offers tremendous potential for improving cyclone prediction and early warning systems. We can use AI to analyze vast datasets of weather patterns and historical cyclone data to create more accurate predictive models.",
+          "loading": false,
+          "content": "AI offers tremendous potential for improving cyclone prediction and early warning systems. We can use AI to analyze vast datasets of weather patterns and historical cyclone data to create more accurate predictive models."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Absolutely, David. AI's ability to detect complex, non-linear patterns in climate data is a game-changer. Deep learning models, for instance, can identify subtle precursors to cyclone intensification that traditional physics-based models might miss, leading to more timely and accurate warnings.",
+          "loading": false,
+          "content": "Absolutely, David. AI's ability to detect complex, non-linear patterns in climate data is a game-changer. Deep learning models, for instance, can identify subtle precursors to cyclone intensification that traditional physics-based models might miss, leading to more timely and accurate warnings."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Exactly, Ashley. And it's not just about prediction; AI can also help us simulate the potential impact of cyclones on infrastructure. Imagine using AI to identify vulnerable bridges or power grids before a cyclone even hits, allowing us to proactively reinforce them.",
+          "loading": false,
+          "content": "Exactly, Ashley. And it's not just about prediction; AI can also help us simulate the potential impact of cyclones on infrastructure. Imagine using AI to identify vulnerable bridges or power grids before a cyclone even hits, allowing us to proactively reinforce them."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Exactly, David. And it's not just about prediction; AI can also help us simulate the potential impact of cyclones on infrastructure. Imagine using AI to identify vulnerable bridges or power grids before a cyclone even hits, allowing us to proactively reinforce them.",
+          "loading": false,
+          "content": "Exactly, David. And it's not just about prediction; AI can also help us simulate the potential impact of cyclones on infrastructure. Imagine using AI to identify vulnerable bridges or power grids before a cyclone even hits, allowing us to proactively reinforce them."
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_fd989f19",
+      "title": "test9",
+      "environment": "park",
+      "scene_description": "Three friends talk about AI for cyclone prediction",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326",
+        "agent_f1dd669a"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "It's fascinating how AI is changing cyclone prediction. Deep learning models can detect complex, non-linear patterns in atmospheric data that traditional models might miss, potentially improving forecast accuracy.",
+          "loading": false,
+          "content": "It's fascinating how AI is changing cyclone prediction. Deep learning models can detect complex, non-linear patterns in atmospheric data that traditional models might miss, potentially improving forecast accuracy."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Ashley, you're right. AI's ability to process vast datasets offers a significant advantage. We can potentially enhance early warning systems, giving communities more time to prepare and evacuate, which is a practical step towards saving lives.",
+          "loading": false,
+          "content": "Ashley, you're right. AI's ability to process vast datasets offers a significant advantage. We can potentially enhance early warning systems, giving communities more time to prepare and evacuate, which is a practical step towards saving lives."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, Ashley. And it's not just about accuracy; AI can also enhance the speed of predictions, providing crucial extra time for evacuations and preparations. I wonder if we can search for recent advancements in deep learning architectures specifically designed for cyclone intensity forecasting?",
+          "loading": false,
+          "content": "Absolutely, Ashley. And it's not just about accuracy; AI can also enhance the speed of predictions, providing crucial extra time for evacuations and preparations. I wonder if we can search for recent advancements in deep learning architectures specifically designed for cyclone intensity forecasting?"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "That's a great idea, Jonathan. Searching for recent advancements in deep learning architectures for cyclone intensity forecasting could give us valuable insights into the latest techniques and their effectiveness. I'm particularly interested in seeing how these models handle rapid intensification events, which are notoriously difficult to predict.",
+          "loading": false,
+          "content": "That's a great idea, Jonathan. Searching for recent advancements in deep learning architectures for cyclone intensity forecasting could give us valuable insights into the latest techniques and their effectiveness. I'm particularly interested in seeing how these models handle rapid intensification events, which are notoriously difficult to predict."
+        }
+      ],
+      "created_at": "2025-08-26T14:34:17.793277",
+      "last_updated": "2025-08-26T14:35:58.319049",
+      "thread_id": "thread_aef431dd",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#FFE8CD",
+        "agent_d9ed4326": "#D4F6FF",
+        "agent_f1dd669a": "#FFDCDC"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2,
+        "agent_f1dd669a": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "It's fascinating how AI is changing cyclone prediction. Deep learning models can detect complex, non-linear patterns in atmospheric data that traditional models might miss, potentially improving forecast accuracy.",
+          "loading": false,
+          "content": "It's fascinating how AI is changing cyclone prediction. Deep learning models can detect complex, non-linear patterns in atmospheric data that traditional models might miss, potentially improving forecast accuracy."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Ashley, you're right. AI's ability to process vast datasets offers a significant advantage. We can potentially enhance early warning systems, giving communities more time to prepare and evacuate, which is a practical step towards saving lives.",
+          "loading": false,
+          "content": "Ashley, you're right. AI's ability to process vast datasets offers a significant advantage. We can potentially enhance early warning systems, giving communities more time to prepare and evacuate, which is a practical step towards saving lives."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, Ashley. And it's not just about accuracy; AI can also enhance the speed of predictions, providing crucial extra time for evacuations and preparations. I wonder if we can search for recent advancements in deep learning architectures specifically designed for cyclone intensity forecasting?",
+          "loading": false,
+          "content": "Absolutely, Ashley. And it's not just about accuracy; AI can also enhance the speed of predictions, providing crucial extra time for evacuations and preparations. I wonder if we can search for recent advancements in deep learning architectures specifically designed for cyclone intensity forecasting?"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "That's a great idea, Jonathan. Searching for recent advancements in deep learning architectures for cyclone intensity forecasting could give us valuable insights into the latest techniques and their effectiveness. I'm particularly interested in seeing how these models handle rapid intensification events, which are notoriously difficult to predict.",
+          "loading": false,
+          "content": "That's a great idea, Jonathan. Searching for recent advancements in deep learning architectures for cyclone intensity forecasting could give us valuable insights into the latest techniques and their effectiveness. I'm particularly interested in seeing how these models handle rapid intensification events, which are notoriously difficult to predict."
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_48dab845",
+      "title": "test",
+      "environment": "park",
+      "scene_description": "three agent discuss AI for cyclone prediction",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326",
+        "agent_f1dd669a"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "This is fascinating! Applying deep learning to predict cyclones could be a game-changer, especially with the increasing intensity we're seeing. Has anyone explored using high-context memory GenAI to better capture the long-term dependencies in climate data?",
+          "loading": false,
+          "content": "This is fascinating! Applying deep learning to predict cyclones could be a game-changer, especially with the increasing intensity we're seeing. Has anyone explored using high-context memory GenAI to better capture the long-term dependencies in climate data?"
+        }
+      ],
+      "created_at": "2025-08-26T14:42:19.749812",
+      "last_updated": "2025-08-26T14:43:01.414018",
+      "thread_id": "thread_23a42416",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_d8fa732c": "#FFDCDC",
+        "agent_d9ed4326": "#FADA7A",
+        "agent_f1dd669a": "#CAE8BD"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2,
+        "agent_f1dd669a": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "This is fascinating! Applying deep learning to predict cyclones could be a game-changer, especially with the increasing intensity we're seeing. Has anyone explored using high-context memory GenAI to better capture the long-term dependencies in climate data?",
+          "loading": false,
+          "content": "This is fascinating! Applying deep learning to predict cyclones could be a game-changer, especially with the increasing intensity we're seeing. Has anyone explored using high-context memory GenAI to better capture the long-term dependencies in climate data?"
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_d9816a8e",
+      "title": "test",
+      "environment": "park",
+      "scene_description": "two friends discuss AI for cyclone prediction",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326"
+      ],
+      "messages": [],
+      "created_at": "2025-08-26T14:47:05.633253",
+      "last_updated": "2025-08-26T14:47:26.208409",
+      "thread_id": "thread_ce0662a4",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_d8fa732c": "#FADA7A",
+        "agent_d9ed4326": "#FFE8CD"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_9aa7bf30",
+      "title": "testttt",
+      "environment": "park",
+      "scene_description": "two firends discuss AI for cyclone prediction",
+      "agents": [
+        "agent_d9ed4326",
+        "agent_f1dd669a"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Cyclones are devastating, indeed. AI offers some really promising avenues for improving our prediction and early warning systems. We could explore AI's potential for simulating infrastructure vulnerabilities too.",
+          "loading": false,
+          "content": "Cyclones are devastating, indeed. AI offers some really promising avenues for improving our prediction and early warning systems. We could explore AI's potential for simulating infrastructure vulnerabilities too."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Absolutely, David. AI excels at identifying complex, non-linear patterns in climate data that traditional models might miss, offering a more nuanced understanding of cyclone behavior. By integrating AI with physics-based models, we can potentially enhance both the accuracy and lead time of cyclone predictions.",
+          "loading": false,
+          "content": "Absolutely, David. AI excels at identifying complex, non-linear patterns in climate data that traditional models might miss, offering a more nuanced understanding of cyclone behavior. By integrating AI with physics-based models, we can potentially enhance both the accuracy and lead time of cyclone predictions."
+        }
+      ],
+      "created_at": "2025-08-26T14:49:52.125469",
+      "last_updated": "2025-08-26T14:50:58.184061",
+      "thread_id": "thread_dcb0b487",
+      "status": "active",
+      "agent_colors": {
+        "agent_d9ed4326": "#FFDCDC",
+        "agent_f1dd669a": "#FADA7A"
+      },
+      "agent_numbers": {
+        "agent_d9ed4326": 1,
+        "agent_f1dd669a": 2
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Cyclones are devastating, indeed. AI offers some really promising avenues for improving our prediction and early warning systems. We could explore AI's potential for simulating infrastructure vulnerabilities too.",
+          "loading": false,
+          "content": "Cyclones are devastating, indeed. AI offers some really promising avenues for improving our prediction and early warning systems. We could explore AI's potential for simulating infrastructure vulnerabilities too."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Absolutely, David. AI excels at identifying complex, non-linear patterns in climate data that traditional models might miss, offering a more nuanced understanding of cyclone behavior. By integrating AI with physics-based models, we can potentially enhance both the accuracy and lead time of cyclone predictions.",
+          "loading": false,
+          "content": "Absolutely, David. AI excels at identifying complex, non-linear patterns in climate data that traditional models might miss, offering a more nuanced understanding of cyclone behavior. By integrating AI with physics-based models, we can potentially enhance both the accuracy and lead time of cyclone predictions."
+        }
+      ],
+      "voices_enabled": true
     }
   ]
 }
