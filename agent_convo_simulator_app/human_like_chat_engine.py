@@ -359,7 +359,7 @@ class HumanLikeChatEngine:
                     }}
 
         """
-        prompt += f""" \nKeep your response natural, conversational, and true to your character. Always respons with the charateristics/personality of your character. \nRespond as if you're speaking directly in the conversation (don't say \"As {agent_name}, I would say...\" just respond naturally).\nRespond only to the dialog parts said by the other agents.\nKeep responses to 1-3 sentences to maintain good conversation flow."""
+        prompt += f""" \nKeep your response natural, conversational, and true to your character. Always respons with the charateristics/personality of your character. \nRespond as if you're speaking directly in the conversation (don't say \"As {agent_name}, I would say...\" just respond naturally).\nRespond only to the dialog parts said by the other agents.\nKeep responses to 1-3 sentences to maintain good conversation flow. And don't mention the names of tools because all the other agents might not have that tool. Only suggest the act of the tool and NOT the name."""
         
 
         if messages:
@@ -370,14 +370,17 @@ class HumanLikeChatEngine:
 
 
     def _add_message_to_conversation(self, message):
-        msg_to_store = dict(message)
-        msg_to_store.pop('blinking', None)
-        with self.lock:
-            if msg_to_store not in self.convo["messages"]:
-                self.convo["messages"].append(msg_to_store)
-            if msg_to_store not in self.convo["LLM_sending_messages"]:
-                self.convo["LLM_sending_messages"].append(msg_to_store)
-        self.parent_engine._save_conversation_state(self.convo_id)
+        print(f"[HumanLikeChatEngine] Adding message to conversation: {message}")
+        if message.get('message') or message.get('content'):
+            msg_to_store = dict(message)
+            msg_to_store.pop('blinking', None)
+            with self.lock:
+                if msg_to_store not in self.convo["messages"]:
+                    self.convo["messages"].append(msg_to_store)
+                if msg_to_store not in self.convo["LLM_sending_messages"]:
+                    self.convo["LLM_sending_messages"].append(msg_to_store)
+            
+            self.parent_engine._save_conversation_state(self.convo_id)
 
     def _display_message(self, agent_config, message, blinking=False):
         ui_callback = self.ui_callback
@@ -398,6 +401,7 @@ class HumanLikeChatEngine:
         print(f"[HumanLikeChatEngine] Sending message to UI: {message}")
         if ui_callback:
             ui_callback(message)
+        
         self._add_message_to_conversation(message)
 
     def register_message_callback(self, conversation_id, callback):

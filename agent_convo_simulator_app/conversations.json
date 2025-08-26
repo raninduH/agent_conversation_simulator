@@ -2169,9 +2169,9 @@
         }
       ],
       "created_at": "2025-08-22T15:55:26.855496",
-      "last_updated": "2025-08-22T15:58:40.491552",
+      "last_updated": "2025-08-22T17:07:07.344804",
       "thread_id": "thread_2872efae",
-      "status": "active",
+      "status": "stopped",
       "agent_colors": {
         "agent_d8fa732c": "#FFE8CD",
         "agent_d9ed4326": "#D4F6FF",
@@ -2275,6 +2275,820 @@
           "sender": "Jonathan",
           "type": "ai",
           "loading": false
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_ac95832a",
+      "title": "Discussion of AI in tropical cyclone prediction",
+      "environment": "laboratory",
+      "scene_description": "Three friends discuss on how to use AI to perform tropical cyclone prediction, disaster damage prevention and reduction.",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326",
+        "agent_f1dd669a"
+      ],
+      "messages": [],
+      "created_at": "2025-08-26T11:25:48.435078",
+      "last_updated": "2025-08-26T11:25:49.686760",
+      "thread_id": "thread_a0f85e1c",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#4F8B61",
+        "agent_d9ed4326": "#FFDCDC",
+        "agent_f1dd669a": "#FCFAEE"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2,
+        "agent_f1dd669a": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "When the agents reach a solid answer or conclusion to all the discussion topics.",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_6a1b4d74",
+      "title": "test",
+      "environment": "park",
+      "scene_description": "three friends discuss about use of AI for climate prediction",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326",
+        "agent_f1dd669a"
+      ],
+      "messages": [],
+      "created_at": "2025-08-26T11:51:20.068054",
+      "last_updated": "2025-08-26T11:51:20.611913",
+      "thread_id": "thread_d586eb09",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#A2AADB",
+        "agent_d9ed4326": "#CAE8BD",
+        "agent_f1dd669a": "#D4F6FF"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2,
+        "agent_f1dd669a": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_a22998ff",
+      "title": "test6",
+      "environment": "park",
+      "scene_description": "three friends discuss how to use AI in climate prediction",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326",
+        "agent_f1dd669a"
+      ],
+      "messages": [],
+      "created_at": "2025-08-26T11:56:41.037886",
+      "last_updated": "2025-08-26T11:56:42.162998",
+      "thread_id": "thread_d6de6eb8",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#FCFAEE",
+        "agent_d9ed4326": "#CAE8BD",
+        "agent_f1dd669a": "#FADA7A"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2,
+        "agent_f1dd669a": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_87a74cbd",
+      "title": "test4",
+      "environment": "park",
+      "scene_description": "two friends discuss climate change",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326"
+      ],
+      "messages": [],
+      "created_at": "2025-08-26T12:01:32.715321",
+      "last_updated": "2025-08-26T12:01:33.704170",
+      "thread_id": "thread_87a2bb2c",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#FCFAEE",
+        "agent_d9ed4326": "#FFE8CD"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_719285ca",
+      "title": "test66",
+      "environment": "park",
+      "scene_description": "two friends discuss AI for climate prediction",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "AI offers exciting possibilities for improving cyclone predictions. I'm particularly interested in how AI-driven simulations can help us identify vulnerable infrastructure and strengthen resilience, especially in rural communities.",
+          "loading": false,
+          "content": "AI offers exciting possibilities for improving cyclone predictions. I'm particularly interested in how AI-driven simulations can help us identify vulnerable infrastructure and strengthen resilience, especially in rural communities."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, David. The potential for AI to refine cyclone predictions and enhance infrastructure resilience is immense. I've been exploring deep learning models for scientific discovery, and I think those models could be used to improve cyclone predictions.",
+          "loading": false,
+          "content": "Absolutely, David. The potential for AI to refine cyclone predictions and enhance infrastructure resilience is immense. I've been exploring deep learning models for scientific discovery, and I think those models could be used to improve cyclone predictions."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's a great point, Jonathan. I think focusing on deep learning models is key. Perhaps we could use a search query to find some recent advancements in deep learning models for cyclone prediction?",
+          "loading": false,
+          "content": "That's a great point, Jonathan. I think focusing on deep learning models is key. Perhaps we could use a search query to find some recent advancements in deep learning models for cyclone prediction?"
+        }
+      ],
+      "created_at": "2025-08-26T12:09:02.503840",
+      "last_updated": "2025-08-26T12:10:45.241440",
+      "thread_id": "thread_80ffedc5",
+      "status": "stopped",
+      "agent_colors": {
+        "agent_d8fa732c": "#4F8B61",
+        "agent_d9ed4326": "#FFDCDC"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "AI offers exciting possibilities for improving cyclone predictions. I'm particularly interested in how AI-driven simulations can help us identify vulnerable infrastructure and strengthen resilience, especially in rural communities.",
+          "loading": false,
+          "content": "AI offers exciting possibilities for improving cyclone predictions. I'm particularly interested in how AI-driven simulations can help us identify vulnerable infrastructure and strengthen resilience, especially in rural communities."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, David. The potential for AI to refine cyclone predictions and enhance infrastructure resilience is immense. I've been exploring deep learning models for scientific discovery, and I think those models could be used to improve cyclone predictions.",
+          "loading": false,
+          "content": "Absolutely, David. The potential for AI to refine cyclone predictions and enhance infrastructure resilience is immense. I've been exploring deep learning models for scientific discovery, and I think those models could be used to improve cyclone predictions."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's a great point, Jonathan. I think focusing on deep learning models is key. Perhaps we could use a search query to find some recent advancements in deep learning models for cyclone prediction?",
+          "loading": false,
+          "content": "That's a great point, Jonathan. I think focusing on deep learning models is key. Perhaps we could use a search query to find some recent advancements in deep learning models for cyclone prediction?"
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_60ef77cb",
+      "title": "test55",
+      "environment": "park",
+      "scene_description": "two friends discuss AI for climate prediction",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey, have you been following the latest on using AI for climate prediction? I saw some really innovative deep learning models being used to analyze climate data with incredible accuracy. I wonder if I can quickly check on the recent advancements.",
+          "loading": false,
+          "content": "Hey, have you been following the latest on using AI for climate prediction? I saw some really innovative deep learning models being used to analyze climate data with incredible accuracy. I wonder if I can quickly check on the recent advancements."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's a fascinating area, Jonathan. AI's ability to process vast climate datasets could significantly improve our cyclone prediction and early warning systems. I'd be interested to see how these models are addressing the unique challenges of different regions and ensuring that vulnerable communities benefit from these advancements.",
+          "loading": false,
+          "content": "That's a fascinating area, Jonathan. AI's ability to process vast climate datasets could significantly improve our cyclone prediction and early warning systems. I'd be interested to see how these models are addressing the unique challenges of different regions and ensuring that vulnerable communities benefit from these advancements."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, David! I was just thinking about how these models could be tailored for specific regions. Perhaps I can quickly search for news articles about AI cyclone prediction in vulnerable communities to see if there are any specific examples.",
+          "loading": false,
+          "content": "Absolutely, David! I was just thinking about how these models could be tailored for specific regions. Perhaps I can quickly search for news articles about AI cyclone prediction in vulnerable communities to see if there are any specific examples."
+        }
+      ],
+      "created_at": "2025-08-26T12:19:01.164735",
+      "last_updated": "2025-08-26T12:20:33.713812",
+      "thread_id": "thread_ccba24b1",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#FADA7A",
+        "agent_d9ed4326": "#4F8B61"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey, have you been following the latest on using AI for climate prediction? I saw some really innovative deep learning models being used to analyze climate data with incredible accuracy. I wonder if I can quickly check on the recent advancements.",
+          "loading": false,
+          "content": "Hey, have you been following the latest on using AI for climate prediction? I saw some really innovative deep learning models being used to analyze climate data with incredible accuracy. I wonder if I can quickly check on the recent advancements."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's a fascinating area, Jonathan. AI's ability to process vast climate datasets could significantly improve our cyclone prediction and early warning systems. I'd be interested to see how these models are addressing the unique challenges of different regions and ensuring that vulnerable communities benefit from these advancements.",
+          "loading": false,
+          "content": "That's a fascinating area, Jonathan. AI's ability to process vast climate datasets could significantly improve our cyclone prediction and early warning systems. I'd be interested to see how these models are addressing the unique challenges of different regions and ensuring that vulnerable communities benefit from these advancements."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, David! I was just thinking about how these models could be tailored for specific regions. Perhaps I can quickly search for news articles about AI cyclone prediction in vulnerable communities to see if there are any specific examples.",
+          "loading": false,
+          "content": "Absolutely, David! I was just thinking about how these models could be tailored for specific regions. Perhaps I can quickly search for news articles about AI cyclone prediction in vulnerable communities to see if there are any specific examples."
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_382700e0",
+      "title": "rest",
+      "environment": "park",
+      "scene_description": "two friends discuss use of AI in climate prediction",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey, I've been diving deep into how AI can revolutionize climate prediction. Imagine AI models capable of processing massive datasets from various sources – weather patterns, ocean currents, even deforestation rates – to give us incredibly accurate forecasts. It's mind-blowing!",
+          "loading": false,
+          "content": "Hey, I've been diving deep into how AI can revolutionize climate prediction. Imagine AI models capable of processing massive datasets from various sources – weather patterns, ocean currents, even deforestation rates – to give us incredibly accurate forecasts. It's mind-blowing!"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's right, Jonathan. AI's ability to handle complex systems and vast amounts of data offers a significant leap in predictive accuracy. We can use AI not just for general forecasts, but also to model specific extreme weather events like cyclones, helping us prepare better.",
+          "loading": false,
+          "content": "That's right, Jonathan. AI's ability to handle complex systems and vast amounts of data offers a significant leap in predictive accuracy. We can use AI not just for general forecasts, but also to model specific extreme weather events like cyclones, helping us prepare better."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely! The potential for AI to refine climate models is immense. I was just reading about some cutting-edge deep learning techniques being applied to downscale global climate models to regional levels, offering much more granular predictions.",
+          "loading": false,
+          "content": "Absolutely! The potential for AI to refine climate models is immense. I was just reading about some cutting-edge deep learning techniques being applied to downscale global climate models to regional levels, offering much more granular predictions."
+        }
+      ],
+      "created_at": "2025-08-26T12:57:00.979948",
+      "last_updated": "2025-08-26T12:58:06.586498",
+      "thread_id": "thread_b8dd84bc",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#4F8B61",
+        "agent_d9ed4326": "#FFE8CD"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey, I've been diving deep into how AI can revolutionize climate prediction. Imagine AI models capable of processing massive datasets from various sources – weather patterns, ocean currents, even deforestation rates – to give us incredibly accurate forecasts. It's mind-blowing!",
+          "loading": false,
+          "content": "Hey, I've been diving deep into how AI can revolutionize climate prediction. Imagine AI models capable of processing massive datasets from various sources – weather patterns, ocean currents, even deforestation rates – to give us incredibly accurate forecasts. It's mind-blowing!"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's right, Jonathan. AI's ability to handle complex systems and vast amounts of data offers a significant leap in predictive accuracy. We can use AI not just for general forecasts, but also to model specific extreme weather events like cyclones, helping us prepare better.",
+          "loading": false,
+          "content": "That's right, Jonathan. AI's ability to handle complex systems and vast amounts of data offers a significant leap in predictive accuracy. We can use AI not just for general forecasts, but also to model specific extreme weather events like cyclones, helping us prepare better."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely! The potential for AI to refine climate models is immense. I was just reading about some cutting-edge deep learning techniques being applied to downscale global climate models to regional levels, offering much more granular predictions.",
+          "loading": false,
+          "content": "Absolutely! The potential for AI to refine climate models is immense. I was just reading about some cutting-edge deep learning techniques being applied to downscale global climate models to regional levels, offering much more granular predictions."
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_f53f2ac2",
+      "title": "test77",
+      "environment": "park",
+      "scene_description": "two friends discuss about AI for cyclone prediction",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey, have you been following the latest advancements in using AI for cyclone prediction? It's fascinating how deep learning models are improving forecast accuracy and lead time, potentially saving countless lives.",
+          "loading": false,
+          "content": "Hey, have you been following the latest advancements in using AI for cyclone prediction? It's fascinating how deep learning models are improving forecast accuracy and lead time, potentially saving countless lives."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Indeed, Jonathan. The use of AI in predicting cyclone paths and intensity is a game-changer. I'm particularly interested in how AI simulations can help us identify vulnerable infrastructure before a cyclone even makes landfall, allowing for proactive measures.",
+          "loading": false,
+          "content": "Indeed, Jonathan. The use of AI in predicting cyclone paths and intensity is a game-changer. I'm particularly interested in how AI simulations can help us identify vulnerable infrastructure before a cyclone even makes landfall, allowing for proactive measures."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, David! I've been digging into how high-context memory GenAI models are being trained with vast datasets of atmospheric data. I wonder if we could use a structured search to find some recent case studies where AI-driven simulations helped in pre-cyclone infrastructure assessment?",
+          "loading": false,
+          "content": "Absolutely, David! I've been digging into how high-context memory GenAI models are being trained with vast datasets of atmospheric data. I wonder if we could use a structured search to find some recent case studies where AI-driven simulations helped in pre-cyclone infrastructure assessment?"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's an excellent idea, Jonathan. By searching for specific examples, we can get a clearer picture of the practical benefits and challenges of using AI in this context. I'm also curious to see how these simulations account for the varying levels of resilience in different types of infrastructure.",
+          "loading": false,
+          "content": "That's an excellent idea, Jonathan. By searching for specific examples, we can get a clearer picture of the practical benefits and challenges of using AI in this context. I'm also curious to see how these simulations account for the varying levels of resilience in different types of infrastructure."
+        }
+      ],
+      "created_at": "2025-08-26T13:16:04.009481",
+      "last_updated": "2025-08-26T13:18:37.057413",
+      "thread_id": "thread_dc5d6b82",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#FFDCDC",
+        "agent_d9ed4326": "#FCFAEE"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey, have you been following the latest advancements in using AI for cyclone prediction? It's fascinating how deep learning models are improving forecast accuracy and lead time, potentially saving countless lives.",
+          "loading": false,
+          "content": "Hey, have you been following the latest advancements in using AI for cyclone prediction? It's fascinating how deep learning models are improving forecast accuracy and lead time, potentially saving countless lives."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Indeed, Jonathan. The use of AI in predicting cyclone paths and intensity is a game-changer. I'm particularly interested in how AI simulations can help us identify vulnerable infrastructure before a cyclone even makes landfall, allowing for proactive measures.",
+          "loading": false,
+          "content": "Indeed, Jonathan. The use of AI in predicting cyclone paths and intensity is a game-changer. I'm particularly interested in how AI simulations can help us identify vulnerable infrastructure before a cyclone even makes landfall, allowing for proactive measures."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, David! I've been digging into how high-context memory GenAI models are being trained with vast datasets of atmospheric data. I wonder if we could use a structured search to find some recent case studies where AI-driven simulations helped in pre-cyclone infrastructure assessment?",
+          "loading": false,
+          "content": "Absolutely, David! I've been digging into how high-context memory GenAI models are being trained with vast datasets of atmospheric data. I wonder if we could use a structured search to find some recent case studies where AI-driven simulations helped in pre-cyclone infrastructure assessment?"
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's an excellent idea, Jonathan. By searching for specific examples, we can get a clearer picture of the practical benefits and challenges of using AI in this context. I'm also curious to see how these simulations account for the varying levels of resilience in different types of infrastructure.",
+          "loading": false,
+          "content": "That's an excellent idea, Jonathan. By searching for specific examples, we can get a clearer picture of the practical benefits and challenges of using AI in this context. I'm also curious to see how these simulations account for the varying levels of resilience in different types of infrastructure."
+        }
+      ],
+      "voices_enabled": true
+    },
+    {
+      "id": "conv_22d20e0a",
+      "title": "Discussion of AI in tropical cyclone prediction",
+      "environment": "laboratory",
+      "scene_description": "Three friends discuss on how to use AI to perform tropical cyclone prediction, disaster damage prevention and reduction.",
+      "agents": [
+        "agent_d8fa732c",
+        "agent_d9ed4326",
+        "agent_f1dd669a"
+      ],
+      "messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey team, tackling tropical cyclone prediction with AI is a fantastic challenge! I've been diving into some deep learning models that could really revolutionize our approach. Imagine using high-context memory GenAI to analyze historical weather patterns and predict future cyclone behavior with unprecedented accuracy.",
+          "loading": false,
+          "content": "Hey team, tackling tropical cyclone prediction with AI is a fantastic challenge! I've been diving into some deep learning models that could really revolutionize our approach. Imagine using high-context memory GenAI to analyze historical weather patterns and predict future cyclone behavior with unprecedented accuracy."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's a great starting point, Jonathan. From a disaster management perspective, the key is translating that prediction accuracy into actionable strategies. How can we use these AI insights to fortify infrastructure and ensure vulnerable communities are prepared?",
+          "loading": false,
+          "content": "That's a great starting point, Jonathan. From a disaster management perspective, the key is translating that prediction accuracy into actionable strategies. How can we use these AI insights to fortify infrastructure and ensure vulnerable communities are prepared?"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "That's a great starting point, Jonathan! Deep learning's ability to detect complex, non-linear patterns could be a game-changer. We should also consider integrating traditional meteorological models with these AI approaches for a more robust prediction system.",
+          "loading": false,
+          "content": "That's a great starting point, Jonathan! Deep learning's ability to detect complex, non-linear patterns could be a game-changer. We should also consider integrating traditional meteorological models with these AI approaches for a more robust prediction system."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, David and Ashley! To David's point, we can use AI-driven simulations to model the impact of cyclones on different infrastructure designs, identifying vulnerabilities and informing better building practices. And Ashley, integrating those traditional models is key – let's use AI to intelligently weigh and combine different data sources for a truly comprehensive prediction.",
+          "loading": false,
+          "content": "Absolutely, David and Ashley! To David's point, we can use AI-driven simulations to model the impact of cyclones on different infrastructure designs, identifying vulnerabilities and informing better building practices. And Ashley, integrating those traditional models is key – let's use AI to intelligently weigh and combine different data sources for a truly comprehensive prediction."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Building on David's point, the effectiveness of our predictions hinges on the quality and availability of data. We need to address the limitations of current datasets for extreme weather events, perhaps by incorporating satellite data and citizen science initiatives to improve spatial and temporal coverage. ",
+          "loading": false,
+          "content": "Building on David's point, the effectiveness of our predictions hinges on the quality and availability of data. We need to address the limitations of current datasets for extreme weather events, perhaps by incorporating satellite data and citizen science initiatives to improve spatial and temporal coverage. "
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Ashley, that's spot on! I was just thinking about how we could leverage computer vision to analyze satellite imagery for real-time damage assessment post-cyclone. We could even train models to identify areas with the highest need for immediate assistance.",
+          "loading": false,
+          "content": "Ashley, that's spot on! I was just thinking about how we could leverage computer vision to analyze satellite imagery for real-time damage assessment post-cyclone. We could even train models to identify areas with the highest need for immediate assistance."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Ashley, your point about data quality is spot on. To ensure equitable disaster response, we should prioritize open-source data initiatives and community-based data collection to fill the gaps in marginalized areas. This will allow us to refine our AI models for better, more inclusive outcomes.",
+          "loading": false,
+          "content": "Ashley, your point about data quality is spot on. To ensure equitable disaster response, we should prioritize open-source data initiatives and community-based data collection to fill the gaps in marginalized areas. This will allow us to refine our AI models for better, more inclusive outcomes."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Jonathan, that's an interesting idea. Analyzing satellite imagery with computer vision could definitely speed up damage assessment. David, I agree that open-source and community-based data are crucial for addressing biases and ensuring fair outcomes in disaster response.",
+          "loading": false,
+          "content": "Jonathan, that's an interesting idea. Analyzing satellite imagery with computer vision could definitely speed up damage assessment. David, I agree that open-source and community-based data are crucial for addressing biases and ensuring fair outcomes in disaster response."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, Ashley and David. To really nail the damage assessment, I wonder if we could search for recent advances in computer vision for identifying specific types of structural damage from satellite imagery. That could give us a more granular understanding of the destruction.",
+          "loading": false,
+          "content": "Absolutely, Ashley and David. To really nail the damage assessment, I wonder if we could search for recent advances in computer vision for identifying specific types of structural damage from satellite imagery. That could give us a more granular understanding of the destruction."
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's a practical next step, Jonathan. While computer vision refines damage assessment, let's also explore how AI-enabled drones can provide high-resolution imagery in areas where satellite data is limited or obstructed by cloud cover. This could offer a more detailed, localized view for rapid response planning.",
+          "loading": false,
+          "content": "That's a practical next step, Jonathan. While computer vision refines damage assessment, let's also explore how AI-enabled drones can provide high-resolution imagery in areas where satellite data is limited or obstructed by cloud cover. This could offer a more detailed, localized view for rapid response planning."
+        },
+        {
+          "agent_no": 3,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "That's a great idea, David! Combining drone imagery with satellite data could provide a more complete picture, especially in areas with limited coverage. We should also explore how AI can help us fuse these different data streams effectively.",
+          "loading": false,
+          "content": "That's a great idea, David! Combining drone imagery with satellite data could provide a more complete picture, especially in areas with limited coverage. We should also explore how AI can help us fuse these different data streams effectively."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "That's an excellent point, David! AI-enabled drones equipped with computer vision could provide invaluable real-time data in those challenging situations. I'll look into recent progress in drone-based image analysis for disaster assessment; it could be a game-changer for rapid response.",
+          "loading": false,
+          "content": "That's an excellent point, David! AI-enabled drones equipped with computer vision could provide invaluable real-time data in those challenging situations. I'll look into recent progress in drone-based image analysis for disaster assessment; it could be a game-changer for rapid response."
+        },
+        {
+          "agent_no": 3,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Jonathan, while you're looking into drone-based image analysis, it would be valuable to also research the limitations of these technologies in extreme weather conditions. Understanding these constraints is crucial for developing reliable deployment strategies.",
+          "loading": false,
+          "content": "Jonathan, while you're looking into drone-based image analysis, it would be valuable to also research the limitations of these technologies in extreme weather conditions. Understanding these constraints is crucial for developing reliable deployment strategies."
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Building on Ashley's point about data fusion, let's consider how GIS (Geographic Information Systems) can integrate drone imagery, satellite data, and even on-the-ground reports. An AI-powered GIS platform could then provide a comprehensive, real-time view of the disaster zone, enabling more effective resource allocation.",
+          "loading": false,
+          "content": "Building on Ashley's point about data fusion, let's consider how GIS (Geographic Information Systems) can integrate drone imagery, satellite data, and even on-the-ground reports. An AI-powered GIS platform could then provide a comprehensive, real-time view of the disaster zone, enabling more effective resource allocation."
+        }
+      ],
+      "created_at": "2025-08-26T13:24:52.106274",
+      "last_updated": "2025-08-26T13:38:01.464433",
+      "thread_id": "thread_880b6e87",
+      "status": "active",
+      "agent_colors": {
+        "agent_d8fa732c": "#CAE8BD",
+        "agent_d9ed4326": "#FFDCDC",
+        "agent_f1dd669a": "#4F8B61"
+      },
+      "agent_numbers": {
+        "agent_d8fa732c": 1,
+        "agent_d9ed4326": 2,
+        "agent_f1dd669a": 3
+      },
+      "invocation_method": "human_like_chat",
+      "termination_condition": "When the agents reach a solid answer or conclusion to all the discussion topics.",
+      "agent_selector_api_key": "",
+      "LLM_sending_messages": [
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Hey team, tackling tropical cyclone prediction with AI is a fantastic challenge! I've been diving into some deep learning models that could really revolutionize our approach. Imagine using high-context memory GenAI to analyze historical weather patterns and predict future cyclone behavior with unprecedented accuracy.",
+          "loading": false,
+          "content": "Hey team, tackling tropical cyclone prediction with AI is a fantastic challenge! I've been diving into some deep learning models that could really revolutionize our approach. Imagine using high-context memory GenAI to analyze historical weather patterns and predict future cyclone behavior with unprecedented accuracy."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's a great starting point, Jonathan. From a disaster management perspective, the key is translating that prediction accuracy into actionable strategies. How can we use these AI insights to fortify infrastructure and ensure vulnerable communities are prepared?",
+          "loading": false,
+          "content": "That's a great starting point, Jonathan. From a disaster management perspective, the key is translating that prediction accuracy into actionable strategies. How can we use these AI insights to fortify infrastructure and ensure vulnerable communities are prepared?"
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "That's a great starting point, Jonathan! Deep learning's ability to detect complex, non-linear patterns could be a game-changer. We should also consider integrating traditional meteorological models with these AI approaches for a more robust prediction system.",
+          "loading": false,
+          "content": "That's a great starting point, Jonathan! Deep learning's ability to detect complex, non-linear patterns could be a game-changer. We should also consider integrating traditional meteorological models with these AI approaches for a more robust prediction system."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, David and Ashley! To David's point, we can use AI-driven simulations to model the impact of cyclones on different infrastructure designs, identifying vulnerabilities and informing better building practices. And Ashley, integrating those traditional models is key – let's use AI to intelligently weigh and combine different data sources for a truly comprehensive prediction.",
+          "loading": false,
+          "content": "Absolutely, David and Ashley! To David's point, we can use AI-driven simulations to model the impact of cyclones on different infrastructure designs, identifying vulnerabilities and informing better building practices. And Ashley, integrating those traditional models is key – let's use AI to intelligently weigh and combine different data sources for a truly comprehensive prediction."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Building on David's point, the effectiveness of our predictions hinges on the quality and availability of data. We need to address the limitations of current datasets for extreme weather events, perhaps by incorporating satellite data and citizen science initiatives to improve spatial and temporal coverage. ",
+          "loading": false,
+          "content": "Building on David's point, the effectiveness of our predictions hinges on the quality and availability of data. We need to address the limitations of current datasets for extreme weather events, perhaps by incorporating satellite data and citizen science initiatives to improve spatial and temporal coverage. "
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Ashley, that's spot on! I was just thinking about how we could leverage computer vision to analyze satellite imagery for real-time damage assessment post-cyclone. We could even train models to identify areas with the highest need for immediate assistance.",
+          "loading": false,
+          "content": "Ashley, that's spot on! I was just thinking about how we could leverage computer vision to analyze satellite imagery for real-time damage assessment post-cyclone. We could even train models to identify areas with the highest need for immediate assistance."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Ashley, your point about data quality is spot on. To ensure equitable disaster response, we should prioritize open-source data initiatives and community-based data collection to fill the gaps in marginalized areas. This will allow us to refine our AI models for better, more inclusive outcomes.",
+          "loading": false,
+          "content": "Ashley, your point about data quality is spot on. To ensure equitable disaster response, we should prioritize open-source data initiatives and community-based data collection to fill the gaps in marginalized areas. This will allow us to refine our AI models for better, more inclusive outcomes."
+        },
+        {
+          "agent_no": null,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Jonathan, that's an interesting idea. Analyzing satellite imagery with computer vision could definitely speed up damage assessment. David, I agree that open-source and community-based data are crucial for addressing biases and ensuring fair outcomes in disaster response.",
+          "loading": false,
+          "content": "Jonathan, that's an interesting idea. Analyzing satellite imagery with computer vision could definitely speed up damage assessment. David, I agree that open-source and community-based data are crucial for addressing biases and ensuring fair outcomes in disaster response."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "Absolutely, Ashley and David. To really nail the damage assessment, I wonder if we could search for recent advances in computer vision for identifying specific types of structural damage from satellite imagery. That could give us a more granular understanding of the destruction.",
+          "loading": false,
+          "content": "Absolutely, Ashley and David. To really nail the damage assessment, I wonder if we could search for recent advances in computer vision for identifying specific types of structural damage from satellite imagery. That could give us a more granular understanding of the destruction."
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "That's a practical next step, Jonathan. While computer vision refines damage assessment, let's also explore how AI-enabled drones can provide high-resolution imagery in areas where satellite data is limited or obstructed by cloud cover. This could offer a more detailed, localized view for rapid response planning.",
+          "loading": false,
+          "content": "That's a practical next step, Jonathan. While computer vision refines damage assessment, let's also explore how AI-enabled drones can provide high-resolution imagery in areas where satellite data is limited or obstructed by cloud cover. This could offer a more detailed, localized view for rapid response planning."
+        },
+        {
+          "agent_no": 3,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "That's a great idea, David! Combining drone imagery with satellite data could provide a more complete picture, especially in areas with limited coverage. We should also explore how AI can help us fuse these different data streams effectively.",
+          "loading": false,
+          "content": "That's a great idea, David! Combining drone imagery with satellite data could provide a more complete picture, especially in areas with limited coverage. We should also explore how AI can help us fuse these different data streams effectively."
+        },
+        {
+          "agent_no": 1,
+          "agent_id": "agent_d8fa732c",
+          "agent_name": "Jonathan",
+          "sender": "Jonathan",
+          "type": "ai",
+          "message": "That's an excellent point, David! AI-enabled drones equipped with computer vision could provide invaluable real-time data in those challenging situations. I'll look into recent progress in drone-based image analysis for disaster assessment; it could be a game-changer for rapid response.",
+          "loading": false,
+          "content": "That's an excellent point, David! AI-enabled drones equipped with computer vision could provide invaluable real-time data in those challenging situations. I'll look into recent progress in drone-based image analysis for disaster assessment; it could be a game-changer for rapid response."
+        },
+        {
+          "agent_no": 3,
+          "agent_id": "agent_f1dd669a",
+          "agent_name": "Ashley",
+          "sender": "Ashley",
+          "type": "ai",
+          "message": "Jonathan, while you're looking into drone-based image analysis, it would be valuable to also research the limitations of these technologies in extreme weather conditions. Understanding these constraints is crucial for developing reliable deployment strategies.",
+          "loading": false,
+          "content": "Jonathan, while you're looking into drone-based image analysis, it would be valuable to also research the limitations of these technologies in extreme weather conditions. Understanding these constraints is crucial for developing reliable deployment strategies."
+        },
+        {
+          "agent_no": 2,
+          "agent_id": "agent_d9ed4326",
+          "agent_name": "David",
+          "sender": "David",
+          "type": "ai",
+          "message": "Building on Ashley's point about data fusion, let's consider how GIS (Geographic Information Systems) can integrate drone imagery, satellite data, and even on-the-ground reports. An AI-powered GIS platform could then provide a comprehensive, real-time view of the disaster zone, enabling more effective resource allocation.",
+          "loading": false,
+          "content": "Building on Ashley's point about data fusion, let's consider how GIS (Geographic Information Systems) can integrate drone imagery, satellite data, and even on-the-ground reports. An AI-powered GIS platform could then provide a comprehensive, real-time view of the disaster zone, enabling more effective resource allocation."
         }
       ],
       "voices_enabled": true
