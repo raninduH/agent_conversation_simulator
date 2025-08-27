@@ -143,6 +143,7 @@ class ResearchConversation:
     
 class DataManager:
 
+
     """Manages JSON file operations for agents and conversations."""
     
     def __init__(self):
@@ -256,6 +257,21 @@ class DataManager:
         self._agents_cache = None
         self._agents_cache_timestamp = None
     
+    def remove_document_from_knowledge_base(self, agent_id: str, doc_name: str) -> bool:
+        """
+        Remove a document (by doc_name) from the knowledge_base list of the agent with the given agent_id.
+        Returns True if removed, False if not found or agent not found.
+        """
+        agent = self.get_agent_by_id(agent_id)
+        if not agent or not hasattr(agent, 'knowledge_base'):
+            return False
+        original_len = len(agent.knowledge_base)
+        agent.knowledge_base = [doc for doc in agent.knowledge_base if doc.get('doc_name') != doc_name]
+        if len(agent.knowledge_base) < original_len:
+            self.save_agent(agent)
+            return True
+        return False
+
     def get_agent_by_id(self, agent_id: str) -> Optional[Agent]:
         """Retrieve an agent by its ID."""
         agents = self.load_agents()

@@ -401,25 +401,6 @@ class SimulationTab(ttk.Frame):
             # Optimized redraw: remove only loading bubbles, add new message, then redraw loading bubbles
             if hasattr(self.chat_canvas, 'remove_loading_bubbles'):
                 self.chat_canvas.remove_loading_bubbles()
-        # else:
-        #     # fallback: clear all and re-add non-loading bubbles (legacy)
-        #     self.chat_canvas.clear()
-        #     for m in self._non_loading_bubbles:
-        #         bubble = self.chat_canvas.add_bubble(
-        #             m.get("sender") or m.get("agent_name") or m.get("agent_id"),
-        #             m.get("content") or m.get("message", ""),
-        #             m.get("timestamp", datetime.now().strftime("%H:%M:%S")),
-        #             m.get("type", "ai"),
-        #             m.get("color"),
-        #             m.get("align_right"),
-        #             m.get("message_id"),
-        #             loading=False,
-        #             agent_id=m.get("agent_id")
-        #         )
-        #         blinking_flag = m.get("blinking", blinking)
-        #         if blinking_flag and bubble:
-        #             bubble.start_blink()
-        #             self.blinking_messages[bubble] = True
 
         if loading:
             if self._loading_bubbles:

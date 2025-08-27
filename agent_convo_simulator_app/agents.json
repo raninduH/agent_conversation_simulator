@@ -185,6 +185,25 @@
       "gender": "female",
       "voice": "af_bella",
       "knowledge_base": []
+    },
+    {
+      "id": "agent_1940fbfa",
+      "name": "ee",
+      "role": "ee",
+      "base_prompt": "eee",
+      "personality_traits": [
+        "ee"
+      ],
+      "created_at": "2025-08-28T00:07:27.224206",
+      "api_key": "eee",
+      "tools": [
+        "internet_search_tool",
+        "search_internet_strucutred_output",
+        "knowledge_base_retriever"
+      ],
+      "gender": "male",
+      "voice": "am_echo",
+      "knowledge_base": []
     }
   ]
 }

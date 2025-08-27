@@ -105,9 +105,12 @@ class HumanLikeChatEngine:
             self.convo["LLM_sending_messages"] = []
         self.selector = AgentSelector(google_api_key=agent_selector_api_key)
         self.agent_instances = []
+        self.agents_name_role_list = []
         for agent_id in self.agent_order:
             agent_config = next(a for a in self.agents if a["id"] == agent_id)
             agent_name = agent_config["name"]
+            agent_role = agent_config["role"]
+            self.agents_name_role_list.append(f"{agent_name}: {agent_role}")
             self.agents_last_seen_messages[agent_name] = None
             print(f"🤖 [HumanLikeChatEngine] Initializing agent: {agent_name}")
             agent_tools = _load_agent_tools(agent_name)
@@ -202,7 +205,7 @@ class HumanLikeChatEngine:
                 agent_config, 
                 self.convo["environment"],
                 self.convo["scene_description"],
-                self.agent_order,
+                self.agents_name_role_list,
                 self.termination_condition,
                 self._should_remind_termination())
             
@@ -299,7 +302,7 @@ class HumanLikeChatEngine:
             print(f"❌ [HumanLikeChatEngine] Error invoking agent {agent_config['name']}: {e}")
             print(traceback.format_exc())
 
-    def _build_human_like_prompt(self, agent_config, environment, scene_description, all_agents, termination_condition=None, should_remind_termination=False):
+    def _build_human_like_prompt(self, agent_config, environment, scene_description, agents_name_role_list, termination_condition=None, should_remind_termination=False):
         """
         Create the prompt for an agent including scene, participants, and conversation history.
         """
@@ -313,7 +316,7 @@ class HumanLikeChatEngine:
                 Always answer based on the given characteristics of yourself. Stay in character always.
                 INITIAL environment: {environment}
                 SCENE DESCRIPTION: {scene_description}
-                \nPARTICIPANTS: {', '.join(all_agents)}\n\nTool Usage: Use your tools freely in the first instance you feel,  just like a noraml person using their mobile phone as a tool. No need to get permsission from other agents. But when it's necessary discuss with other agents how the tools should be used.\n\n"""
+                \nPARTICIPANTS: {', '.join(agents_name_role_list)}\n\nTool Usage: Use your tools freely in the first instance you feel,  just like a noraml person using their mobile phone as a tool. No need to get permsission from other agents. But when it's necessary discuss with other agents how the tools should be used.\n\n"""
         
         # Always use the current messages list as the single source of truth
         if messages:
@@ -474,9 +477,12 @@ class HumanLikeChatEngine:
             print(f"❌ [HumanLikeChatEngine] Missing agent(s) in DataManager: {missing_agents}")
         self.selector = AgentSelector(google_api_key=self.agent_selector_api_key)
         self.agent_instances = []
+        self.agents_name_role_list = []
         for agent_id in self.agent_order:
             agent_config = next(a for a in self.agents if a["id"] == agent_id)
             agent_name = agent_config["name"]
+            agent_role = agent_config["role"]
+            self.agents_name_role_list.append(f"{agent_name}: {agent_role}")
             self.agents_last_seen_messages[agent_name] = None
             print(f"🤖 [HumanLikeChatEngine] Initializing agent: {agent_name}")
             agent_tools = _load_agent_tools(agent_name)

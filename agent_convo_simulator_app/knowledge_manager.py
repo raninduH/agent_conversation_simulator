@@ -469,6 +469,7 @@ def query_pinecone(index_name: str, query: str, top_k: int = 3):
 
 
 class KnowledgeManager:
+
     """Main class for managing knowledge base operations."""
     
     def __init__(self):
@@ -498,7 +499,7 @@ class KnowledgeManager:
             bool: True if successful, False otherwise
         """
         print(f"\n🚀 INGESTING SINGLE DOCUMENT FOR AGENT: {agent_id}")
-        print(f"📄 File: {os.path.basename(file_path)}")
+        print(f"📄 File path: {file_path}")
         print(f"💬 Description: {description}")
         print(f"📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         print("=" * 60)
@@ -641,178 +642,60 @@ class KnowledgeManager:
             print(f"   🔢 Vectors: {len(vectors)}")
             print("=" * 60)
             
-            return True
+            return True, "done"
             
         except Exception as e:
             print(f"❌ DOCUMENT INGESTION FAILED: {e}")
             import traceback
             traceback.print_exc()
             print("=" * 60)
-            return False
+            return False, traceback.format_exc()
 
-def ingest_document_for_agent(agent_id: str, file_path: str, description: str = None):
-    """
-    Ingest a single document for an agent by copying it to the agent's knowledge base directory,
-    chunking it, vectorizing it, and storing it in Pinecone with proper metadata.
-    
-    Args:
-        agent_id: The unique identifier for the agent
-        file_path: Path to the document file to ingest
-        description: Optional description of the document
-        
-    Returns:
-        bool: True if successful, False otherwise
-    """
-    print(f"\n🚀 INGESTING SINGLE DOCUMENT FOR AGENT: {agent_id}")
-    print(f"📄 File: {os.path.basename(file_path)}")
-    print(f"💬 Description: {description}")
-    print(f"📅 Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("=" * 60)
-    
-    try:
-        # Generate unique document ID
-        doc_id = str(uuid.uuid4())
-        file_name = os.path.basename(file_path)
-        current_time = datetime.now().isoformat()
-        
-        # Create the agent's knowledge base directory if it doesn't exist
-        agent_docs_path = os.path.join("knowledge_base", agent_id)
-        os.makedirs(agent_docs_path, exist_ok=True)
-        
-        # Copy the file to the agent's directory with doc_id prefix
-        destination_path = os.path.join(agent_docs_path, f"{doc_id}_{file_name}")
-        
-        print(f"📁 Copying file to: {destination_path}")
-        shutil.copy2(file_path, destination_path)
-        
-        # Update knowledge_sources.json
-        sources_file = os.path.join(agent_docs_path, "knowledge_sources.json")
-        sources_data = {}
-        
-        if os.path.exists(sources_file):
-            try:
-                with open(sources_file, 'r', encoding='utf-8') as f:
-                    sources_data = json.load(f)
-            except Exception as e:
-                print(f"⚠️  Error reading existing sources file: {e}")
-                sources_data = {}
-        
-        # Add new document info
-        sources_data[doc_id] = {
-            "doc_id": doc_id,
-            "doc_name": file_name,
-            "doc_description": description or f"Document: {file_name}",
-            "doc_uploaded_datetime": current_time,
-            "file_path": f"{doc_id}_{file_name}"
-        }
-        
-        # Save updated sources
-        with open(sources_file, 'w', encoding='utf-8') as f:
-            json.dump(sources_data, f, indent=2, ensure_ascii=False)
-        print(f"📝 Updated knowledge_sources.json")
-        
-        # Now process the document: chunk, vectorize, and upload to Pinecone
-        print(f"🔄 Processing document for vectorization...")
-        
-        # Load document content
-        content = load_document(destination_path)
-        if not content:
-            print(f"❌ Failed to load document content")
-            return False
-        
-        char_count = len(content)
-        print(f"📊 Content: {char_count:,} characters")
-        
-        # Chunk the document
-        print(f"✂️ Chunking document...")
-        chunks = chunk_text(content, chunk_size=1000, overlap=200)
-        print(f"📦 Created {len(chunks)} chunks")
-        
-        # Prepare chunks with metadata
-        chunk_data = []
-        for j, chunk in enumerate(chunks):
-            chunk_data.append({
-                'id': f"{agent_id}_{doc_id}_{j}",
-                'text': chunk,
-                'doc_id': doc_id,
-                'doc_name': file_name,
-                'chunk_index': j,
-                'agent_id': agent_id
-            })
-        
-        # Initialize Pinecone and setup embedding
+    def remove_document_chunks(self, agent_id: str, doc_id: str):
+        """
+        Remove all chunks from the Pinecone index for the given agent and document ID.
+        Args:
+            agent_id: The unique identifier for the agent
+            doc_id: The document ID whose chunks should be removed
+        Returns:
+            int: Number of chunks deleted
+        """
+        print(f"\n🗑️ Removing all chunks for doc_id={doc_id} from agent {agent_id}'s Pinecone index...")
         pinecone_api_key = os.getenv("PINECONE_API_KEY")
         pinecone_env = os.getenv("PINECONE_ENV")
-        
         if not pinecone_api_key or not pinecone_env:
             print(f"❌ Missing Pinecone credentials!")
-            return False
-        
-        print(f"🌲 Connecting to Pinecone...")
+            return 0
         pc = Pinecone(api_key=pinecone_api_key)
-        
-        # Create/connect to index
         index_name = f"agent-kb-{agent_id.lower().replace('_', '-')}"
-        dimension = 384  # for all-MiniLM-L6-v2
-        
         existing_indexes = pc.list_indexes().names()
         if index_name not in existing_indexes:
-            print(f"🆕 Creating new index '{index_name}'...")
-            pc.create_index(
-                name=index_name, 
-                dimension=dimension, 
-                metric="cosine",
-                spec=ServerlessSpec(
-                    cloud='aws',
-                    region='us-east-1'
-                )
-            )
-            time.sleep(10)  # Wait for index to be ready
-        
+            print(f"❌ Index '{index_name}' not found!")
+            return 0
         pinecone_index = pc.Index(index_name)
-        print(f"✅ Connected to index '{index_name}'")
-        
-        # Setup embedding model
-        model = get_embedding_model()
-        
-        # Generate embeddings and upload
-        print(f"🔄 Generating embeddings for {len(chunk_data)} chunks...")
-        
-        texts = [chunk['text'] for chunk in chunk_data]
-        embeddings = model.encode(texts)
-        
-        # Prepare vectors for upsert
-        vectors = []
-        for chunk, embedding in zip(chunk_data, embeddings):
-            vectors.append({
-                'id': chunk['id'],
-                'values': embedding.tolist(),
-                'metadata': {
-                    'text': chunk['text'],
-                    'doc_id': chunk['doc_id'],
-                    'doc_name': chunk['doc_name'],
-                    'chunk_index': chunk['chunk_index'],
-                    'agent_id': chunk['agent_id']
-                }
-            })
-        
-        # Upload to Pinecone
-        pinecone_index.upsert(vectors)
-        print(f"✅ Uploaded {len(vectors)} vectors to Pinecone")
-        
-        print(f"✅ DOCUMENT INGESTION COMPLETED SUCCESSFULLY!")
-        print(f"   🆔 Document ID: {doc_id}")
-        print(f"   📄 File: {file_name}")
-        print(f"   📦 Chunks: {len(chunk_data)}")
-        print(f"   🔢 Vectors: {len(vectors)}")
-        print("=" * 60)
-        
-        return True
-        
-    except Exception as e:
-        print(f"❌ DOCUMENT INGESTION FAILED: {e}")
-        import traceback
-        traceback.print_exc()
-        print("=" * 60)
-        return False
+        # Query for all chunk IDs with this doc_id
+        print(f"🔍 Querying index for all chunk IDs with doc_id={doc_id}...")
+        # Pinecone does not support direct metadata filtering for deletion, so we need to fetch all IDs
+        # We'll use a large top_k and filter client-side
+        all_ids = []
+        batch_size = 1000
+        cursor = None
+        while True:
+            res = pinecone_index.fetch(ids=None, filter={"doc_id": {"$eq": doc_id}}, limit=batch_size, cursor=cursor)
+            matches = res.get('vectors', {}) if hasattr(res, 'get') else getattr(res, 'vectors', {})
+            ids = list(matches.keys())
+            all_ids.extend(ids)
+            cursor = getattr(res, 'next', None)
+            if not cursor or not ids:
+                break
+        if not all_ids:
+            print(f"ℹ️ No chunks found for doc_id={doc_id}.")
+            return 0
+        print(f"🗑️ Deleting {len(all_ids)} chunk(s) from index '{index_name}'...")
+        pinecone_index.delete(ids=all_ids)
+        print(f"✅ Deleted {len(all_ids)} chunk(s) for doc_id={doc_id}.")
+        return len(all_ids)
 
+  # create a function to get the specific document from the knowldgebase folder
+
+knowledge_manager = KnowledgeManager()

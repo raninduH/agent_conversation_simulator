@@ -6,7 +6,7 @@ from datetime import datetime
 import time
 
 from ..data_manager import Agent
-from .. import knowledge_manager
+from ..knowledge_manager import knowledge_manager
 from .main_utils import _generate_clone_name, _select_agent_by_name
 
 class AgentManagementTab(ttk.Frame):
@@ -154,14 +154,57 @@ class AgentManagementTab(ttk.Frame):
         kb_frame.grid(row=8, column=0, columnspan=2, sticky="ew", pady=(10, 0), padx=(0,0))
         kb_frame.grid_columnconfigure(1, weight=1)
 
+
         self.app.upload_kb_btn = ttk.Button(kb_frame, text="Upload Files (.pdf, .txt)", command=self.upload_knowledge_files, state=tk.NORMAL)
         self.app.upload_kb_btn.grid(row=0, column=0, padx=5, pady=5)
 
+        # Add Show Existing Knowledge button
+        self.app.show_existing_kb_btn = ttk.Button(kb_frame, text="Show Existing Knowledge", command=self.show_existing_knowledge)
+        self.app.show_existing_kb_btn.grid(row=0, column=2, padx=5, pady=5)
+
         self.app.knowledge_files_label = ttk.Label(kb_frame, text="No files selected.")
         self.app.knowledge_files_label.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-        
+
         # Save button
         ttk.Button(details_frame, text="Save Agent", command=self.save_agent).grid(row=9, column=1, sticky="e", pady=(10, 0))
+
+    def show_existing_knowledge(self):
+        """Show a popup listing the current agent's knowledge base documents and descriptions."""
+        # Determine which agent is currently being edited/selected
+        agent = None
+        if self.current_editing_agent_id:
+            agent = self.data_manager.get_agent_by_id(self.current_editing_agent_id)
+        else:
+            # Try to get agent by name if possible (for new agent, nothing to show)
+            agent_name = self.app.agent_name_var.get().strip()
+            if agent_name:
+                agents = self.data_manager.load_agents()
+                agent = next((a for a in agents if a.name == agent_name), None)
+        if not agent or not hasattr(agent, 'knowledge_base') or not agent.knowledge_base:
+            messagebox.showinfo("No Knowledge Base", "This agent has no knowledge base documents.")
+            return
+
+        popup = tk.Toplevel(self)
+        popup.title("Existing Knowledge Base Documents")
+        popup.geometry("600x350")
+        popup.grab_set()
+        label = tk.Label(popup, text="Current Knowledge Base Documents:", font=("Arial", 12, "bold"))
+        label.pack(pady=(10, 5))
+
+        # Use a Text widget for scrollable, formatted display
+        text = tk.Text(popup, wrap="word", height=14, width=70)
+        text.pack(padx=10, pady=5, fill="both", expand=True)
+        text.config(state="normal")
+
+        # Format and insert the knowledge base info
+        for idx, doc in enumerate(agent.knowledge_base, 1):
+            doc_name = doc.get("doc_name", "(No name)")
+            desc = doc.get("description", "(No description)")
+            text.insert("end", f"{idx}. {doc_name}\n   Description: {desc}\n\n")
+        text.config(state="disabled")
+
+        close_btn = ttk.Button(popup, text="Close", command=popup.destroy)
+        close_btn.pack(pady=(0, 10))
 
     def on_agent_select(self, event):
         """Handle agent selection in the listbox."""
@@ -413,15 +456,42 @@ class AgentManagementTab(ttk.Frame):
         if not all([name, role, prompt]):
             messagebox.showwarning("Missing Info", "Please fill in all required agent details.")
             return
+        print("\n================ SAVE_AGENT CALLED ================")
+        print(f"Agent name: {name}, role: {role}, gender: {gender}, voice: {voice}")
+        print(f"Current editing agent id: {self.current_editing_agent_id}")
         # Parse personality traits
         traits = [t.strip() for t in traits_str.split(",") if t.strip()] if traits_str else []
         # Get selected tools (excluding knowledge_base_retriever as it's auto-managed)
         selected_tools = [name for name, var in self.tool_vars.items() if var.get()]
-        # Check if editing existing agent using the tracking variable
+        # Track the agent_id for knowledge ingestion
+        agent_id_for_ingestion = None
+        # Check if knowledge_base_retriever should be added
+        knowledge_base_nonempty = False
+        staged_kb = []
         if self.current_editing_agent_id:
             # Update existing agent
             agent = self.data_manager.get_agent_by_id(self.current_editing_agent_id)
             if agent:
+                print(f"Loaded existing agent: {agent.name} (id: {agent.id})")
+                # If there are staged files, prepare staged_kb
+                if self.current_editing_agent_id in self.knowledge_files:
+                    file_data = self.knowledge_files[self.current_editing_agent_id]
+                    file_paths = file_data['file_paths']
+                    descriptions = file_data['descriptions']
+                    print(f"Found staged files for agent {self.current_editing_agent_id}: {file_paths}")
+                    for file_path in file_paths:
+                        file_name = os.path.basename(file_path)
+                        description = descriptions.get(file_path, f"Document: {file_name}")
+                        staged_kb.append({"doc_name": file_name, "description": description})
+                    print(f"Staged KB to append: {staged_kb}")
+                # Check if agent.knowledge_base is non-empty or staged_kb is non-empty
+                if (hasattr(agent, 'knowledge_base') and agent.knowledge_base) or staged_kb:
+                    knowledge_base_nonempty = True
+                print(f"knowledge_base_nonempty: {knowledge_base_nonempty}")
+                # Add knowledge_base_retriever if needed
+                if knowledge_base_nonempty and 'knowledge_base_retriever' not in selected_tools:
+                    selected_tools.append('knowledge_base_retriever')
+                    print("Added 'knowledge_base_retriever' to selected_tools")
                 agent.name = name
                 agent.role = role
                 agent.gender = gender
@@ -430,9 +500,37 @@ class AgentManagementTab(ttk.Frame):
                 agent.base_prompt = prompt
                 agent.voice = voice
                 agent.tools = selected_tools
+                # If there are staged files, append to knowledge_base
+                if staged_kb:
+                    if hasattr(agent, 'knowledge_base') and agent.knowledge_base:
+                        agent.knowledge_base.extend(staged_kb)
+                        print(f"Appended to existing knowledge_base. New length: {len(agent.knowledge_base)}")
+                    else:
+                        agent.knowledge_base = staged_kb
+                        print(f"Set new knowledge_base: {agent.knowledge_base}")
                 self.data_manager.save_agent(agent)
+                print(f"Agent {agent.name} saved.")
+                agent_id_for_ingestion = self.current_editing_agent_id
         else:
             # Create new agent
+            temp_agent_id = f"NEW_AGENT_{name.replace(' ', '_')}"
+            print(f"Creating new agent. Temp id: {temp_agent_id}")
+            if temp_agent_id in self.knowledge_files:
+                file_data = self.knowledge_files[temp_agent_id]
+                file_paths = file_data['file_paths']
+                descriptions = file_data['descriptions']
+                print(f"Found staged files for new agent: {file_paths}")
+                for file_path in file_paths:
+                    file_name = os.path.basename(file_path)
+                    description = descriptions.get(file_path, f"Document: {file_name}")
+                    staged_kb.append({"doc_name": file_name, "description": description})
+                print(f"Staged KB for new agent: {staged_kb}")
+           
+            # Add knowledge_base_retriever if staged_kb is non-empty
+            if staged_kb and 'knowledge_base_retriever' not in selected_tools:
+                selected_tools.append('knowledge_base_retriever')
+                print("Added 'knowledge_base_retriever' to selected_tools for new agent")
+            
             new_agent = Agent.create_new(
                 name=name,
                 role=role,
@@ -443,13 +541,132 @@ class AgentManagementTab(ttk.Frame):
                 gender=gender,
                 voice=voice
             )
+            # For new agent, set knowledge_base if any staged files
+            if staged_kb:
+                new_agent.knowledge_base = staged_kb
+                print(f"Set knowledge_base for new agent: {new_agent.knowledge_base}")
             self.data_manager.save_agent(new_agent)
+            print(f"New agent {name} saved.")
+            # After saving, get the new agent's ID for ingestion
+            agent_id_for_ingestion = new_agent.id if hasattr(new_agent, 'id') else None
+            # Move staged files from temp ID to real agent ID for ingestion
+            if agent_id_for_ingestion and temp_agent_id in self.knowledge_files:
+                self.knowledge_files[agent_id_for_ingestion] = self.knowledge_files.pop(temp_agent_id)
+                print(f"Moved staged files from {temp_agent_id} to {agent_id_for_ingestion} for ingestion.")
+        # If there are staged files for this agent, call handle_knowledge_ingestion
+        if agent_id_for_ingestion and agent_id_for_ingestion in self.knowledge_files:
+            print(f"Calling handle_knowledge_ingestion for agent_id: {agent_id_for_ingestion}")
+            ingestion_results = self.handle_knowledge_ingestion(agent_id_for_ingestion)
+            # Remove failed docs from knowledge_base
+            failed_docs = ingestion_results.get("failed", []) if ingestion_results else []
+            failed_msgs = []
+            for fail in failed_docs:
+                doc_name = fail.get("doc_name")
+                reason = fail.get("reason", "Unknown error")
+                if doc_name:
+                    self.data_manager.remove_document_from_knowledge_base(agent_id_for_ingestion, doc_name)
+                    print(f"Removed failed doc from knowledge_base: {doc_name}")
+                failed_msgs.append(f"{doc_name or 'Unknown'}: {reason}")
+            # Show popup if any failed
+            if failed_msgs:
+                self.show_failed_ingestion_popup(failed_msgs)
+        print("================ SAVE_AGENT END ================\n")
+
+
+    def handle_knowledge_ingestion(self, agent_id: str):
+        """Handles the process of storing and ingesting knowledge base files.
+        Returns a dict with lists of successful and failed ingestions (with reasons)."""
+        if agent_id not in self.knowledge_files:
+            return {"success": [], "failed": []}
+
+        print(f"\n🚀 STARTING KNOWLEDGE INGESTION FOR AGENT {agent_id}")
+        print("="*60)
+
+        results = {"success": [], "failed": []}
+        try:
+            file_data = self.knowledge_files[agent_id]
+            file_paths = file_data['file_paths']
+            descriptions = file_data['descriptions']
+
+            print(f"📁 Processing {len(file_paths)} files...")
+
+            # Process and ingest the files
+            for file_path in file_paths:
+                file_name = os.path.basename(file_path)
+                description = descriptions.get(file_path, f"Document: {file_name}")
+
+                print(f"   📄 Processing: {file_name}")
+                print(f"   💬 Description: {description}")
+
+                try:
+                    # Use the knowledge manager to process and ingest the file
+                    success, message = knowledge_manager.ingest_document_for_agent(
+                        agent_id=agent_id,
+                        file_path=file_path,
+                        description=description
+                    )
+
+                    if success:
+                        print(f"   ✅ Successfully processed: {file_name}")
+                        results["success"].append(file_name)
+                    else:
+                        print(f"   ❌ Failed to process: {file_name}")
+                        results["failed"].append({"doc_name": file_name, "reason": message})
+
+                except Exception as e:
+                    print(f"   ❌ Error processing {file_name}: {e}")
+                    results["failed"].append({"doc_name": file_name, "reason": str(e)})
+
+            # Clean up staged files
+            del self.knowledge_files[agent_id]
+            print(f"🧹 Cleaned up staged files for agent {agent_id}")
+
+            print("✅ KNOWLEDGE INGESTION COMPLETED!")
+            print("="*60)
+            return results
+
+        except Exception as e:
+            print(f"❌ KNOWLEDGE INGESTION FAILED: {e}")
+            print("="*60)
+            results["failed"].append({"doc_name": None, "reason": str(e)})
+            return results
+
+    
+
+    def show_failed_ingestion_popup(self, failed_msgs):
+        """Show a popup window listing failed document ingestions and reasons."""
+        popup = tk.Toplevel(self)
+        popup.title("Knowledge Ingestion Failures")
+        popup.geometry("600x350")
+        popup.grab_set()
+        label = tk.Label(popup, text="The following documents failed to ingest:", font=("Arial", 12, "bold"))
+        label.pack(pady=(10, 5))
+        text = tk.Text(popup, wrap="word", height=10, width=70)
+        text.pack(padx=10, pady=5, fill="both", expand=True)
+        text.insert("1.0", "\n".join(failed_msgs))
+        text.config(state="disabled")
+
+        # Add troubleshooting instructions
+        instructions = (
+            "\n\nPossible reasons for failure:\n"
+            "- File path contains special characters (like the en dash – or em dash — or other Unicode characters) that may cause issues on Windows, especially if the file was renamed, moved, or not supported by the filesystem.\n"
+            "- File path is too long for Windows (Windows has a 260-character path limit by default).\n"
+            "\nTry renaming the file or moving it to a simpler, shorter path (e.g., C:\\Docs) and avoid special characters."
+        )
+        instr_label = tk.Label(popup, text=instructions, justify="left", wraplength=560, font=("Arial", 10), fg="#a94442")
+        instr_label.pack(padx=10, pady=(0, 10), anchor="w")
+
+        close_btn = ttk.Button(popup, text="Close", command=popup.destroy)
+        close_btn.pack(pady=(0, 10))
         self.current_editing_agent_id = None
         self.refresh_agents_list()
         self.app.conversation_setup_tab.refresh_agent_checkboxes()
         # Clear the agent details form after saving
         self.clear_agent_form()
 
+    
+    
+    
     def _update_knowledge_base_tool(self, agent):
         """Update the knowledge_base_retriever tool based on agent's knowledge_base content."""
         has_knowledge_base = hasattr(agent, 'knowledge_base') and agent.knowledge_base and len(agent.knowledge_base) > 0
@@ -466,59 +683,8 @@ class AgentManagementTab(ttk.Frame):
         else:
             print(f"ℹ️  Agent '{agent.name}' has no knowledge base documents, no retriever tool needed")
 
-    def handle_knowledge_ingestion(self, agent_id: str):
-        """Handles the process of storing and ingesting knowledge base files."""
-        # ... (implementation remains the same)
 
-    def handle_knowledge_ingestion(self, agent_id: str):
-        """Handles the process of storing and ingesting knowledge base files."""
-        if agent_id not in self.knowledge_files:
-            return
-        
-        print(f"\n🚀 STARTING KNOWLEDGE INGESTION FOR AGENT {agent_id}")
-        print("="*60)
-        
-        try:
-            file_data = self.knowledge_files[agent_id]
-            file_paths = file_data['file_paths']
-            descriptions = file_data['descriptions']
-            
-            print(f"📁 Processing {len(file_paths)} files...")
-            
-            # Process and ingest the files
-            for file_path in file_paths:
-                file_name = os.path.basename(file_path)
-                description = descriptions.get(file_path, f"Document: {file_name}")
-                
-                print(f"   📄 Processing: {file_name}")
-                print(f"   💬 Description: {description}")
-                
-                try:
-                    # Use the knowledge manager to process and ingest the file
-                    success = knowledge_manager.ingest_document_for_agent(
-                        agent_id=agent_id,
-                        file_path=file_path,
-                        description=description
-                    )
-                    
-                    if success:
-                        print(f"   ✅ Successfully processed: {file_name}")
-                    else:
-                        print(f"   ❌ Failed to process: {file_name}")
-                        
-                except Exception as e:
-                    print(f"   ❌ Error processing {file_name}: {e}")
-            
-            # Clean up staged files
-            del self.knowledge_files[agent_id]
-            print(f"🧹 Cleaned up staged files for agent {agent_id}")
-            
-            print("✅ KNOWLEDGE INGESTION COMPLETED SUCCESSFULLY!")
-            print("="*60)
-            
-        except Exception as e:
-            print(f"❌ KNOWLEDGE INGESTION FAILED: {e}")
-            print("="*60)
+
 
     def refresh_agents_list(self):
         """Refresh the agents list in the UI."""
